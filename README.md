@@ -1,9 +1,9 @@
 # Konclude Reasoning Pipeline
 
-
+```bash
 ./koncludix_pipeline.sh
 
-
+Before running the pipeline, you must update the paths inside the script: Konclude binary path, Input ontology file path, Output file locations (if customized)
 
 The pipeline consists of four main stages:
 
@@ -30,9 +30,12 @@ This produces a structured Turtle file containing all explicitly asserted triple
 ---
 
 ### **Stage 3 — Realisation (Konclude Reasoning)**
-Runs OWL reasoning using Konclude: (because this way it only takes a few seconds) 
+This step performs OWL reasoning and generates the inferred class assertions ABox. Realisation is intentionally executed as a separate stage because:
 
--generated Class Assertions
+-Ensure Completeness
+
+-Performance : Running realisation as a dedicated reasoning step is significantly faster and more stable than attempting to reproduce inference via multiple SPARQL queries.
+
 
 ```bash
 Konclude realisation -i input.owl -o output_realisation.ttl
