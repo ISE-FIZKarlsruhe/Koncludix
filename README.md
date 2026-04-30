@@ -1,7 +1,7 @@
 # Konclude Reasoning Pipeline
 
-```bash
-./koncludix_pipeline.sh
+
+Run: ./koncludix_pipeline.sh
 
 Before running the pipeline, you must update the paths inside the script: Konclude binary path, Input ontology file path, Output file locations (if customized)
 
