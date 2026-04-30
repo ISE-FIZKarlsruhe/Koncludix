@@ -2,13 +2,16 @@ import sys
 import os
 import subprocess
 import time
+import re
 from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, OWL
 from collections import defaultdict, deque
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import xml.etree.ElementTree as ET
 
+
 # ---------------------------------------------------------
-# URI extraction (kept for SPARQL XML fragments if needed)
+# URI extraction (legacy fallback)
 # ---------------------------------------------------------
 def extract_uri(text: str):
     if "<uri>" not in text:
@@ -18,13 +21,6 @@ def extract_uri(text: str):
         return uri if "://" in uri else None
     except Exception:
         return None
-
-
-# ---------------------------------------------------------
-# SILENT RUN
-# ---------------------------------------------------------
-def run_silent(cmd):
-    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
 
 
 # ---------------------------------------------------------
@@ -53,52 +49,34 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
 
     os.makedirs(tmpfolder, exist_ok=True)
 
-    # CLASSES
-    with open(os.path.join(tmpfolder, "classes.sparql"), "w") as f:
-        f.write(
-            prefix + "\n".join(
-                f'SELECT (IRI("{c}") as ?class) ?superclass WHERE {{ <{c}> rdfs:subClassOf ?superclass . }}'
-                for c in classes
-            )
-        )
-
-    # OBJECT PROPERTIES
-    with open(os.path.join(tmpfolder, "oprops.sparql"), "w") as f:
-        f.write(
-            prefix + "\n".join(
-                f'SELECT ?s (IRI("{op}") as ?op) ?o WHERE {{ ?s <{op}> ?o . }}'
-                for op in op_properties
-            )
-        )
-
-    # DATA PROPERTIES
-    with open(os.path.join(tmpfolder, "dprops.sparql"), "w") as f:
-        f.write(
-            prefix + "\n".join(
-                f'SELECT ?s (IRI("{dp}") as ?dp) ?val WHERE {{ ?s <{dp}> ?val . }}'
-                for dp in dp_properties
-            )
-        )
-
-    # OBJECT SUBPROPERTIES
-    with open(os.path.join(tmpfolder, "osubprops.sparql"), "w") as f:
-        f.write(
-            prefix + "\n".join(
-                f'SELECT (IRI("{op}") as ?op) ?superop WHERE {{ <{op}> rdfs:subPropertyOf ?superop . }}'
-                for op in op_properties
-            )
-        )
-
-    # CLASS ASSERTIONS (SPARQL)
-    with open(os.path.join(tmpfolder, "class_assertions.sparql"), "w") as f:
-        f.write(
-            prefix + """
+    queries = {
+        "classes": "\n".join(
+            f'SELECT (IRI("{c}") as ?class) ?superclass WHERE {{ <{c}> rdfs:subClassOf ?superclass . }}'
+            for c in classes
+        ),
+        "oprops": "\n".join(
+            f'SELECT ?s (IRI("{op}") as ?op) ?o WHERE {{ ?s <{op}> ?o . }}'
+            for op in op_properties
+        ),
+        "dprops": "\n".join(
+            f'SELECT ?s (IRI("{dp}") as ?dp) ?val WHERE {{ ?s <{dp}> ?val . }}'
+            for dp in dp_properties
+        ),
+        "osubprops": "\n".join(
+            f'SELECT (IRI("{op}") as ?op) ?superop WHERE {{ <{op}> rdfs:subPropertyOf ?superop . }}'
+            for op in op_properties
+        ),
+        "class_assertions": """
 SELECT ?s ?type WHERE {
     ?s rdf:type ?type .
     FILTER(isIRI(?type))
 }
 """
-        )
+    }
+
+    for name, q in queries.items():
+        with open(os.path.join(tmpfolder, f"{name}.sparql"), "w") as f:
+            f.write(prefix + q)
 
     print("[PRE] done")
     return classes, op_properties, dp_properties, inverse_map
@@ -107,9 +85,6 @@ SELECT ?s ?type WHERE {
 # ---------------------------------------------------------
 # RUN KONCLUDE
 # ---------------------------------------------------------
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
-
 def run_one_job(binary, input_file, tmpfolder, job):
     cmd = [
         binary, "sparqlfile",
@@ -122,7 +97,7 @@ def run_one_job(binary, input_file, tmpfolder, job):
 
 
 def run_jobs(binary, input_file, tmpfolder):
-    print("[RUN] executing konclude (parallel)...")
+    print("[RUN] executing konclude...")
 
     jobs = ["classes", "oprops", "dprops", "osubprops", "class_assertions"]
 
@@ -130,8 +105,8 @@ def run_jobs(binary, input_file, tmpfolder):
 
     with ThreadPoolExecutor(max_workers=len(jobs)) as executor:
         futures = [
-            executor.submit(run_one_job, binary, input_file, tmpfolder, job)
-            for job in jobs
+            executor.submit(run_one_job, binary, input_file, tmpfolder, j)
+            for j in jobs
         ]
 
         for f in as_completed(futures):
@@ -141,175 +116,181 @@ def run_jobs(binary, input_file, tmpfolder):
 
 
 # ---------------------------------------------------------
-# HIERARCHY
+# SAFE RESULT BLOCK EXTRACTION
 # ---------------------------------------------------------
-def parse_hierarchy(file, sub_name, sup_name):
-    pairs = set()
-    if not os.path.exists(file):
-        return pairs
-
-    sub = sup = None
-
-    with open(file) as f:
-        for line in f:
-            if f'binding name="{sub_name}"' in line:
-                sub = extract_uri(line)
-            elif f'binding name="{sup_name}"' in line:
-                sup = extract_uri(line)
-                if sub and sup and sub != sup:
-                    pairs.add((sub, sup))
-
-    return pairs
-
-
-def compute_closure(pairs):
-    g = defaultdict(set)
-    nodes = set()
-
-    for a, b in pairs:
-        g[a].add(b)
-        nodes.add(a)
-        nodes.add(b)
-
-    out = set()
-
-    for n in nodes:
-        vis = set()
-        q = deque([n])
-
-        while q:
-            x = q.popleft()
-            for y in g[x]:
-                if y not in vis:
-                    vis.add(y)
-                    q.append(y)
-                    out.add((n, y))
-
-    return out
+def extract_result_blocks(content: str):
+    return re.findall(r'<result>.*?</result>', content, re.DOTALL)
 
 
 # ---------------------------------------------------------
-# REALISATION PARSER (FIXED - OWL/XML SAFE)
+# SAFE BINDING PARSER
 # ---------------------------------------------------------
-def parse_realisation_owlxml(file, graph):
-    if not os.path.exists(file):
-        return
+def parse_binding(block, name):
+    try:
+        root = ET.fromstring(f"<root>{block}</root>")
 
-    print("[POST] parsing realisation (OWL/XML)...")
+        for b in root.findall(".//binding"):
+            if b.attrib.get("name") != name:
+                continue
 
-    tree = ET.parse(file)
-    root = tree.getroot()
+            uri = b.find(".//uri")
+            if uri is not None and uri.text:
+                return ("URI", uri.text.strip())
 
-    for ca in root.findall(".//{http://www.w3.org/2002/07/owl#}ClassAssertion"):
+            lit = b.find(".//literal")
+            if lit is not None:
+                return ("LITERAL",
+                        lit.text or "",
+                        lit.attrib.get("datatype"))
 
-        cls = ca.find(".//{*}Class")
-        ind = ca.find(".//{*}NamedIndividual")
+    except Exception:
+        return None
 
-        if cls is None or ind is None:
-            continue
+    return None
 
-        cls_iri = cls.attrib.get("IRI")
-        ind_iri = ind.attrib.get("IRI")
 
-        if cls_iri and ind_iri:
-            graph.add((
-                URIRef(ind_iri),
-                RDF.type,
-                URIRef(cls_iri)
-            ))
+# ---------------------------------------------------------
+# PARSE XML FILES (ROBUST)
+# ---------------------------------------------------------
+def parse_multi_xml_results(file_path):
+    if not os.path.exists(file_path):
+        return []
+
+    with open(file_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    blocks = extract_result_blocks(content)
+    results = []
+
+    for block in blocks:
+        row = {}
+
+        s = parse_binding(block, "s")
+        p = (parse_binding(block, "dp") or
+             parse_binding(block, "op") or
+             parse_binding(block, "ap") or
+             parse_binding(block, "type"))
+        o = (parse_binding(block, "o") or
+             parse_binding(block, "val"))
+
+        if s: row["s"] = s
+        if p: row["p"] = p
+        if o: row["o"] = o
+
+        if row:
+            results.append(row)
+
+    return results
+
+
+# ---------------------------------------------------------
+# CONVERT TO RDF
+# ---------------------------------------------------------
+def to_rdf(v):
+    if not v:
+        return None
+
+    if v[0] == "URI":
+        return URIRef(v[1])
+
+    text = v[1]
+    dtype = v[2] if len(v) > 2 else None
+
+    if dtype and dtype.startswith("http"):
+        return Literal(text, datatype=URIRef(dtype))
+
+    return Literal(text)
 
 
 # ---------------------------------------------------------
 # POSTPROCESS
 # ---------------------------------------------------------
-def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map):
+def postprocess(outfile, tmp, classes, op_props, dp_props, inverse_map):
     print("[POST] building graph...")
 
     g = Graph()
 
-    for op in op_properties:
-        g.add((URIRef(op), RDF.type, OWL.ObjectProperty))
-    for dp in dp_properties:
-        g.add((URIRef(dp), RDF.type, OWL.DatatypeProperty))
+    for p in op_props:
+        g.add((URIRef(p), RDF.type, OWL.ObjectProperty))
+    for p in dp_props:
+        g.add((URIRef(p), RDF.type, OWL.DatatypeProperty))
     for p, q in inverse_map.items():
         g.add((URIRef(p), OWL.inverseOf, URIRef(q)))
 
+    # ---------------------------
+    # DATA PROPERTIES (FIXED)
+    # ---------------------------
+    for res in parse_multi_xml_results(os.path.join(tmp, "dprops.xml")):
+        s, p, o = res.get("s"), res.get("p"), res.get("o")
+        if s and p and o:
+            g.add((to_rdf(s), to_rdf(p), to_rdf(o)))
+
+    # ---------------------------
     # OBJECT PROPERTIES
-    oprops_file = os.path.join(tmp, "oprops.xml")
-    if os.path.exists(oprops_file):
-        with open(oprops_file, encoding='utf-8') as f:
-            s = op = None
-            for line in f:
-                if 'binding name="s"' in line:
-                    s = extract_uri(line)
-                elif 'binding name="op"' in line:
-                    op = extract_uri(line)
-                elif 'binding name="o"' in line:
-                    o = extract_uri(line)
-                    if s and op and o:
-                        g.add((URIRef(s), URIRef(op), URIRef(o)))
+    # ---------------------------
+    for res in parse_multi_xml_results(os.path.join(tmp, "oprops.xml")):
+        s, p, o = res.get("s"), res.get("p"), res.get("o")
+        if s and p and o:
+            g.add((to_rdf(s), to_rdf(p), to_rdf(o)))
 
-    # DATA PROPERTIES
-    dprops_file = os.path.join(tmp, "dprops.xml")
-    if os.path.exists(dprops_file):
-        print("[POST] parsing data properties...")
-        with open(dprops_file, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
+    # ---------------------------
+    # CLASS ASSERTIONS (UNCHANGED)
+    # ---------------------------
+    for res in parse_multi_xml_results(os.path.join(tmp, "class_assertions.xml")):
+        s, t = res.get("s"), res.get("p")
+        if s and t:
+            g.add((to_rdf(s), RDF.type, to_rdf(t)))
 
-        clean_content = "".join([line for line in lines if "<?xml" not in line])
-        wrapped_xml = f"<root>{clean_content}</root>"
-        root = ET.fromstring(wrapped_xml)
-
-        def get_binding_info(result_node, name):
-            for b in result_node.findall(".//{*}binding"):
-                if b.attrib.get("name") == name:
-                    uri_node = b.find(".//{*}uri")
-                    if uri_node is not None and uri_node.text:
-                        return uri_node.text.strip(), "URI"
-
-                    lit_node = b.find(".//{*}literal")
-                    if lit_node is not None:
-                        val = lit_node.text.strip() if lit_node.text else ""
-                        dtype = lit_node.attrib.get("datatype")
-                        return val, dtype
-            return None, None
-
-        for result in root.findall(".//{*}result"):
-            s_val, _ = get_binding_info(result, "s")
-            dp_val, _ = get_binding_info(result, "dp")
-            val_text, val_dtype = get_binding_info(result, "val")
-
-            if s_val and dp_val and val_text is not None:
-                g.add((URIRef(s_val), URIRef(dp_val), Literal(val_text)))
-
-    # CLASS ASSERTIONS (SPARQL)
-    ca_file = os.path.join(tmp, "class_assertions.xml")
-    if os.path.exists(ca_file):
-        print("[POST] parsing class assertions...")
-        s = t = None
-        with open(ca_file, encoding='utf-8') as f:
-            for line in f:
-                if 'binding name="s"' in line:
-                    s = extract_uri(line)
-                elif 'binding name="type"' in line:
-                    t = extract_uri(line)
-                    if s and t:
-                        g.add((URIRef(s), RDF.type, URIRef(t)))
-
-    #  REALISATION (FIXED)
+    # ---------------------------
+    # REALISATION
+    # ---------------------------
     real_file = os.path.join(tmp, "realisation.owl")
-    parse_realisation_owlxml(real_file, g)
+    if os.path.exists(real_file):
+        try:
+            tree = ET.parse(real_file)
+            for ca in tree.getroot().findall(".//{http://www.w3.org/2002/07/owl#}ClassAssertion"):
+                cls = ca.find(".//{*}Class")
+                ind = ca.find(".//{*}NamedIndividual")
+                if cls is not None and ind is not None:
+                    g.add((URIRef(ind.attrib.get("IRI")),
+                           RDF.type,
+                           URIRef(cls.attrib.get("IRI"))))
+        except:
+            pass
 
+    # ---------------------------
     # HIERARCHY
-    subclass_pairs = parse_hierarchy(os.path.join(tmp, "classes.xml"), "class", "superclass")
-    for s, t in compute_closure(subclass_pairs):
-        g.add((URIRef(s), RDFS.subClassOf, URIRef(t)))
+    # ---------------------------
+    for file, s_n, t_n, rel in [
+        ("classes.xml", "class", "superclass", RDFS.subClassOf),
+        ("osubprops.xml", "op", "superop", RDFS.subPropertyOf)
+    ]:
+        pairs = set()
+        for res in parse_multi_xml_results(os.path.join(tmp, file)):
+            s, t = res.get(s_n), res.get(t_n)
+            if s and t:
+                pairs.add((s[1], t[1]))
 
-    osub_pairs = parse_hierarchy(os.path.join(tmp, "osubprops.xml"), "op", "superop")
-    for s, t in compute_closure(osub_pairs):
-        g.add((URIRef(s), RDFS.subPropertyOf, URIRef(t)))
+        graph = defaultdict(set)
+        nodes = set()
 
-    print("[POST] writing output...")
+        for a, b in pairs:
+            graph[a].add(b)
+            nodes.update([a, b])
+
+        for n in nodes:
+            vis = set()
+            q = deque([n])
+
+            while q:
+                x = q.popleft()
+                for y in graph[x]:
+                    if y not in vis:
+                        vis.add(y)
+                        q.append(y)
+                        g.add((URIRef(n), rel, URIRef(y)))
+
+    print("[POST] total triples:", len(g))
     g.serialize(outfile, format="turtle")
 
 
@@ -319,29 +300,20 @@ def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map
 def koncludix(binary, input_file, output_file, work_dir):
     start = time.time()
 
-    classes, op_properties, dp_properties, inverse_map = preprocess(
-        input_file, work_dir
-    )
+    classes, ops, dps, inv = preprocess(input_file, work_dir)
 
     run_jobs(binary, input_file, work_dir)
 
-    postprocess(
-        output_file,
-        work_dir,
-        classes,
-        op_properties,
-        dp_properties,
-        inverse_map
-    )
+    postprocess(output_file, work_dir, classes, ops, dps, inv)
 
     print(f"\nTOTAL TIME: {time.time() - start:.2f}s")
 
 
 # ---------------------------------------------------------
-# ENTRY POINT
+# ENTRY
 # ---------------------------------------------------------
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        print("Usage: python koncludix.py <konclude_binary> <input.owl> <output.ttl>")
+        print("Usage: python script.py <konclude_bin> <input.owl> <output.ttl>")
     else:
         koncludix(sys.argv[1], sys.argv[2], sys.argv[3], "tmp")
