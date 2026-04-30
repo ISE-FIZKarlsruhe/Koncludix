@@ -15,3 +15,7 @@ Install dependencies:
 
 ```bash
 pip install rdflib
+
+
+How to run:
+python koncludix_full.py input.owl output.ttl /path/to/Konclude
