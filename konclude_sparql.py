@@ -89,6 +89,17 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
             )
         )
 
+    # CLASS ASSERTIONS (SPARQL)
+    with open(os.path.join(tmpfolder, "class_assertions.sparql"), "w") as f:
+        f.write(
+            prefix + """
+SELECT ?s ?type WHERE {
+    ?s rdf:type ?type .
+    FILTER(isIRI(?type))
+}
+"""
+        )
+
     print("[PRE] done")
     return classes, op_properties, dp_properties, inverse_map
 
@@ -113,7 +124,7 @@ def run_one_job(binary, input_file, tmpfolder, job):
 def run_jobs(binary, input_file, tmpfolder):
     print("[RUN] executing konclude (parallel)...")
 
-    jobs = ["classes", "oprops", "dprops", "osubprops"]
+    jobs = ["classes", "oprops", "dprops", "osubprops", "class_assertions"]
 
     start = time.time()
 
@@ -178,16 +189,44 @@ def compute_closure(pairs):
 
 
 # ---------------------------------------------------------
-# POSTPROCESS (FIXED DATA PROPERTY PARSER)
+# REALISATION PARSER (FIXED - OWL/XML SAFE)
+# ---------------------------------------------------------
+def parse_realisation_owlxml(file, graph):
+    if not os.path.exists(file):
+        return
+
+    print("[POST] parsing realisation (OWL/XML)...")
+
+    tree = ET.parse(file)
+    root = tree.getroot()
+
+    for ca in root.findall(".//{http://www.w3.org/2002/07/owl#}ClassAssertion"):
+
+        cls = ca.find(".//{*}Class")
+        ind = ca.find(".//{*}NamedIndividual")
+
+        if cls is None or ind is None:
+            continue
+
+        cls_iri = cls.attrib.get("IRI")
+        ind_iri = ind.attrib.get("IRI")
+
+        if cls_iri and ind_iri:
+            graph.add((
+                URIRef(ind_iri),
+                RDF.type,
+                URIRef(cls_iri)
+            ))
+
+
+# ---------------------------------------------------------
+# POSTPROCESS
 # ---------------------------------------------------------
 def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map):
     print("[POST] building graph...")
 
     g = Graph()
 
-    # Add Schema definitions
-    # for c in classes:
-    #     g.add((URIRef(c), RDF.type, OWL.Class))
     for op in op_properties:
         g.add((URIRef(op), RDF.type, OWL.ObjectProperty))
     for dp in dp_properties:
@@ -195,9 +234,7 @@ def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map
     for p, q in inverse_map.items():
         g.add((URIRef(p), OWL.inverseOf, URIRef(q)))
 
-    # ---------------------------------------------------------
     # OBJECT PROPERTIES
-    # ---------------------------------------------------------
     oprops_file = os.path.join(tmp, "oprops.xml")
     if os.path.exists(oprops_file):
         with open(oprops_file, encoding='utf-8') as f:
@@ -212,34 +249,24 @@ def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map
                     if s and op and o:
                         g.add((URIRef(s), URIRef(op), URIRef(o)))
 
-    # ---------------------------------------------------------
-    # DATA PROPERTIES (FIXED: Handling Multi-root and Datatypes)
-    # ---------------------------------------------------------
+    # DATA PROPERTIES
     dprops_file = os.path.join(tmp, "dprops.xml")
-
     if os.path.exists(dprops_file):
-        print("[POST] parsing data properties safely with datatypes...")
-
-        # 1. Clean the file (Remove multiple XML headers)
+        print("[POST] parsing data properties...")
         with open(dprops_file, 'r', encoding='utf-8') as f:
             lines = f.readlines()
-        
+
         clean_content = "".join([line for line in lines if "<?xml" not in line])
         wrapped_xml = f"<root>{clean_content}</root>"
-        
-        # 2. Parse the combined XML string
         root = ET.fromstring(wrapped_xml)
 
-        # 3. Helper to capture both the value and the datatype attribute
         def get_binding_info(result_node, name):
             for b in result_node.findall(".//{*}binding"):
                 if b.attrib.get("name") == name:
-                    # Check for URIs
                     uri_node = b.find(".//{*}uri")
                     if uri_node is not None and uri_node.text:
                         return uri_node.text.strip(), "URI"
-                    
-                    # Check for Literals and their datatypes
+
                     lit_node = b.find(".//{*}literal")
                     if lit_node is not None:
                         val = lit_node.text.strip() if lit_node.text else ""
@@ -247,27 +274,33 @@ def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map
                         return val, dtype
             return None, None
 
-        # 4. Iterate through results and add to graph
         for result in root.findall(".//{*}result"):
             s_val, _ = get_binding_info(result, "s")
             dp_val, _ = get_binding_info(result, "dp")
             val_text, val_dtype = get_binding_info(result, "val")
 
             if s_val and dp_val and val_text is not None:
-                s_uri = URIRef(s_val)
-                dp_uri = URIRef(dp_val)
-                
-                if val_dtype == "URI":
-                    g.add((s_uri, dp_uri, URIRef(val_text)))
-                elif val_dtype:
-                    # This preserves things like xsd:anyURI or xsd:integer
-                    g.add((s_uri, dp_uri, Literal(val_text, datatype=URIRef(val_dtype))))
-                else:
-                    g.add((s_uri, dp_uri, Literal(val_text)))
+                g.add((URIRef(s_val), URIRef(dp_val), Literal(val_text)))
 
-    # ---------------------------------------------------------
-    # CLASSES & SUBPROPERTIES (Hierarchy)
-    # ---------------------------------------------------------
+    # CLASS ASSERTIONS (SPARQL)
+    ca_file = os.path.join(tmp, "class_assertions.xml")
+    if os.path.exists(ca_file):
+        print("[POST] parsing class assertions...")
+        s = t = None
+        with open(ca_file, encoding='utf-8') as f:
+            for line in f:
+                if 'binding name="s"' in line:
+                    s = extract_uri(line)
+                elif 'binding name="type"' in line:
+                    t = extract_uri(line)
+                    if s and t:
+                        g.add((URIRef(s), RDF.type, URIRef(t)))
+
+    #  REALISATION (FIXED)
+    real_file = os.path.join(tmp, "realisation.owl")
+    parse_realisation_owlxml(real_file, g)
+
+    # HIERARCHY
     subclass_pairs = parse_hierarchy(os.path.join(tmp, "classes.xml"), "class", "superclass")
     for s, t in compute_closure(subclass_pairs):
         g.add((URIRef(s), RDFS.subClassOf, URIRef(t)))
@@ -278,6 +311,8 @@ def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map
 
     print("[POST] writing output...")
     g.serialize(outfile, format="turtle")
+
+
 # ---------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------
