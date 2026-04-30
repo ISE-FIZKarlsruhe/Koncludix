@@ -9,9 +9,15 @@ The pipeline consists of four main stages:
 
 ### **Stage 1 — SPARQL Extraction (Konclude)**
 Extracts explicit knowledge from the ontology:
+
 - Object property assertions
+  
+- Data property assertions
+  
 - Subclass relations
+  
 - Subproperty relations
+  
 - Inverse Relations
 
 ---
@@ -25,6 +31,8 @@ This produces a structured Turtle file containing all explicitly asserted triple
 
 ### **Stage 3 — Realisation (Konclude Reasoning)**
 Runs OWL reasoning using Konclude: (because this way it only takes a few seconds) 
+
+-generated Class Assertions
 
 ```bash
 Konclude realisation -i input.owl -o output_realisation.ttl
