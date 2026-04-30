@@ -186,8 +186,8 @@ def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map
     g = Graph()
 
     # Add Schema definitions
-    for c in classes:
-        g.add((URIRef(c), RDF.type, OWL.Class))
+    # for c in classes:
+    #     g.add((URIRef(c), RDF.type, OWL.Class))
     for op in op_properties:
         g.add((URIRef(op), RDF.type, OWL.ObjectProperty))
     for dp in dp_properties:
