@@ -1,6 +1,12 @@
 # Koncludix
 
 This script runs the Konclude reasoner on an OWL ontology and produces a fully materialized RDF graph in Turtle format.
+-subclass axioms (+ closure)
+-subproperty axioms (+ closure)
+-inverse properties
+-object property assertions
+-class assertions
+-sameAs normalization
 
 ---
 
