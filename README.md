@@ -1,27 +1,30 @@
-# Koncludix
+# Konclude Reasoning Pipeline
 
-This script runs the Konclude reasoner on an OWL ontology and produces a fully materialized RDF graph in Turtle format.
--subclass axioms (+ closure)
--subproperty axioms (+ closure)
--inverse properties
--object property assertions
--class assertions
--sameAs normalization
+
+./koncludix_pipeline.sh
+
+
+
+The pipeline consists of four main stages:
+
+### **Stage 1 — SPARQL Extraction (Konclude)**
+Extracts explicit knowledge from the ontology:
+- Object property assertions
+- Subclass relations
+- Subproperty relations
+- Inverse Relations
 
 ---
 
-## 🔧 Requirements
+### **Stage 2 — RDF Reconstruction (Python)**
+The SPARQL XML results are parsed and reconstructed into an RDF graph using `rdflib`.
 
-- Python 3.8+
-- Konclude reasoner binary
-- Python packages:
-  - rdflib
+This produces a structured Turtle file containing all explicitly asserted triples.
 
-Install dependencies:
+---
+
+### **Stage 3 — Realisation (Konclude Reasoning)**
+Runs OWL reasoning using Konclude: (because this way it only takes a few seconds) 
 
 ```bash
-pip install rdflib
-
-
-How to run:
-python koncludix_full.py input.owl output.ttl /path/to/Konclude
+Konclude realisation -i input.owl -o output_realisation.ttl
