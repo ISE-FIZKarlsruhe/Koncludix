@@ -95,19 +95,37 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
 # ---------------------------------------------------------
 # RUN KONCLUDE
 # ---------------------------------------------------------
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+def run_one_job(binary, input_file, tmpfolder, job):
+    cmd = [
+        binary, "sparqlfile",
+        "-s", os.path.join(tmpfolder, f"{job}.sparql"),
+        "-o", os.path.join(tmpfolder, f"{job}.xml"),
+        "-i", input_file
+    ]
+    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+    return job
+
+
 def run_jobs(binary, input_file, tmpfolder):
-    print("[RUN] executing konclude...")
+    print("[RUN] executing konclude (parallel)...")
 
     jobs = ["classes", "oprops", "osubprops"]
 
-    for job in jobs:
-        run_silent([
-            binary, "sparqlfile",
-            "-s", os.path.join(tmpfolder, f"{job}.sparql"),
-            "-o", os.path.join(tmpfolder, f"{job}.xml"),
-            "-i", input_file
-        ])
+    start = time.time()
 
+    with ThreadPoolExecutor(max_workers=len(jobs)) as executor:
+        futures = [
+            executor.submit(run_one_job, binary, input_file, tmpfolder, job)
+            for job in jobs
+        ]
+
+        for f in as_completed(futures):
+            job = f.result()
+            print(f"[DONE] {job}")
+
+    print(f"[RUN] all jobs finished in {time.time() - start:.2f}s\n")
 
 # ---------------------------------------------------------
 # HIERARCHY
