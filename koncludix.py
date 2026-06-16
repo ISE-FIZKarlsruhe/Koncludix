@@ -106,6 +106,15 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
             )
         )
 
+    # DATATYPE SUBPROPERTIES
+    with open(os.path.join(tmpfolder, "dsubprops.sparql"), "w") as f:
+        f.write(
+            prefix + "\n".join(
+                f'SELECT (IRI("{op}") as ?op) ?superop WHERE {{ <{op}> rdfs:subPropertyOf ?superop . }}'
+                for op in dp_properties
+            )
+        )
+
     # CLASS ASSERTIONS (SPARQL)
     with open(os.path.join(tmpfolder, "class_assertions.sparql"), "w") as f:
         f.write(
@@ -138,10 +147,11 @@ def run_one_job(binary, input_file, tmpfolder, job):
     return job
 
 
+
 def run_jobs(binary, input_file, tmpfolder):
     print("[RUN] executing konclude (parallel)...")
 
-    jobs = ["classes", "oprops", "dprops", "osubprops", "class_assertions"]
+    jobs = ["classes", "oprops", "dprops", "osubprops", "dsubprops", "class_assertions"]
 
     start = time.time()
 
@@ -323,6 +333,10 @@ def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map
 
     osub_pairs = parse_hierarchy(os.path.join(tmp, "osubprops.xml"), "op", "superop")
     for s, t in compute_closure(osub_pairs):
+        g.add((URIRef(s), RDFS.subPropertyOf, URIRef(t)))
+
+    dsub_pairs = parse_hierarchy(os.path.join(tmp, "dsubprops.xml"), "op", "superop")
+    for s, t in compute_closure(dsub_pairs):
         g.add((URIRef(s), RDFS.subPropertyOf, URIRef(t)))
 
     print("[POST] writing output...")
