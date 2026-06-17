@@ -63,6 +63,18 @@ def preprocess(ontology, tmpfolder):
             inverse_map[str(p)] = str(q)
             inverse_map[str(q)] = str(p)
 
+    # Asserted rdfs:subPropertyOf pairs for datatype properties, read directly
+    # from the source ontology via rdflib. Konclude's SPARQL engine has known
+    # issues handling subPropertyOf over datatype properties (crashes on this
+    # ontology), and since these relationships are normally asserted rather
+    # than something that needs deep reasoning to discover, we bypass
+    # Konclude for this and compute transitive closure ourselves.
+    dsub_pairs = set()
+    for dp in dp_properties:
+        for sup in g.objects(URIRef(dp), RDFS.subPropertyOf):
+            if isinstance(sup, URIRef):
+                dsub_pairs.add((dp, str(sup)))
+
     prefix = """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -106,15 +118,6 @@ PREFIX owl: <http://www.w3.org/2002/07/owl#>
             )
         )
 
-    # DATATYPE SUBPROPERTIES
-    with open(os.path.join(tmpfolder, "dsubprops.sparql"), "w") as f:
-        f.write(
-            prefix + "\n".join(
-                f'SELECT (IRI("{op}") as ?op) ?superop WHERE {{ <{op}> rdfs:subPropertyOf ?superop . }}'
-                for op in dp_properties
-            )
-        )
-
     # CLASS ASSERTIONS (SPARQL)
     with open(os.path.join(tmpfolder, "class_assertions.sparql"), "w") as f:
         f.write(
@@ -127,7 +130,7 @@ SELECT ?s ?type WHERE {
         )
 
     print("[PRE] done")
-    return classes, op_properties, dp_properties, inverse_map
+    return classes, op_properties, dp_properties, inverse_map, dsub_pairs
 
 
 # ---------------------------------------------------------
@@ -136,22 +139,82 @@ SELECT ?s ?type WHERE {
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
-def run_one_job(binary, input_file, tmpfolder, job):
+def run_konclude(binary, input_file, sparql_file, output_file):
+    """Run a single Konclude sparqlfile job. Returns (success, returncode)."""
     cmd = [
         binary, "sparqlfile",
-        "-s", os.path.join(tmpfolder, f"{job}.sparql"),
-        "-o", os.path.join(tmpfolder, f"{job}.xml"),
+        "-s", sparql_file,
+        "-o", output_file,
         "-i", input_file
     ]
-    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-    return job
+    result = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return result.returncode == 0, result.returncode
 
+
+def run_one_job(binary, input_file, tmpfolder, job):
+    sparql_file = os.path.join(tmpfolder, f"{job}.sparql")
+    output_file = os.path.join(tmpfolder, f"{job}.xml")
+
+    ok, code = run_konclude(binary, input_file, sparql_file, output_file)
+
+    if ok:
+        return job, True
+
+    # Batched query crashed/failed. Fall back to one-query-per-line so a
+    # single bad IRI or pathological query doesn't lose the whole job.
+    print(f"[WARN] {job} failed as a batch (exit {code}). Retrying line-by-line...")
+
+    with open(sparql_file, encoding="utf-8") as f:
+        lines = [l.rstrip("\n") for l in f]
+
+    prefix_lines = [l for l in lines if l.strip().startswith("PREFIX")]
+    query_lines = [l for l in lines if l.strip().startswith("SELECT")]
+
+    prefix_block = "\n".join(prefix_lines) + "\n" if prefix_lines else ""
+
+    good_results = []  # list of single-query output files that succeeded
+    skipped = []
+
+    retry_dir = os.path.join(tmpfolder, f"{job}_retry")
+    os.makedirs(retry_dir, exist_ok=True)
+
+    for i, q in enumerate(query_lines):
+        single_sparql = os.path.join(retry_dir, f"{i}.sparql")
+        single_xml = os.path.join(retry_dir, f"{i}.xml")
+
+        with open(single_sparql, "w", encoding="utf-8") as f:
+            f.write(prefix_block + q)
+
+        ok_i, code_i = run_konclude(binary, input_file, single_sparql, single_xml)
+
+        if ok_i:
+            good_results.append(single_xml)
+        else:
+            skipped.append((q, code_i))
+
+    if skipped:
+        print(f"[WARN] {job}: skipped {len(skipped)} query line(s) that crashed Konclude individually:")
+        for q, code_i in skipped:
+            print(f"        exit {code_i}: {q[:160]}")
+
+    # Merge surviving per-query XML fragments into the expected combined output file.
+    merged = []
+    for path in good_results:
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                merged.append(f.read())
+
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write("\n".join(merged))
+
+    print(f"[INFO] {job}: recovered {len(good_results)}/{len(query_lines)} queries after retry.")
+    return job, len(skipped) == 0
 
 
 def run_jobs(binary, input_file, tmpfolder):
     print("[RUN] executing konclude (parallel)...")
 
-    jobs = ["classes", "oprops", "dprops", "osubprops", "dsubprops", "class_assertions"]
+    jobs = ["classes", "oprops", "dprops", "osubprops", "class_assertions"]
 
     start = time.time()
 
@@ -162,7 +225,9 @@ def run_jobs(binary, input_file, tmpfolder):
         ]
 
         for f in as_completed(futures):
-            print(f"[DONE] {f.result()}")
+            job, clean = f.result()
+            status = "DONE" if clean else "DONE (partial)"
+            print(f"[{status}] {job}")
 
     print(f"[RUN] finished in {time.time() - start:.2f}s\n")
 
@@ -245,7 +310,7 @@ def parse_realisation_owlxml(file, graph):
 # ---------------------------------------------------------
 # POSTPROCESS (FIXED DATA PROPERTY PARSER)
 # ---------------------------------------------------------
-def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map):
+def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map, dsub_pairs):
     print("[POST] building graph...")
 
     g = Graph()
@@ -335,7 +400,9 @@ def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map
     for s, t in compute_closure(osub_pairs):
         g.add((URIRef(s), RDFS.subPropertyOf, URIRef(t)))
 
-    dsub_pairs = parse_hierarchy(os.path.join(tmp, "dsubprops.xml"), "op", "superop")
+    # dsub_pairs comes from preprocess() (asserted in the source ontology via
+    # rdflib), since Konclude's SPARQL engine crashes on subPropertyOf
+    # queries over datatype properties for this ontology.
     for s, t in compute_closure(dsub_pairs):
         g.add((URIRef(s), RDFS.subPropertyOf, URIRef(t)))
 
@@ -349,7 +416,7 @@ def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map
 def koncludix(binary, input_file, output_file, work_dir):
     start = time.time()
 
-    classes, op_properties, dp_properties, inverse_map = preprocess(
+    classes, op_properties, dp_properties, inverse_map, dsub_pairs = preprocess(
         input_file, work_dir
     )
 
@@ -361,7 +428,8 @@ def koncludix(binary, input_file, output_file, work_dir):
         classes,
         op_properties,
         dp_properties,
-        inverse_map
+        inverse_map,
+        dsub_pairs
     )
 
     print(f"\nTOTAL TIME: {time.time() - start:.2f}s")
@@ -375,4 +443,3 @@ if __name__ == "__main__":
         print("Usage: python koncludix.py <konclude_binary> <input.owl> <output.ttl>")
     else:
         koncludix(sys.argv[1], sys.argv[2], sys.argv[3], "tmp")
-
