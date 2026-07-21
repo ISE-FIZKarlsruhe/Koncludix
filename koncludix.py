@@ -341,6 +341,7 @@ def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map
     # FIXED DATA PROPERTY PARSER (NAMESPACE-AWARE + MULTI-DOC SAFE)
     # ---------------------------------------------------------
     dprops_file = os.path.join(tmp, "dprops.xml")
+    data_assertions = []
     if os.path.exists(dprops_file):
         print("[POST] parsing data properties...")
 
@@ -369,9 +370,12 @@ def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map
 
             if s_val and dp_val and val_text is not None:
                 if val_dtype:
-                    g.add((URIRef(s_val), URIRef(dp_val), Literal(val_text, datatype=URIRef(val_dtype))))
+                    lit = Literal(val_text, datatype=URIRef(val_dtype))
                 else:
-                    g.add((URIRef(s_val), URIRef(dp_val), Literal(val_text)))
+                    lit = Literal(val_text)
+
+                g.add((URIRef(s_val), URIRef(dp_val), lit))
+                data_assertions.append((URIRef(s_val), dp_val, lit))
 
     # CLASS ASSERTIONS (SPARQL)
     ca_file = os.path.join(tmp, "class_assertions.xml")
@@ -405,6 +409,15 @@ def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map
     # queries over datatype properties for this ontology.
     for s, t in compute_closure(dsub_pairs):
         g.add((URIRef(s), RDFS.subPropertyOf, URIRef(t)))
+
+    # Materialize inferred datatype property assertions via datatype property hierarchy
+    dp_super = defaultdict(set)
+    for sub, sup in compute_closure(dsub_pairs):
+        dp_super[sub].add(sup)
+
+    for subj, dp, lit in data_assertions:
+        for super_dp in dp_super.get(dp, []):
+            g.add((subj, URIRef(super_dp), lit))
 
     print("[POST] writing output...")
     g.serialize(outfile, format="turtle")
