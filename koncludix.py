@@ -148,6 +148,8 @@ def run_konclude(binary, input_file, sparql_file, output_file):
         "-i", input_file
     ]
     result = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if (result.returncode != 0):
+        print ("Crashed on args: sparqlfile -s ", sparql_file, " -o ", output_file, " -i ", input_file )
     return result.returncode == 0, result.returncode
 
 
