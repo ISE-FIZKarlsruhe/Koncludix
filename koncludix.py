@@ -14,6 +14,9 @@
 #
 # Usage: python koncludix_fix.py <konclude_binary> <input.owl> <output.ttl>
 
+# Note: Konclude's SPARQL layer only reliably answers flat, single-pattern queries with a fixed predicate 
+# anything with a variable predicate returns silently empty, and anything that joins multiple patterns through a blank node segfaults. 
+
 import sys
 import os
 import re
