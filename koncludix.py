@@ -2,11 +2,15 @@
 # object props, data props, subproperties, class assertions) and stitches
 # the answers back into one reasoned TTL file.
 #
-# Konclude segfaults on a handful of specific queries in this ontology and
-# just dies instead of answering. If a query fails even after retrying it
-# on its own, we don't just drop that data -- we grab the asserted (not
-# reasoned) version of it straight from the source file with rdflib, so at
-# least nothing silently disappears from the output.
+# Two things this version handles that the original didn't:
+#  - Konclude segfaults on a handful of specific queries in this ontology.
+#    If a query still fails after retrying it on its own, we grab the
+#    asserted (not reasoned) version of it straight from the source file
+#    with rdflib, instead of just losing that data.
+#  - Anonymous individuals (blank nodes) used to get silently dropped,
+#    because the old parser only understood named IRIs in Konclude's
+#    answers. Now blank nodes are read too, kept per-query so we don't
+#    accidentally mix up two different unnamed things.
 #
 # Usage: python koncludix_fix.py <konclude_binary> <input.owl> <output.ttl>
 
@@ -15,7 +19,7 @@ import os
 import re
 import subprocess
 import time
-from rdflib import Graph, URIRef, Literal
+from rdflib import Graph, URIRef, BNode, Literal
 from rdflib.namespace import RDF, RDFS, OWL
 from collections import defaultdict, deque
 import xml.etree.ElementTree as ET
@@ -48,6 +52,63 @@ def load_konclude_multixml(path):
     wrapped = f"<root>{cleaned}</root>"
 
     return ET.fromstring(wrapped)
+
+
+# ---------------------------------------------------------
+# BLANK NODE AWARE RESULT PARSING
+# ---------------------------------------------------------
+# Konclude labels blank nodes "b0", "b1", ... per query it answers, and
+# those labels are only meaningful within that one query's own results --
+# they get reused across different queries (different Konclude processes)
+# without meaning the same node. So we keep a fresh label->BNode map per
+# embedded result document instead of one shared map for the whole file,
+# otherwise we'd risk stitching two unrelated anonymous individuals
+# together just because they both got called "b0".
+SPARQL_RESULTS_NS = {"sr": "http://www.w3.org/2005/sparql-results#"}
+
+
+def iter_result_rows(root):
+    docs = root.findall("sr:sparql", SPARQL_RESULTS_NS)
+    if not docs:
+        docs = [root]
+    for doc in docs:
+        bnode_map = {}
+        for result in doc.findall(".//sr:result", SPARQL_RESULTS_NS):
+            yield bnode_map, result
+
+
+def extract_binding_node(binding, bnode_map):
+    """Turn one sr:binding element into a URIRef, BNode, or Literal."""
+    ns = SPARQL_RESULTS_NS
+
+    uri_node = binding.find("sr:uri", ns)
+    if uri_node is not None:
+        return URIRef(uri_node.text.strip())
+
+    bnode_node = binding.find("sr:bnode", ns)
+    if bnode_node is not None:
+        label = bnode_node.text.strip()
+        if label not in bnode_map:
+            bnode_map[label] = BNode()
+        return bnode_map[label]
+
+    lit_node = binding.find("sr:literal", ns)
+    if lit_node is not None:
+        text = lit_node.text.strip() if lit_node.text else ""
+        dtype = lit_node.attrib.get("datatype")
+        return Literal(text, datatype=URIRef(dtype)) if dtype else Literal(text)
+
+    return None
+
+
+def extract_row(result, bnode_map, names):
+    """Pull out the named bindings from one result row as a dict."""
+    row = {}
+    for b in result.findall("sr:binding", SPARQL_RESULTS_NS):
+        name = b.attrib.get("name")
+        if name in names:
+            row[name] = extract_binding_node(b, bnode_map)
+    return row
 
 
 # ---------------------------------------------------------
@@ -325,7 +386,7 @@ def recover_skipped_predicate_triples(job, skipped, source_graph, literal_only):
             continue
         count = 0
         for subj, val in source_graph.subject_objects(URIRef(pred_iri)):
-            if not isinstance(subj, URIRef):
+            if not isinstance(subj, (URIRef, BNode)):
                 continue
             if isinstance(val, Literal) != literal_only:
                 continue
@@ -402,66 +463,37 @@ def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map
     for p, q in inverse_map.items():
         g.add((URIRef(p), OWL.inverseOf, URIRef(q)))
 
-    # OBJECT PROPERTIES
+    # OBJECT PROPERTIES (blank-node aware: subject and object can be
+    # anonymous individuals, not just named IRIs)
     oprops_file = os.path.join(tmp, "oprops.xml")
     if os.path.exists(oprops_file):
-        with open(oprops_file, encoding='utf-8') as f:
-            s = op = None
-            for line in f:
-                if 'binding name="s"' in line:
-                    s = extract_uri(line)
-                elif 'binding name="op"' in line:
-                    op = extract_uri(line)
-                elif 'binding name="o"' in line:
-                    o = extract_uri(line)
-                    if s and op and o:
-                        g.add((URIRef(s), URIRef(op), URIRef(o)))
+        print("[POST] parsing object properties...")
+        root = load_konclude_multixml(oprops_file)
+        for bnode_map, result in iter_result_rows(root):
+            row = extract_row(result, bnode_map, {"s", "op", "o"})
+            if row.get("s") is not None and row.get("op") is not None and row.get("o") is not None:
+                g.add((row["s"], row["op"], row["o"]))
 
     if source_graph is not None:
         for subj, pred, val in recover_skipped_predicate_triples(
                 "oprops", skipped_by_job.get("oprops", []), source_graph, literal_only=False
         ):
-            g.add((URIRef(subj), URIRef(pred), val))
+            g.add((subj, URIRef(pred), val))
 
-    # ---------------------------------------------------------
-    # FIXED DATA PROPERTY PARSER (NAMESPACE-AWARE + MULTI-DOC SAFE)
-    # ---------------------------------------------------------
+    # DATA PROPERTIES (blank-node aware: subject can be an anonymous
+    # individual, e.g. a value with a literal attached to it)
     dprops_file = os.path.join(tmp, "dprops.xml")
     data_assertions = []
     if os.path.exists(dprops_file):
         print("[POST] parsing data properties...")
 
         root = load_konclude_multixml(dprops_file)
-        ns = {"sr": "http://www.w3.org/2005/sparql-results#"}
-
-        for result in root.findall(".//sr:result", ns):
-
-            s_val = dp_val = val_text = val_dtype = None
-
-            for b in result.findall("sr:binding", ns):
-                name = b.attrib.get("name")
-
-                uri_node = b.find("sr:uri", ns)
-                lit_node = b.find("sr:literal", ns)
-
-                if uri_node is not None:
-                    if name == "s":
-                        s_val = uri_node.text.strip()
-                    elif name == "dp":
-                        dp_val = uri_node.text.strip()
-
-                if lit_node is not None and name == "val":
-                    val_text = lit_node.text.strip() if lit_node.text else ""
-                    val_dtype = lit_node.attrib.get("datatype")
-
-            if s_val and dp_val and val_text is not None:
-                if val_dtype:
-                    lit = Literal(val_text, datatype=URIRef(val_dtype))
-                else:
-                    lit = Literal(val_text)
-
-                g.add((URIRef(s_val), URIRef(dp_val), lit))
-                data_assertions.append((URIRef(s_val), dp_val, lit))
+        for bnode_map, result in iter_result_rows(root):
+            row = extract_row(result, bnode_map, {"s", "dp", "val"})
+            if row.get("s") is not None and row.get("dp") is not None and row.get("val") is not None:
+                dp_iri = str(row["dp"])
+                g.add((row["s"], row["dp"], row["val"]))
+                data_assertions.append((row["s"], dp_iri, row["val"]))
 
     if source_graph is not None:
         for subj, pred, lit in recover_skipped_predicate_triples(
@@ -470,19 +502,16 @@ def postprocess(outfile, tmp, classes, op_properties, dp_properties, inverse_map
             g.add((subj, URIRef(pred), lit))
             data_assertions.append((subj, pred, lit))
 
-    # CLASS ASSERTIONS (SPARQL)
+    # CLASS ASSERTIONS (blank-node aware: an anonymous individual can be
+    # classified too, e.g. one created to satisfy an existential restriction)
     ca_file = os.path.join(tmp, "class_assertions.xml")
     if os.path.exists(ca_file):
         print("[POST] parsing class assertions...")
-        s = t = None
-        with open(ca_file, encoding='utf-8') as f:
-            for line in f:
-                if 'binding name="s"' in line:
-                    s = extract_uri(line)
-                elif 'binding name="type"' in line:
-                    t = extract_uri(line)
-                    if s and t:
-                        g.add((URIRef(s), RDF.type, URIRef(t)))
+        root = load_konclude_multixml(ca_file)
+        for bnode_map, result in iter_result_rows(root):
+            row = extract_row(result, bnode_map, {"s", "type"})
+            if row.get("s") is not None and row.get("type") is not None:
+                g.add((row["s"], RDF.type, row["type"]))
 
     # REALISATION
     real_file = os.path.join(tmp, "realisation.owl")
