@@ -19,6 +19,7 @@ import os
 import re
 import subprocess
 import time
+from decimal import Decimal
 from rdflib import Graph, URIRef, BNode, Literal
 from rdflib.namespace import RDF, RDFS, OWL
 from collections import defaultdict, deque
@@ -83,7 +84,17 @@ def extract_binding_node(binding, bnode_map):
 
     uri_node = binding.find("sr:uri", ns)
     if uri_node is not None:
-        return URIRef(uri_node.text.strip())
+        text = uri_node.text.strip()
+        # Konclude doesn't use the standard <bnode> element for blank
+        # nodes -- it reports them as a <uri> whose text is a synthetic
+        # "_:..." id instead (e.g. "_:http://konclude.com/test/kb:r1...").
+        # Treat that the same as a real bnode rather than wrapping it as
+        # a URIRef, which would leak Konclude's internal id as a fake IRI.
+        if text.startswith("_:"):
+            if text not in bnode_map:
+                bnode_map[text] = BNode()
+            return bnode_map[text]
+        return URIRef(text)
 
     bnode_node = binding.find("sr:bnode", ns)
     if bnode_node is not None:
@@ -96,9 +107,36 @@ def extract_binding_node(binding, bnode_map):
     if lit_node is not None:
         text = lit_node.text.strip() if lit_node.text else ""
         dtype = lit_node.attrib.get("datatype")
+        if dtype and dtype.endswith("#decimal"):
+            text = normalize_decimal_text(text)
         return Literal(text, datatype=URIRef(dtype)) if dtype else Literal(text)
 
     return None
+
+
+# Konclude sometimes hands back a decimal value as a fraction ("1/2") or
+# mixed number ("23 1/2") instead of a normal xsd:decimal lexical form
+# ("0.5", "23.5") -- looks like its internal exact-arithmetic
+# representation leaking into the answer. Convert it back if we see that
+# shape, otherwise leave the text alone.
+_MIXED_FRACTION_RE = re.compile(r'^(-?)(\d+)\s+(\d+)/(\d+)$')
+_SIMPLE_FRACTION_RE = re.compile(r'^(-?)(\d+)/(\d+)$')
+
+
+def normalize_decimal_text(text):
+    m = _MIXED_FRACTION_RE.match(text)
+    if m:
+        sign, whole, num, den = m.groups()
+        value = Decimal(whole) + Decimal(num) / Decimal(den)
+        return str(-value if sign else value)
+
+    m = _SIMPLE_FRACTION_RE.match(text)
+    if m:
+        sign, num, den = m.groups()
+        value = Decimal(num) / Decimal(den)
+        return str(-value if sign else value)
+
+    return text
 
 
 def extract_row(result, bnode_map, names):
