@@ -182,7 +182,13 @@ namespace Konclude {
 						mDeclaratedConceptSet.insert(concept);
 						writeClassDeclaration(conceptString);
 					}
-					writeIndividualType(mCurrentIndividualName, mCurrentIndividualAnonymous, conceptString);
+					// Anonymity is checked here (at the point of writing),
+					// not by skipping visitation of an anonymous individual
+					// altogether -- see visitRoleInstance()'s comment for why
+					// that distinction matters.
+					if (mWriteAnonymousIndividuals || !mCurrentIndividualAnonymous) {
+						writeIndividualType(mCurrentIndividualName, mCurrentIndividualAnonymous, conceptString);
+					}
 				}
 				return true;
 			}
@@ -200,12 +206,23 @@ namespace Konclude {
 
 
 			bool CWriteMaterializedIndividualAssertionsQuery::visitRoleInstance(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleRealization* roleRealization) {
+				// Always collect, regardless of mWriteAnonymousIndividuals --
+				// this fact feeds propagateSubProperties()/propagateInverseRoles()/
+				// propagatePropertyChains() below, which can derive a fact
+				// between two NAMED individuals via an intermediate role hop
+				// that happens to land on an anonymous individual (e.g. a
+				// property-chain composition A->_:b->C, where only the final
+				// A->C fact is ever written). Silently dropping the A->_:b
+				// hop here purely because _:b is anonymous would make that
+				// derivation impossible to reach even though nothing
+				// anonymous ever appears in the final written fact. Whether
+				// an individual (named or anonymous) actually appears as a
+				// subject/target in the WRITTEN output is decided later, at
+				// each write call site, not here at collection time.
 				bool targetAnonymous = mOntology->getIndividualNameResolver()->isAnonymous(indiRealItemRef);
-				if (mWriteAnonymousIndividuals || !targetAnonymous) {
-					QString targetName = mOntology->getIndividualNameResolver()->getIndividualName(indiRealItemRef, mUseAbbreviatedIRIs);
-					mGlobalSubjectRoleTargets[mCurrentIndividualName][mCurrentRole].insert(targetName, targetAnonymous);
-					mIndividualAnonymousHash.insert(targetName, targetAnonymous);
-				}
+				QString targetName = mOntology->getIndividualNameResolver()->getIndividualName(indiRealItemRef, mUseAbbreviatedIRIs);
+				mGlobalSubjectRoleTargets[mCurrentIndividualName][mCurrentRole].insert(targetName, targetAnonymous);
+				mIndividualAnonymousHash.insert(targetName, targetAnonymous);
 				return true;
 			}
 
@@ -562,54 +579,78 @@ namespace Konclude {
 					mIndividualAnonymousHash.clear();
 
 					visitIndividuals([&](const CIndividualReference& indiRef)->bool {
+						// Every individual is always visited here -- named or
+						// anonymous -- regardless of mWriteAnonymousIndividuals.
+						// That flag only controls what ends up WRITTEN to the
+						// output (checked at each write call site below, and
+						// inside visitConcept()/writeObjectPropertyAssertion's
+						// caller), not whether an anonymous individual's own
+						// outgoing facts get queried and collected at all.
+						// Skipping collection entirely for an anonymous
+						// individual would silently break propagateSubProperties()/
+						// propagateInverseRoles()/propagatePropertyChains()
+						// whenever a derivation's intermediate hop happens to
+						// pass through one, even if the final derived fact
+						// only involves named individuals on both ends (e.g.
+						// a property chain A --P--> _:b --P--> C entailing
+						// A --Q--> C, composed via SubObjectPropertyOf(P o P,
+						// Q): if A--P-->_:b were never collected because _:b
+						// is anonymous, that composition could never be
+						// found, even though _:b never appears in the final
+						// A--Q-->C fact that IS supposed to be written).
 						bool anonymous = mOntology->getIndividualNameResolver()->isAnonymous(indiRef);
-						if (mWriteAnonymousIndividuals || !anonymous) {
-							mCurrentIndividualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, mUseAbbreviatedIRIs);
-							mCurrentIndividualAnonymous = anonymous;
-							mIndividualAnonymousHash.insert(mCurrentIndividualName, anonymous);
-							if (mWriteDeclarations) {
-								writeIndividualDeclaration(mCurrentIndividualName, anonymous);
+						mCurrentIndividualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, mUseAbbreviatedIRIs);
+						mCurrentIndividualAnonymous = anonymous;
+						mIndividualAnonymousHash.insert(mCurrentIndividualName, anonymous);
+						if (mWriteDeclarations && (mWriteAnonymousIndividuals || !anonymous)) {
+							writeIndividualDeclaration(mCurrentIndividualName, anonymous);
+						}
+						if (conRealization) {
+							conRealization->visitTypes(indiRef, mWriteOnlyDirectTypes, this);
+						}
+						if (roleRealization) {
+							foreach (CRole* role, mObjectPropertyRoleList) {
+								mCurrentRole = role;
+								mCurrentPropertyName = mObjectPropertyNameHash.value(role);
+								roleRealization->visitTargetIndividuals(indiRef, role, this);
 							}
-							if (conRealization) {
-								conRealization->visitTypes(indiRef, mWriteOnlyDirectTypes, this);
-							}
-							if (roleRealization) {
-								foreach (CRole* role, mObjectPropertyRoleList) {
-									mCurrentRole = role;
-									mCurrentPropertyName = mObjectPropertyNameHash.value(role);
-									roleRealization->visitTargetIndividuals(indiRef, role, this);
-								}
-							}
+						}
 
-							// Data properties: read each individual's *asserted* data
-							// property values directly off the ABox (no realizer query
-							// -- see mDataPropertySuperRolesHash's comment), then
-							// propagate each one to its transitive super-data-properties
-							// using the very same hierarchy-closure mechanism as
-							// mObjectPropertySuperRolesHash, and write immediately (no
-							// cross-individual propagation is needed for data
-							// properties, so unlike object properties this does not need
-							// to go through the global accumulator).
-							CIndividual* individual = indiRef.getIndividual();
-							if (individual) {
-								QHash<CRole*, QSet<QPair<QString,QString> > > collectedDataAssertions;
-								for (CDataAssertionLinker* link = individual->getAssertionDataLinker(); link; link = link->getNext()) {
-									CRole* dataRole = link->getRole();
-									CDataLiteral* literal = link->getDataLiteral();
-									if (dataRole && literal && mDataPropertyNameHash.contains(dataRole)) {
-										CDatatype* datatype = literal->getDatatype();
-										QString datatypeIRI = datatype ? datatype->getDatatypeIRI() : QString();
-										collectedDataAssertions[dataRole].insert(qMakePair(literal->getLexicalDataLiteralValueString(), datatypeIRI));
-									}
+						// Data properties: read each individual's *asserted* data
+						// property values directly off the ABox (no realizer query
+						// -- see mDataPropertySuperRolesHash's comment), then
+						// propagate each one to its transitive super-data-properties
+						// using the very same hierarchy-closure mechanism as
+						// mObjectPropertySuperRolesHash, and write immediately (no
+						// cross-individual propagation is needed for data
+						// properties, so unlike object properties this does not need
+						// to go through the global accumulator). Collection always
+						// happens; only the final write is gated on
+						// mWriteAnonymousIndividuals, for the same reason as above
+						// (data properties have no cross-individual composition, but
+						// keeping collect/write separated here anyway for
+						// consistency and in case that ever changes).
+						CIndividual* individual = indiRef.getIndividual();
+						if (individual) {
+							QHash<CRole*, QSet<QPair<QString,QString> > > collectedDataAssertions;
+							for (CDataAssertionLinker* link = individual->getAssertionDataLinker(); link; link = link->getNext()) {
+								CRole* dataRole = link->getRole();
+								CDataLiteral* literal = link->getDataLiteral();
+								if (dataRole && literal && mDataPropertyNameHash.contains(dataRole)) {
+									CDatatype* datatype = literal->getDatatype();
+									QString datatypeIRI = datatype ? datatype->getDatatypeIRI() : QString();
+									collectedDataAssertions[dataRole].insert(qMakePair(literal->getLexicalDataLiteralValueString(), datatypeIRI));
 								}
-								QList<CRole*> collectedDataRoleList(collectedDataAssertions.keys());
-								foreach (CRole* role, collectedDataRoleList) {
-									const QSet<QPair<QString,QString> > literals(collectedDataAssertions.value(role));
-									const QSet<CRole*>& superRoles = mDataPropertySuperRolesHash.value(role);
-									foreach (CRole* superRole, superRoles) {
-										collectedDataAssertions[superRole].unite(literals);
-									}
+							}
+							QList<CRole*> collectedDataRoleList(collectedDataAssertions.keys());
+							foreach (CRole* role, collectedDataRoleList) {
+								const QSet<QPair<QString,QString> > literals(collectedDataAssertions.value(role));
+								const QSet<CRole*>& superRoles = mDataPropertySuperRolesHash.value(role);
+								foreach (CRole* superRole, superRoles) {
+									collectedDataAssertions[superRole].unite(literals);
 								}
+							}
+							if (mWriteAnonymousIndividuals || !anonymous) {
 								for (QHash<CRole*, QSet<QPair<QString,QString> > >::const_iterator dpIt = collectedDataAssertions.constBegin(), dpItEnd = collectedDataAssertions.constEnd(); dpIt != dpItEnd; ++dpIt) {
 									const QString& propertyName = mDataPropertyNameHash.value(dpIt.key());
 									if (propertyName.isEmpty()) {
@@ -657,7 +698,18 @@ namespace Konclude {
 								}
 								const QHash<QString,bool>& targets = roleIt.value();
 								for (QHash<QString,bool>::const_iterator it = targets.constBegin(), itEnd = targets.constEnd(); it != itEnd; ++it) {
-									writeObjectPropertyAssertion(subjectName, subjectAnonymous, propertyName, it.key(), it.value());
+									// Collection (visitRoleInstance()) is unconditional so
+									// that a fact touching an anonymous individual can still
+									// feed chain/inverse/sub-property propagation -- so the
+									// anonymity check that used to happen at collection time
+									// has to happen here instead, at the actual point of
+									// writing, on both ends of the (possibly propagated)
+									// fact.
+									bool targetAnonymous = it.value();
+									if (!mWriteAnonymousIndividuals && (subjectAnonymous || targetAnonymous)) {
+										continue;
+									}
+									writeObjectPropertyAssertion(subjectName, subjectAnonymous, propertyName, it.key(), targetAnonymous);
 								}
 							}
 						}

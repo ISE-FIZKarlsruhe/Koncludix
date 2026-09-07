@@ -26,5 +26,5 @@ A modified, worked-upon build of [Konclude](https://github.com/konclude/Konclude
 - `Konclude/Binaries/` — ready-to-run build (`Konclude.bat materialize -w AUTO -i <ontology> -o <output>`)
 - `Konclude/Source/` — the modified source (LGPLv3, same license as upstream Konclude)
 
-Checked against [InferTest](https://github.com/ISE-FIZKarlsruhe/InferTest): all core OWL 2 constructs pass (class/property hierarchies, class/property assertions, inverses, chains, cardinalities, functional/inverse-functional properties, etc.). One known gap remains: `owl:hasKey` with a datatype-property key is not enforced.
+Checked against [InferTest](https://github.com/ISE-FIZKarlsruhe/InferTest): all core OWL 2 constructs pass (class/property hierarchies, class/property assertions, inverses, chains, cardinalities, functional/inverse-functional properties, blank nodes, etc.). A few known gaps remain, all confirmed to be in Konclude's own reasoning/parsing rather than anything added here: `owl:hasKey` with a datatype-property key is not enforced, and `owl:AsymmetricProperty` / `owl:IrreflexiveProperty` / `owl:propertyDisjointWith` violations aren't detected either.
 
