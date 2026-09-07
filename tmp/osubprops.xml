@@ -1,0 +1,1988 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001025</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001025</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001025</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000079</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000079</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000052</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000079</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000079</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000221</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000221</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000221</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001138</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001138</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001028</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001138</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001138</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000199</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000199</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000199</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0009006</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0009006</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0009006</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000118</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000118</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000117</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000118</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000118</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000195</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000195</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000195</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000057</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000057</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000057</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000194</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000194</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000194</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/IAO_0000136</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/IAO_0000136</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/IAO_0000136</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000056</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000056</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000056</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000196</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000196</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000194</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000196</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000196</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000184</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000184</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000184</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000181</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000181</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000117</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000181</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000121</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000181</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000181</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001115</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001115</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000056</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001115</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001115</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001114</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001114</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000057</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001114</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001114</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001028</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001028</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001028</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001118</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001118</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/IAO_0000136</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001118</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001118</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000194</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000194</uri></binding>
+  <binding name="superop"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000194</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000059</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000059</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000059</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0001006</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0001006</uri></binding>
+  <binding name="superop"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0001006</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/OBI_0000295</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/OBI_0000295</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000056</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/OBI_0000295</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/OBI_0000295</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000092</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000092</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000052</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000092</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000092</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001135</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001135</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001025</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001135</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001135</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000211</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000211</uri></binding>
+  <binding name="superop"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000211</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000121</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000121</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000117</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000121</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000121</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000223</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000223</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000223</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000054</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000054</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000054</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000086</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000086</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000053</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000086</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000086</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://www.w3.org/2004/02/skos/core#broaderTransitive</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://www.w3.org/2004/02/skos/core#broaderTransitive</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2004/02/skos/core#broaderTransitive</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000185</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000185</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000185</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000091</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000091</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000053</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000091</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000091</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001117</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001117</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/IAO_0000136</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001117</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001117</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000224</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000224</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000224</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001137</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001137</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001025</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001137</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001137</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000132</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000132</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000132</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://www.w3.org/2004/02/skos/core#exactMatch</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://www.w3.org/2004/02/skos/core#exactMatch</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2004/02/skos/core#exactMatch</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000081</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000081</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000052</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000081</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000081</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002351</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002351</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000051</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002351</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0002351</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000053</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000053</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000053</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000240</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000240</uri></binding>
+  <binding name="superop"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000240</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/STATO_0000102</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/STATO_0000102</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/STATO_0000102</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001116</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001116</uri></binding>
+  <binding name="superop"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000226</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001116</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001116</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000182</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000182</uri></binding>
+  <binding name="superop"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000182</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000108</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000108</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000108</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000051</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000051</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000051</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0001025</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0001025</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0001025</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000183</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000183</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000183</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000138</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000138</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000132</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000138</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000138</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000063</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000063</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000063</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002233</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002233</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000057</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002233</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0002233</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000187</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000187</uri></binding>
+  <binding name="superop"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000187</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000050</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000050</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000050</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/IAO_0000417</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/IAO_0000417</uri></binding>
+  <binding name="superop"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000226</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/IAO_0000417</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/IAO_0000417</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000142</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000142</uri></binding>
+  <binding name="superop"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000142</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001119</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001119</uri></binding>
+  <binding name="superop"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000226</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001119</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001119</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000216</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000216</uri></binding>
+  <binding name="superop"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000216</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://www.w3.org/2004/02/skos/core#narrowerTransitive</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://www.w3.org/2004/02/skos/core#narrowerTransitive</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2004/02/skos/core#narrowerTransitive</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000153</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000153</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000153</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/OBI_0000293</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/OBI_0000293</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000057</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/OBI_0000293</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/OBI_0000293</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002234</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002234</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000057</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002234</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0002234</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001139</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001139</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001025</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001139</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001139</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000222</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000222</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000222</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002350</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002350</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000050</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002350</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0002350</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0009007</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0009007</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0009007</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002353</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002353</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000056</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002353</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0002353</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000062</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000062</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000062</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000066</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000066</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000066</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://www.w3.org/2004/02/skos/core#broader</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://www.w3.org/2004/02/skos/core#broader</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2004/02/skos/core#broaderTransitive</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://www.w3.org/2004/02/skos/core#broader</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2004/02/skos/core#broader</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000058</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000058</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000058</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000136</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000136</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000132</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000136</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000139</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000136</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000136</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/IAO_0000219</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/IAO_0000219</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/IAO_0000136</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/IAO_0000219</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/IAO_0000219</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/OBI_0000417</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/OBI_0000417</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/OBI_0000417</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/OBI_0000299</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/OBI_0000299</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000057</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/OBI_0000299</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/OBI_0000299</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002352</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002352</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000056</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0002352</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0002352</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000052</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000052</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000052</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://www.w3.org/2004/02/skos/core#narrower</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://www.w3.org/2004/02/skos/core#narrower</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2004/02/skos/core#narrowerTransitive</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://www.w3.org/2004/02/skos/core#narrower</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2004/02/skos/core#narrower</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000055</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000055</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000055</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000139</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000139</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000132</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000139</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000139</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000197</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000197</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000195</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000197</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000197</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000117</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000117</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000117</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001134</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001134</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001028</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001134</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001134</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/IAO_0000221</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/IAO_0000221</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/IAO_0000136</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/IAO_0000221</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/IAO_0000221</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000087</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000087</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000053</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000087</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000087</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001136</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001136</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001028</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001136</uri></binding>
+  <binding name="superop"><uri>http://purls.helmholtz-metadaten.de/mwo/MWO_0001136</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000200</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/BFO_0000200</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/BFO_0000200</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000226</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000226</uri></binding>
+  <binding name="superop"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000226</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000085</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000085</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000053</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000085</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000085</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://www.w3.org/ns/dcat#downloadURL</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://www.w3.org/ns/dcat#downloadURL</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/ns/dcat#downloadURL</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000207</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000207</uri></binding>
+  <binding name="superop"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000207</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000132</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000132</uri></binding>
+  <binding name="superop"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000132</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/OBI_0000312</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/OBI_0000312</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000056</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/OBI_0000312</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/OBI_0000312</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000080</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000080</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000052</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/RO_0000080</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/RO_0000080</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#" xml:base="http://www.w3.org/2005/sparql-results#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+<head>
+  <variable name="op"/>
+  <variable name="superop"/>
+</head>
+<results>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/IAO_0000235</uri></binding>
+  <binding name="superop"><uri>http://www.w3.org/2002/07/owl#topObjectProperty</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/IAO_0000235</uri></binding>
+  <binding name="superop"><uri>https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0000226</uri></binding>
+ </result>
+ <result>
+  <binding name="op"><uri>http://purl.obolibrary.org/obo/IAO_0000235</uri></binding>
+  <binding name="superop"><uri>http://purl.obolibrary.org/obo/IAO_0000235</uri></binding>
+ </result>
+ <!-- end of part 1 -->
+</results>
+</sparql>
