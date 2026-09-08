@@ -30,6 +30,18 @@ chmod +x Konclude-x86_64.AppImage
 ./Konclude-x86_64.AppImage --appimage-extract-and-run input.ttl output.ttl
 ```
 
+Both of the above are wrappers that already run with `-w AUTO` (see "Thread count" below) — this is enough for most uses. Two optional extras, only if you need them:
+
+- **`-anon`** — by default, facts touching a blank node (anonymous individual) are computed correctly internally but left out of the written output; only entailments between named individuals get written. Adding `-anon` also writes the blank nodes' own facts to the file. Leave it off unless you specifically need to see/use the blank nodes themselves:
+  ```bash
+  ./materialize.sh input.ttl output.ttl -anon
+  ./Konclude-x86_64.AppImage input.ttl output.ttl -anon
+  ```
+- **Thread count** — both wrappers hardcode `-w AUTO` (scale to every CPU core available) for convenience. To control this yourself, call the underlying binary directly instead of the wrapper, e.g. `-w 1` for single-threaded, or `-w 4` for a fixed count:
+  ```bash
+  ./Konclude materialize -w 1 -i input.ttl -o output.ttl
+  ```
+
 
 ## Quick start (Windows)
 
