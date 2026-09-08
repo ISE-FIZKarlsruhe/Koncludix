@@ -26,7 +26,6 @@ The portable build (`Konclude-Linux-x64-portable.tar.gz`) and the single-file Ap
 tar xzf Konclude-Linux-x64-portable.tar.gz
 cd Konclude-Linux-x64-portable
 ./materialize.sh input.ttl output.ttl
-./materialize.sh -selftest
 
 # or the single-file AppImage
 chmod +x Konclude-x86_64.AppImage
