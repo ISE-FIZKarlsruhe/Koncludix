@@ -99,6 +99,8 @@ Checked against [InferTest](https://github.com/ISE-FIZKarlsruhe/InferTest)'s ful
 
 **Linux / Docker native-Turtle path** (input parsed directly from RDF via Redland): the same `owl:hasKey` gap, plus five more entailments/violations not detected — `owl:InverseFunctionalProperty`, qualified cardinality restrictions, and `owl:sameAs` merging from `same-individual`-style constructs aren't entailed; `owl:differentFrom` and negative property assertion violations aren't detected. All five share something in common: each has an unusually indirect RDF/Turtle encoding (RDF-list-encoded keys, blank-node restriction structures, reification-style assertions) — the Redland-based Turtle→OWL-axiom mapping doesn't appear to fully reconstruct them from raw triples before reasoning starts. This is a parser-level gap, separate from the reasoning/materialization logic itself (everything else — 23/28 entailment constructs and 3/9 inconsistency constructs on this path — is correct).
 
+Also specific to the native-Turtle path: certain `rdfs:subPropertyOf` axioms between data properties fail to parse (`Couldn't extract minimal required 2 DataProperty-Expressions... Couldn't match parameters for 'SubDataPropertyOf'-Expression`), confirmed on real-world data — the same ontology parses and reasons cleanly when given as OWL2-XML instead of Turtle. If you hit this, converting to OWL2-XML first (see "Working with Turtle on Windows" above) is the current workaround.
+
 Both paths also share: `owl:AsymmetricProperty` / `owl:IrreflexiveProperty` / `owl:propertyDisjointWith` violations aren't detected (a kernel-level gap, not parser-specific), and numeric literals beyond 64-bit range (e.g. very large physical constants) are silently dropped.
 
 ## Licensing
