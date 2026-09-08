@@ -35,17 +35,19 @@ Checked against [InferTest](https://github.com/ISE-FIZKarlsruhe/InferTest): all 
 ```bat
 cd Konclude
 materialize.bat -selftest
+materialize.bat -infertest
 materialize.bat input.owl.xml output.owl.xml
 materialize.bat input.owl.xml output.owl.xml -anon
 ```
 
 - **Input/output format**: OWL2-XML or OWL2-Functional syntax only (`.owl.xml`, `.ofn`) — **not** Turtle/RDF-XML/N-Triples. The Windows build has no Redland integration, so it can't parse or write plain RDF directly. If your data is Turtle, either convert it first (see "Working with Turtle on Windows" below) or use the Docker image, which reads/writes Turtle natively.
 - **`-anon`**: by default, facts touching a blank node (anonymous individual) are computed correctly internally but left out of the written output — only entailments between named individuals get written. `-anon` also writes the blank nodes' own facts (their types, property values, any assertion where one is the subject or object) to the file, tagged `<AnonymousIndividual nodeID="...">`. Leave it off unless you specifically need to see/use the blank nodes themselves.
-- **`-selftest`**: a ~1-second sanity check (a property chain through a blank node) — run it first any time to confirm the build itself is working before pointing it at real data.
+- **`-selftest`**: a ~1-second sanity check — one hardcoded case (a property chain through a blank node). Run it first any time to confirm the build itself launches and reasons at all.
+- **`-infertest`**: the thorough check — every construct [InferTest](https://github.com/ISE-FIZKarlsruhe/InferTest) defines (28 entailment + 9 inconsistency), not just one. Needs InferTest cloned as a sibling of this repo (`git clone https://github.com/ISE-FIZKarlsruhe/InferTest.git` next to `Koncludix/`) plus Python + `pip install rdflib`; the converters below are compiled automatically on first run. Reports **regressions only** — the small set of already-diagnosed Konclude kernel gaps (`has-key`, `asymmetric-property`, `disjoint-properties`, `irreflexive-property`) are expected to fail every time and don't count against you; anything else failing means something actually broke. Exit code 0 = no regressions.
 
 #### Working with Turtle on Windows
 
-`Konclude/tools/` has two small OWL API–based Java converters (`ConvertToOWLXML`, `ConvertToRDFXML`) plus a bundled, verified-working `openllet.jar` (Maven Central's own OWL API/openllet "distribution" jars turned out to be missing several of their own dependencies — this one is confirmed to actually work). One-time setup, then convert in both directions around `materialize.bat`:
+`Konclude/tools/` has two small OWL API–based Java converters (`ConvertToOWLXML`, `ConvertToRDFXML`) plus a bundled, verified-working `openllet.jar` (Maven Central's own OWL API/openllet "distribution" jars turned out to be missing several of their own dependencies — this one is confirmed to actually work). `-infertest` above uses these automatically; to convert your own Turtle data by hand:
 
 ```bat
 Konclude\tools\setup.bat
@@ -57,8 +59,6 @@ java -cp %CP% ConvertToRDFXML  temp-output.owl.xml   your-result.rdf.xml
 ```
 
 (run from the repo root; adjust paths if running from elsewhere)
-
-This is also how to check the Windows build against [InferTest](https://github.com/ISE-FIZKarlsruhe/InferTest)'s Turtle-format test cases (its `prepare_test_ontology.py` / `validate_entailments.py` work with RDF/XML just as well as Turtle).
 
 ### Running it anywhere: Docker (recommended)
 

@@ -24,12 +24,19 @@ rem Usage:
 rem   materialize.bat input-file output-file
 rem   materialize.bat input-file output-file -anon     (also write blank
 rem                                                      nodes' own facts)
-rem   materialize.bat -selftest                         (quick sanity check)
+rem   materialize.bat -selftest                         (quick, ~1s sanity
+rem                                                      check -- one
+rem                                                      hardcoded case)
+rem   materialize.bat -infertest                        (thorough: every
+rem                                                      InferTest construct,
+rem                                                      ~a few seconds --
+rem                                                      see tools\run-infertest.ps1)
 
 set SCRIPT_DIR=%~dp0
 set KONCLUDE=%SCRIPT_DIR%Binaries\Konclude.exe
 
 if "%~1"=="-selftest" goto selftest
+if "%~1"=="-infertest" goto infertest
 if "%~1"=="" goto usage
 if "%~2"=="" goto usage
 
@@ -79,9 +86,14 @@ echo SELF-TEST PASSED: Konclude.exe is working correctly.
 del "%TEST_INPUT%" "%TEST_OUTPUT%" >nul 2>&1
 exit /b 0
 
+:infertest
+powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%tools\run-infertest.ps1"
+exit /b %errorlevel%
+
 :usage
 echo Usage: materialize.bat input-file output-file [-anon]
 echo        materialize.bat -selftest
+echo        materialize.bat -infertest
 echo.
 echo   input-file   OWL2-XML or OWL2-Functional-syntax ontology (.owl.xml, .ofn)
 echo   output-file  Where to write the materialized ABox (same format)
