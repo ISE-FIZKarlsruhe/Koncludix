@@ -6,8 +6,8 @@ A modified build of [Konclude](https://github.com/konclude/Konclude), the OWL 2 
 
 | Platform | Where to get it |
 |---|---|
-| Windows | Already in this repo — `Binaries/` + `materialize.bat` (`git clone` and go) |
 | Linux (single file) | `Konclude-x86_64.AppImage`, attached to this repo's [Releases](../../releases) |
+| Windows | Already in this repo — `Binaries/` + `materialize.bat` (`git clone` and go) |
 | Docker | `docker build -t konclude .` (build locally from this repo) |
 | Docker (prebuilt pull) | coming soon |
 | macOS | coming soon |
@@ -30,7 +30,7 @@ chmod +x Konclude-x86_64.AppImage
 ./Konclude-x86_64.AppImage --appimage-extract-and-run input.ttl output.ttl
 ```
 
-Both of the above are wrappers that already run with `-w AUTO` (see "Thread count" below) — this is enough for most uses. Two optional extras, only if you need them:
+Every wrapper already runs with `-w AUTO` (see "Thread count" below) — this is enough for most uses. **Two optional** arguments, only if you need them:
 
 - **`-anon`** — by default, facts touching a blank node (anonymous individual) are computed correctly internally but left out of the written output; only entailments between named individuals get written. Adding `-anon` also writes the blank nodes' own facts to the file. Leave it off unless you specifically need to see/use the blank nodes themselves:
   ```bash
