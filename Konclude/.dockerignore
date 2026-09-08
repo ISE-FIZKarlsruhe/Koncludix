@@ -1,7 +1,0 @@
-Binaries/
-GeneratedFiles/
-release/
-debug/
-Makefile*
-*.vcxproj
-*.sln

@@ -1,0 +1,14 @@
+Binaries/
+GeneratedFiles/
+release/
+debug/
+Makefile*
+*.vcxproj
+*.sln
+
+# Now that the build context is the repo root (not a trimmed subfolder),
+# also exclude everything the Docker build itself never needs.
+.git/
+.github/
+tools/
+linux-bundle-work/

@@ -1,0 +1,12 @@
+# Build output
+GeneratedFiles/
+release/
+debug/
+Makefile*
+.qmake.stash
+*.vcxproj
+*.sln
+
+# Scratch working directory used while building/testing distributable
+# binaries locally -- never meant to be committed.
+linux-bundle-work/

@@ -1,9 +1,9 @@
 name: Build Konclude (Windows / Linux / macOS)
 
-# Builds our modified Konclude (see Konclude/README.md) on all three
-# platforms, the same way upstream Konclude publishes prebuilt binaries for
-# each — except these builds are dynamically linked against Qt on every
-# platform (upstream's Linux/macOS builds are statically linked against a
+# Builds this modified Konclude (see README.md) on all three platforms, the
+# same way upstream Konclude publishes prebuilt binaries for each -- except
+# these builds are dynamically linked against Qt on every platform
+# (upstream's Linux/macOS builds are statically linked against a
 # custom-built Qt, which needs a much heavier build step we don't do here).
 # A dynamic build just needs Qt's shared libraries available alongside the
 # binary at runtime, exactly like the Windows build we already use.
@@ -15,9 +15,9 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'Konclude/Source/**'
-      - 'Konclude/*.pro'
-      - 'Konclude/*.pri'
+      - 'Source/**'
+      - '*.pro'
+      - '*.pri'
       - '.github/workflows/build-konclude.yml'
 
 jobs:
@@ -44,10 +44,18 @@ jobs:
       - name: Set up MSVC environment (Windows only)
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
+        with:
+          # Qt 5.15.2's headers still call the old MSVC STL helper
+          # stdext::make_checked_array_iterator, which Microsoft has since
+          # removed from newer toolsets (fails with "'stdext' is not a
+          # class or namespace name" on whatever ships as default on the
+          # runner). Pin the older VS2019-era (v142) toolset, matching what
+          # actually builds Qt 5.15.2 locally, instead of the runner's
+          # newest preinstalled compiler.
+          toolset: 14.29
 
       - name: Build (Windows)
         if: runner.os == 'Windows'
-        working-directory: Konclude
         shell: cmd
         run: |
           qmake KoncludeWithoutRedland.pro -spec win32-msvc
@@ -55,22 +63,23 @@ jobs:
 
       - name: Build (Linux)
         if: runner.os == 'Linux'
-        working-directory: Konclude
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y build-essential
+          # Committed from Windows, where git doesn't track the executable
+          # bit -- the checked-out script is otherwise non-executable here.
+          chmod +x UnixGitBuildScript.sh
           qmake KoncludeWithoutRedland.pro
           make -j"$(nproc)"
 
       - name: Build (macOS)
         if: runner.os == 'macOS'
-        working-directory: Konclude
         run: |
+          chmod +x UnixGitBuildScript.sh
           qmake KoncludeWithoutRedland.pro
           make -j"$(sysctl -n hw.ncpu)"
 
       - name: Package build output
-        working-directory: Konclude
         shell: bash
         run: |
           set -eu
@@ -86,17 +95,17 @@ jobs:
             chmod +x dist/Binaries/Konclude
           fi
           cp -r Configs/. dist/Configs/ 2>/dev/null || true
-          cp Konclude.bat dist/ 2>/dev/null || true
-          cp GPL.txt LGPL-3.0.txt Readme.md dist/ 2>/dev/null || true
+          cp materialize.bat dist/ 2>/dev/null || true
+          cp GPL.txt LGPL-3.0.txt dist/ 2>/dev/null || true
 
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
-          path: Konclude/dist
+          path: dist
 
   docker:
     # The actual "runs the same regardless of environment" option (see
-    # Konclude/Dockerfile) -- builds and (on pushes to main) publishes a
+    # Dockerfile) -- builds and (on pushes to main) publishes a
     # self-contained image, verified locally to build and reason correctly
     # before this workflow was written.
     runs-on: ubuntu-latest
@@ -116,9 +125,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Compute lowercase image tag
+        id: image
+        # ghcr.io requires an all-lowercase repository name; our org name
+        # (ISE-FIZKarlsruhe) isn't, and Actions expressions have no
+        # built-in lower() function, so lowercase it in shell instead.
+        run: echo "owner=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+
       - uses: docker/build-push-action@v6
         with:
-          context: Konclude
-          file: Konclude/Dockerfile
+          context: .
+          file: Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ghcr.io/${{ github.repository_owner }}/konclude:latest
+          tags: ghcr.io/${{ steps.image.outputs.owner }}/konclude:latest

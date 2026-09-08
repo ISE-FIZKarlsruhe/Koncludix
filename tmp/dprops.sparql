@@ -1,8 +1,0 @@
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-SELECT ?s (IRI("http://purls.helmholtz-metadaten.de/mwo/mwo.owlhasubvalue") as ?dp) ?val WHERE { ?s <http://purls.helmholtz-metadaten.de/mwo/mwo.owlhasubvalue> ?val . }
-SELECT ?s (IRI("https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0001007") as ?dp) ?val WHERE { ?s <https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0001007> ?val . }
-SELECT ?s (IRI("http://purls.helmholtz-metadaten.de/mwo/MWO_0001143") as ?dp) ?val WHERE { ?s <http://purls.helmholtz-metadaten.de/mwo/MWO_0001143> ?val . }
-SELECT ?s (IRI("http://purls.helmholtz-metadaten.de/mwo/MWO_0001142") as ?dp) ?val WHERE { ?s <http://purls.helmholtz-metadaten.de/mwo/MWO_0001142> ?val . }
-SELECT ?s (IRI("https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0001008") as ?dp) ?val WHERE { ?s <https://nfdi.fiz-karlsruhe.de/ontology/NFDI_0001008> ?val . }
