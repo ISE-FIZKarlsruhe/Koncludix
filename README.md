@@ -34,7 +34,6 @@ Checked against [InferTest](https://github.com/ISE-FIZKarlsruhe/InferTest): all 
 
 ```bat
 cd Konclude
-materialize.bat -selftest
 materialize.bat -infertest
 materialize.bat input.owl.xml output.owl.xml
 materialize.bat input.owl.xml output.owl.xml -anon
@@ -42,7 +41,6 @@ materialize.bat input.owl.xml output.owl.xml -anon
 
 - **Input/output format**: OWL2-XML or OWL2-Functional syntax only (`.owl.xml`, `.ofn`) — **not** Turtle/RDF-XML/N-Triples. The Windows build has no Redland integration, so it can't parse or write plain RDF directly. If your data is Turtle, either convert it first (see "Working with Turtle on Windows" below) or use the Docker image, which reads/writes Turtle natively.
 - **`-anon`**: by default, facts touching a blank node (anonymous individual) are computed correctly internally but left out of the written output — only entailments between named individuals get written. `-anon` also writes the blank nodes' own facts (their types, property values, any assertion where one is the subject or object) to the file, tagged `<AnonymousIndividual nodeID="...">`. Leave it off unless you specifically need to see/use the blank nodes themselves.
-- **`-selftest`**: a ~1-second sanity check — one hardcoded case (a property chain through a blank node). Run it first any time to confirm the build itself launches and reasons at all.
 - **`-infertest`**: the thorough check — every construct [InferTest](https://github.com/ISE-FIZKarlsruhe/InferTest) defines (28 entailment + 9 inconsistency), not just one. Needs InferTest cloned as a sibling of this repo (`git clone https://github.com/ISE-FIZKarlsruhe/InferTest.git` next to `Koncludix/`) plus Python + `pip install rdflib`; the converters below are compiled automatically on first run. Reports **regressions only** — the small set of already-diagnosed Konclude kernel gaps (`has-key`, `asymmetric-property`, `disjoint-properties`, `irreflexive-property`) are expected to fail every time and don't count against you; anything else failing means something actually broke. Exit code 0 = no regressions.
 
 #### Working with Turtle on Windows
@@ -70,8 +68,4 @@ docker run --rm -v "$(pwd):/data" konclude materialize -w AUTO -i /data/your-ont
 ```
 
 `.github/workflows/build-konclude.yml` also builds and publishes this image to `ghcr.io/<owner>/konclude` automatically on pushes to main (or trigger it manually from the Actions tab).
-
-### Building natively for Linux / macOS
-
-`Konclude/Binaries/Konclude.exe` only runs on Windows. The same workflow also builds native Windows/Linux/macOS binaries as downloadable artifacts. Unlike upstream Konclude's Linux/macOS releases (statically linked, self-contained), these are dynamically linked the same way the Windows build is — so the Linux/macOS binary also needs Qt 5's runtime libraries installed on the machine that runs it (e.g. `sudo apt install libqt5core5a libqt5network5 libqt5xml5 libqt5concurrent5` on Debian/Ubuntu, or `brew install qt@5` on macOS). Unlike the Docker path above, I haven't been able to verify these native Linux/macOS builds myself (no Linux/Mac machine in this environment) — only the Docker build has actually been built and run.
 
