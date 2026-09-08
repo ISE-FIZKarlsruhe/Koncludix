@@ -4,17 +4,15 @@ A modified build of [Konclude](https://github.com/konclude/Konclude), the OWL 2 
 
 ## Downloads
 
-Prebuilt binaries for every platform are attached to this repo's [Releases](../../releases):
-
-| Platform | What to grab | Requirements |
+| Platform | Where to get it | Status |
 |---|---|---|
-| Windows | `Konclude-Windows-x64.zip` | none — self-contained |
-| Linux | `Konclude-Linux-x64-portable.tar.gz` | none — bundles all its shared libraries |
-| Linux (single file) | `Konclude-x86_64.AppImage` | `chmod +x` and run; no unzip |
-| macOS | `Konclude-macOS-x64.zip` | none — self-contained |
-| Any platform | `docker pull ghcr.io/<owner>/konclude` | Docker |
+| Windows | Already in this repo — `Binaries/` + `materialize.bat` (`git clone` and go) | Available |
+| Linux (single file) | `Konclude-x86_64.AppImage`, attached to this repo's [Releases](../../releases) | Available |
+| Docker | `docker build -t konclude .` (build locally from this repo) | Available |
+| Docker (prebuilt) | `docker pull ghcr.io/<owner>/konclude` | Builds successfully in CI, but the package needs to be switched to public visibility first (GitHub packages default to private) |
+| macOS | — | CI build currently failing, not yet available |
 
-`.github/workflows/build-konclude.yml` builds all of these (native Windows/Linux/macOS binaries plus the Docker image) automatically on every push to `Source/`, and publishes the Docker image to `ghcr.io/<owner>/konclude` — or trigger it manually from the Actions tab.
+`.github/workflows/build-konclude.yml` builds Windows/Linux/macOS binaries plus the Docker image automatically on every push to `Source/` (or trigger it manually from the Actions tab) — the artifacts it produces are downloadable from that run's page for a limited time, but aren't the intended long-term distribution method (Releases and this repo's own `Binaries/` are).
 
 
 ## Quick start (Linux)
