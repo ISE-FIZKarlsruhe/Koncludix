@@ -16,6 +16,26 @@ Prebuilt binaries for every platform are attached to this repo's [Releases](../.
 
 `.github/workflows/build-konclude.yml` builds all of these (native Windows/Linux/macOS binaries plus the Docker image) automatically on every push to `Source/`, and publishes the Docker image to `ghcr.io/<owner>/konclude` — or trigger it manually from the Actions tab.
 
+
+## Quick start (Linux)
+
+The portable build (`Konclude-Linux-x64-portable.tar.gz`) and the single-file AppImage both read/write Turtle, RDF/XML, N-Triples, OWL2-XML, and OWL2-Functional natively — format is auto-detected on both input and output, no conversion step needed.
+
+```bash
+# portable tarball
+tar xzf Konclude-Linux-x64-portable.tar.gz
+cd Konclude-Linux-x64-portable
+./materialize.sh input.ttl output.ttl
+./materialize.sh -selftest
+
+# or the single-file AppImage
+chmod +x Konclude-x86_64.AppImage
+./Konclude-x86_64.AppImage input.ttl output.ttl
+# if your machine has no FUSE (common on servers/containers):
+./Konclude-x86_64.AppImage --appimage-extract-and-run input.ttl output.ttl
+```
+
+
 ## Quick start (Windows)
 
 `materialize.bat` wraps the Windows build (`Binaries/`) with a simple interface:
@@ -45,23 +65,6 @@ java -cp %CP% ConvertToRDFXML   temp-output.owl.xml   your-result.rdf.xml
 
 (run from the repo root; adjust paths if running from elsewhere)
 
-## Quick start (Linux)
-
-The portable build (`Konclude-Linux-x64-portable.tar.gz`) and the single-file AppImage both read/write Turtle, RDF/XML, N-Triples, OWL2-XML, and OWL2-Functional natively — format is auto-detected on both input and output, no conversion step needed.
-
-```bash
-# portable tarball
-tar xzf Konclude-Linux-x64-portable.tar.gz
-cd Konclude-Linux-x64-portable
-./materialize.sh input.ttl output.ttl
-./materialize.sh -selftest
-
-# or the single-file AppImage
-chmod +x Konclude-x86_64.AppImage
-./Konclude-x86_64.AppImage input.ttl output.ttl
-# if your machine has no FUSE (common on servers/containers):
-./Konclude-x86_64.AppImage --appimage-extract-and-run input.ttl output.ttl
-```
 
 ## Running it anywhere: Docker
 
