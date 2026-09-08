@@ -58,9 +58,9 @@ java -cp %CP% ConvertToRDFXML  temp-output.owl.xml   your-result.rdf.xml
 
 (run from the repo root; adjust paths if running from elsewhere)
 
-### Running it anywhere: Docker (recommended)
+### Running it anywhere: Docker
 
-`Konclude/Dockerfile` builds a small, fully self-contained image — verified locally to build and reason correctly. This is the actual answer to "make it not depend on the environment": the same image runs identically on Windows, Linux, and macOS, since Docker carries its own Qt runtime with it rather than relying on whatever's installed on the host.
+`Konclude/Dockerfile` builds a small, fully self-contained image — verified locally to build and reason correctly: the same image runs identically on Windows, Linux, and macOS, since Docker carries its own Qt runtime with it rather than relying on whatever's installed on the host.
 
 ```bash
 docker build -t konclude -f Konclude/Dockerfile Konclude
