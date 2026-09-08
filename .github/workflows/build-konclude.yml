@@ -1,0 +1,124 @@
+name: Build Konclude (Windows / Linux / macOS)
+
+# Builds our modified Konclude (see Konclude/README.md) on all three
+# platforms, the same way upstream Konclude publishes prebuilt binaries for
+# each — except these builds are dynamically linked against Qt on every
+# platform (upstream's Linux/macOS builds are statically linked against a
+# custom-built Qt, which needs a much heavier build step we don't do here).
+# A dynamic build just needs Qt's shared libraries available alongside the
+# binary at runtime, exactly like the Windows build we already use.
+#
+# Run manually from the Actions tab (workflow_dispatch), or automatically
+# whenever the Konclude source/project files change.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'Konclude/Source/**'
+      - 'Konclude/*.pro'
+      - 'Konclude/*.pri'
+      - '.github/workflows/build-konclude.yml'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: Konclude-Windows-x64-MSVC-Dynamic-Qt5.15.2
+          - os: ubuntu-latest
+            artifact_name: Konclude-Linux-x64-GCC-Dynamic-Qt5.15.2
+          - os: macos-latest
+            artifact_name: Konclude-macOS-x64-Clang-Dynamic-Qt5.15.2
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '5.15.2'
+
+      - name: Set up MSVC environment (Windows only)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        working-directory: Konclude
+        shell: cmd
+        run: |
+          qmake KoncludeWithoutRedland.pro -spec win32-msvc
+          nmake
+
+      - name: Build (Linux)
+        if: runner.os == 'Linux'
+        working-directory: Konclude
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y build-essential
+          qmake KoncludeWithoutRedland.pro
+          make -j"$(nproc)"
+
+      - name: Build (macOS)
+        if: runner.os == 'macOS'
+        working-directory: Konclude
+        run: |
+          qmake KoncludeWithoutRedland.pro
+          make -j"$(sysctl -n hw.ncpu)"
+
+      - name: Package build output
+        working-directory: Konclude
+        shell: bash
+        run: |
+          set -eu
+          mkdir -p dist/Binaries dist/Configs
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            cp Release/Konclude.exe dist/Binaries/
+            # Qt's runtime DLLs, so the package is self-contained like our
+            # existing Windows build.
+            QT_BIN="$(qmake -query QT_INSTALL_BINS)"
+            cp "$QT_BIN/Qt5Core.dll" "$QT_BIN/Qt5Network.dll" "$QT_BIN/Qt5Xml.dll" "$QT_BIN/Qt5Concurrent.dll" dist/Binaries/
+          else
+            cp Release/Konclude dist/Binaries/
+            chmod +x dist/Binaries/Konclude
+          fi
+          cp -r Configs/. dist/Configs/ 2>/dev/null || true
+          cp Konclude.bat dist/ 2>/dev/null || true
+          cp GPL.txt LGPL-3.0.txt Readme.md dist/ 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: Konclude/dist
+
+  docker:
+    # The actual "runs the same regardless of environment" option (see
+    # Konclude/Dockerfile) -- builds and (on pushes to main) publishes a
+    # self-contained image, verified locally to build and reason correctly
+    # before this workflow was written.
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: Konclude
+          file: Konclude/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ghcr.io/${{ github.repository_owner }}/konclude:latest

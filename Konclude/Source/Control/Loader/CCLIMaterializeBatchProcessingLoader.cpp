@@ -27,6 +27,31 @@ namespace Konclude {
 
 		namespace Loader {
 
+			namespace {
+				// Picks the write serializer by the output file's extension:
+				// .ttl/.turtle/.nt/.rdf get real RDF via Redland's own
+				// serializer (so downstream RDF-only tools like rdflib/pyshacl
+				// need no separate conversion step -- see
+				// CWriteQueryFileRedlandSerializer), anything else keeps the
+				// existing hand-written OWL2-XML output. Only available in
+				// builds with Redland linked in (KONCLUDE_REDLAND_INTEGRATION);
+				// without it every extension falls back to OWL2-XML, same as
+				// before this existed.
+				CWriteQuerySerializer* createMaterializeSerializer(const QString& responseFileString) {
+#ifdef KONCLUDE_REDLAND_INTEGRATION
+					QString lowerFileString = responseFileString.toLower();
+					if (lowerFileString.endsWith(".ttl") || lowerFileString.endsWith(".turtle")) {
+						return new CWriteQueryFileRedlandSerializer(responseFileString, "turtle");
+					} else if (lowerFileString.endsWith(".nt")) {
+						return new CWriteQueryFileRedlandSerializer(responseFileString, "ntriples");
+					} else if (lowerFileString.endsWith(".rdf")) {
+						return new CWriteQueryFileRedlandSerializer(responseFileString, "rdfxml");
+					}
+#endif // KONCLUDE_REDLAND_INTEGRATION
+					return new CWriteQueryFileOWL2XMLSerializer(responseFileString);
+				}
+			}
+
 
 			CCLIMaterializeBatchProcessingLoader::CCLIMaterializeBatchProcessingLoader() {
 			}
@@ -104,12 +129,12 @@ namespace Konclude {
 					// below can read them back via CConcreteOntology::getClassification().
 					// Their own output is immediately superseded by the real
 					// materialization write below, so it is discarded to the same path.
-					CWriteCustomQueryCommand* primeObjectPropertyHierarchyCommand = new CWriteCustomQueryCommand(testKB,CWriteQuery::WRITESUBOBJECTPROPERTYHIERARCHY,new CWriteQueryFileOWL2XMLSerializer(mResponseFileString));
-					CWriteCustomQueryCommand* primeDataPropertyHierarchyCommand = new CWriteCustomQueryCommand(testKB,CWriteQuery::WRITESUBDATAPROPERTYHIERARCHY,new CWriteQueryFileOWL2XMLSerializer(mResponseFileString));
+					CWriteCustomQueryCommand* primeObjectPropertyHierarchyCommand = new CWriteCustomQueryCommand(testKB,CWriteQuery::WRITESUBOBJECTPROPERTYHIERARCHY,createMaterializeSerializer(mResponseFileString));
+					CWriteCustomQueryCommand* primeDataPropertyHierarchyCommand = new CWriteCustomQueryCommand(testKB,CWriteQuery::WRITESUBDATAPROPERTYHIERARCHY,createMaterializeSerializer(mResponseFileString));
 					addProcessingCommand(primeObjectPropertyHierarchyCommand);
 					addProcessingCommand(primeDataPropertyHierarchyCommand);
 
-					CWriteCustomQueryCommand* writeAssertionsCommand = new CWriteCustomQueryCommand(testKB,CWriteQuery::WRITEMATERIALIZEDINDIVIDUALASSERTIONS,new CWriteQueryFileOWL2XMLSerializer(mResponseFileString));
+					CWriteCustomQueryCommand* writeAssertionsCommand = new CWriteCustomQueryCommand(testKB,CWriteQuery::WRITEMATERIALIZEDINDIVIDUALASSERTIONS,createMaterializeSerializer(mResponseFileString));
 					addProcessingCommand(writeAssertionsCommand);
 				}
 				processNextCommand();

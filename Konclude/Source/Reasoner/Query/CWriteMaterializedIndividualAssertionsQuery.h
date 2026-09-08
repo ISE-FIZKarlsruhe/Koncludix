@@ -184,6 +184,22 @@ namespace Konclude {
 					virtual bool visitRoleInstance(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleRealization* roleRealization);
 					virtual bool visitIndividual(const CIndividualReference& indiRef, CSameRealization* sameRealization);
 
+					// An individual loaded through Konclude's Redland-based RDF
+					// parser (as opposed to its native OWL2-XML/Functional parser)
+					// can have isAnonymous() report false for what is, in every
+					// output-relevant sense, still a blank node -- its resolved
+					// "name" is instead a synthesized identifier string that
+					// itself starts with "_:" (not a valid absolute IRI; nothing
+					// with a real IRI ever starts that way). Writing that string
+					// as if it were a named resource produces genuinely invalid
+					// output (e.g. Turtle's <_:...> is a malformed IRIREF, not a
+					// blank node). Every anonymity check in this class goes
+					// through here instead of using CIndividualNameResolver's
+					// isAnonymous() result directly, so this one place decides
+					// what "anonymous" means for OUTPUT purposes, regardless of
+					// which parser loaded the individual.
+					static bool isEffectivelyAnonymous(bool resolverAnonymous, const QString& name);
+
 
 					virtual bool startWritingOutput() = 0;
 					virtual bool endWritingOutput() = 0;

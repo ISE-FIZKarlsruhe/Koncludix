@@ -1967,6 +1967,7 @@ HEADERS += \
    ./Source\Reasoner\Query\CWriteQuerySerializer.h \
    ./Source\Reasoner\Query\CWriteQueryFileSerializer.h \
    ./Source\Reasoner\Query\CWriteQueryFileOWL2XMLSerializer.h \
+   ./Source\Reasoner\Query\CWriteQueryFileRedlandSerializer.h \
    ./Source\Reasoner\Query\CWriteQueryFileOWL2FunctionalSerializer.h \
    ./Source\Reasoner\Query\CWriteQuery.h \
    ./Source\Reasoner\Query\CWritePropertySubsumptionsHierarchyQuery.h \
@@ -4591,6 +4592,7 @@ SOURCES += \
    ./Source/Reasoner/Query/CWriteQuerySerializer.cpp \
    ./Source/Reasoner/Query/CWriteQueryFileSerializer.cpp \
    ./Source/Reasoner/Query/CWriteQueryFileOWL2XMLSerializer.cpp \
+   ./Source/Reasoner/Query/CWriteQueryFileRedlandSerializer.cpp \
    ./Source/Reasoner/Query/CWriteQueryFileOWL2FunctionalSerializer.cpp \
    ./Source/Reasoner/Query/CWriteQuery.cpp \
    ./Source/Reasoner/Query/CWritePropertySubsumptionsHierarchyQuery.cpp \

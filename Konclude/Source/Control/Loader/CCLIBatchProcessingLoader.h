@@ -40,6 +40,7 @@
 
 #include "Reasoner/Query/CWriteQueryFileOWL2XMLSerializer.h"
 #include "Reasoner/Query/CWriteQueryFileOWL2FunctionalSerializer.h"
+#include "Reasoner/Query/CWriteQueryFileRedlandSerializer.h"
 
 // Logger includes
 #include "Logger/CLogger.h"

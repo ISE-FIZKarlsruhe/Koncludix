@@ -140,9 +140,9 @@ namespace Konclude {
 						if (mIndividualNameString.isEmpty()) {
 
 							visitIndividuals([&](const CIndividualReference& indiRef)->bool {
-								bool anonymous = mOntology->getIndividualNameResolver()->isAnonymous(indiRef);
+								QString individualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, mUseAbbreviatedIRIs);
+								bool anonymous = isEffectivelyAnonymous(mOntology->getIndividualNameResolver()->isAnonymous(indiRef), individualName);
 								if (mWriteAnonymousIndividuals || !anonymous) {
-									QString individualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, mUseAbbreviatedIRIs);
 									if (mWriteDeclarations) {
 										writeIndividualDeclaration(individualName, anonymous);
 									}
@@ -167,6 +167,11 @@ namespace Konclude {
 			}
 
 
+
+
+			bool CWriteMaterializedIndividualAssertionsQuery::isEffectivelyAnonymous(bool resolverAnonymous, const QString& name) {
+				return resolverAnonymous || name.startsWith(QLatin1String("_:"));
+			}
 
 
 			bool CWriteMaterializedIndividualAssertionsQuery::visitConcept(CConcept* concept, CConceptRealization* conRealization) {
@@ -195,9 +200,9 @@ namespace Konclude {
 
 
 			bool CWriteMaterializedIndividualAssertionsQuery::visitIndividual(const CIndividualReference& indiRef, CSameRealization* sameRealization) {
-				bool anonymous = mOntology->getIndividualNameResolver()->isAnonymous(indiRef);
+				QString individualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, mUseAbbreviatedIRIs);
+				bool anonymous = isEffectivelyAnonymous(mOntology->getIndividualNameResolver()->isAnonymous(indiRef), individualName);
 				if (mWriteAnonymousIndividuals || !anonymous) {
-					QString individualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, mUseAbbreviatedIRIs);
 					mCurrentSameIndividualNameList.append(individualName);
 					mCurrentSameIndividualAnonymousList.append(anonymous);
 				}
@@ -219,8 +224,8 @@ namespace Konclude {
 				// an individual (named or anonymous) actually appears as a
 				// subject/target in the WRITTEN output is decided later, at
 				// each write call site, not here at collection time.
-				bool targetAnonymous = mOntology->getIndividualNameResolver()->isAnonymous(indiRealItemRef);
 				QString targetName = mOntology->getIndividualNameResolver()->getIndividualName(indiRealItemRef, mUseAbbreviatedIRIs);
+				bool targetAnonymous = isEffectivelyAnonymous(mOntology->getIndividualNameResolver()->isAnonymous(indiRealItemRef), targetName);
 				mGlobalSubjectRoleTargets[mCurrentIndividualName][mCurrentRole].insert(targetName, targetAnonymous);
 				mIndividualAnonymousHash.insert(targetName, targetAnonymous);
 				return true;
@@ -598,8 +603,8 @@ namespace Konclude {
 						// is anonymous, that composition could never be
 						// found, even though _:b never appears in the final
 						// A--Q-->C fact that IS supposed to be written).
-						bool anonymous = mOntology->getIndividualNameResolver()->isAnonymous(indiRef);
 						mCurrentIndividualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, mUseAbbreviatedIRIs);
+						bool anonymous = isEffectivelyAnonymous(mOntology->getIndividualNameResolver()->isAnonymous(indiRef), mCurrentIndividualName);
 						mCurrentIndividualAnonymous = anonymous;
 						mIndividualAnonymousHash.insert(mCurrentIndividualName, anonymous);
 						if (mWriteDeclarations && (mWriteAnonymousIndividuals || !anonymous)) {
@@ -733,11 +738,11 @@ namespace Konclude {
 					if (sameRealization) {
 						mSameIndividualEmittedSet.clear();
 						visitIndividuals([&](const CIndividualReference& indiRef)->bool {
-							bool anonymous = mOntology->getIndividualNameResolver()->isAnonymous(indiRef);
+							QString individualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, mUseAbbreviatedIRIs);
+							bool anonymous = isEffectivelyAnonymous(mOntology->getIndividualNameResolver()->isAnonymous(indiRef), individualName);
 							if (!(mWriteAnonymousIndividuals || !anonymous)) {
 								return true;
 							}
-							QString individualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, mUseAbbreviatedIRIs);
 							if (mSameIndividualEmittedSet.contains(individualName)) {
 								return true;
 							}
