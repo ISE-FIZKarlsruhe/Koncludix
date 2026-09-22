@@ -245,7 +245,15 @@ namespace Konclude {
 					LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Initializing reasoner. Creating calculation context."),this);
 
 					if (mConfgAdaptThreadPoolToWorkerCount) {
-						QThreadPool::globalInstance()->setMaxThreadCount(mWorkControllerCount);
+						// mBlockThreadPoolThreadCount threads below are deliberately submitted to
+						// this same global pool and made to block for the reasoner's entire lifetime
+						// (only released in threadStopped()) -- so the pool's max size must cover
+						// them ON TOP OF mWorkControllerCount, not just mWorkControllerCount alone.
+						// Sizing it to mWorkControllerCount only reserves ALL of a small pool (e.g.
+						// the whole pool when mWorkControllerCount==1, which is also the CLI default
+						// when -w is omitted) for these permanently-blocked threads, leaving zero
+						// threads free to ever run actual reasoning work -- a permanent deadlock.
+						QThreadPool::globalInstance()->setMaxThreadCount(mWorkControllerCount + mBlockThreadPoolThreadCount);
 					}
 					if (mBlockThreadPoolThreadCount > 0) {
 						for (cint64 i = 0; i < mBlockThreadPoolThreadCount; ++i) {
