@@ -34,10 +34,7 @@ param(
 # in this list is a real regression.
 $KnownFailures = @(
     "has-key",
-    "[inconsistency] asymmetric-property",
-    "[inconsistency] disjoint-properties",
-    "[inconsistency] has-key",
-    "[inconsistency] irreflexive-property"
+    "[inconsistency] has-key"
 )
 
 $ToolsDir = $PSScriptRoot

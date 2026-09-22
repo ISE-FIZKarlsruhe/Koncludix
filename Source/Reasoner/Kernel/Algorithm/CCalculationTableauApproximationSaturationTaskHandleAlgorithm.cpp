@@ -5093,6 +5093,89 @@ namespace Konclude {
 
 
 							CIndividualSaturationProcessNode* othIndiNode = getIndividualNodeForIndividual(indiProcSatNode,othIndi,saturationID,calcAlgContext);
+							// AllDisjointProperties + EquivalentObjectProperties clash:
+							// If role is equivalent to another role that it is also disjoint with,
+							// any ABox assertion using role is a clash (e.g. DisjointObjectProperties(p,q)
+							// + EquivalentObjectProperties(p,q) + p(alice,bob)).
+							// Checked here (before othIndiNode branch) because the clash depends only
+							// on the role axioms, not on whether the target individual is initialized.
+							{
+								CSortedNegLinker<CRole*>* eqRoleIt = role->getEquivalentRoleList();
+								while (eqRoleIt) {
+									if (!eqRoleIt->isNegated()) {  // skip inverse roles
+										CRole* eqRole = eqRoleIt->getData();
+										if (eqRole->hasDisjointRole(role)) {
+											updateDirectAddingIndividualStatusFlags(
+												indiProcSatNode,
+												CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCLASHED,
+												calcAlgContext);
+											return;
+										}
+									}
+									eqRoleIt = eqRoleIt->getNext();
+								}
+							}
+							// AllDisjointProperties ABox clash:
+							// p(alice,bob) and q(alice,bob) where DisjointObjectProperties(p,q) - inconsistent.
+							// Check if nominalIndi has any assertion of a disjoint role to the same othIndi.
+							{
+								CSortedNegLinker<CRole*>* disjRoleIt = role->getDisjointRoleList();
+								while (disjRoleIt) {
+									if (!disjRoleIt->isNegated()) {
+										CRole* disjRole = disjRoleIt->getData();
+										for (CRoleAssertionLinker* otherAssIt = nominalIndi->getAssertionRoleLinker();
+												otherAssIt; otherAssIt = otherAssIt->getNext()) {
+											if (otherAssIt->getRole() == disjRole &&
+													otherAssIt->getIndividual() == othIndi) {
+												updateDirectAddingIndividualStatusFlags(
+													indiProcSatNode,
+													CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCLASHED,
+													calcAlgContext);
+												return;
+											}
+										}
+									}
+									disjRoleIt = disjRoleIt->getNext();
+								}
+							}
+							// AsymmetricProperty violation: r(a,b) and r(b,a) both present.
+							// Checked here (like the equivalent/disjoint-role checks above), using only
+							// raw ABox assertions on the individuals themselves -- NOT saturation-node
+							// state (othIndiNode/isInitialized()) -- because for two named individuals
+							// that both reference each other, each one's saturation node can still be
+							// unresolved (neither initialized nor equal to indiProcSatNode) when the
+							// other's assertion is processed, in which case the code below falls into
+							// neither the "othIndiNode initialized" nor the "!othIndiNode" branch and a
+							// check placed inside either one is silently skipped.
+							if (othIndi != nominalIndi && role->isAsymmetric()) {
+								for (CRoleAssertionLinker* revAssIt = othIndi->getAssertionRoleLinker(); revAssIt; revAssIt = revAssIt->getNext()) {
+									if (revAssIt->getRole() == role &&
+											revAssIt->getIndividual() == nominalIndi) {
+										updateDirectAddingIndividualStatusFlags(
+											indiProcSatNode,
+											CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCLASHED,
+											calcAlgContext);
+										return;
+									}
+								}
+							}
+							// IrreflexiveProperty violation: r(a,a) where r (or a super-role of r) is
+							// irreflexive. Checked via raw individual identity (othIndi == nominalIndi)
+							// for the same reason as above -- not via saturation-node identity.
+							if (othIndi == nominalIndi) {
+								CSortedNegLinker<CRole*>* superRoleIt = role->getIndirectSuperRoleList();
+								while (superRoleIt) {
+									if (!superRoleIt->isNegated() &&
+											superRoleIt->getData()->isIrreflexive()) {
+										updateDirectAddingIndividualStatusFlags(
+											indiProcSatNode,
+											CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCLASHED,
+											calcAlgContext);
+										return;
+									}
+									superRoleIt = superRoleIt->getNext();
+								}
+							}
 							if (othIndiNode && (othIndiNode->isInitialized() || othIndiNode == indiProcSatNode)) {
 								createRoleAssertionLink(indiProcSatNode,othIndiNode,role,false,calcAlgContext);
 								indiProcSatNode->addRoleAssertion(othIndiNode,role,false);

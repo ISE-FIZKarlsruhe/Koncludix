@@ -245,8 +245,8 @@ namespace Konclude {
 				for (CRedlandNodeProcessingData* nextProcessingData : mClassNodeHandlingList) {
 					if (nextProcessingData->mExpression) {
 						if (librdf_node_is_blank(nextProcessingData->mRedlandNode)) {
-							QList<CRedlandNodeProcessingData*>* processingDataList = getNodeProcessingDataListFromNodeStreamWithNewHandling(createRedlandNodeStreamWrapper()->init(getPartialStatementFilteredTripleStream(getAdaptedPartialFilteringStatement(nullptr, nullptr, nextProcessingData->mRedlandNode, mPartialFilteringStatementForOWLAllRDFTypePredecessors)), 0), mNamedIndividualNodeIdentifierDataHash, [&](librdf_node* node)->CRedlandNodeProcessingData* { 
-								return createNamedIndividualProcessingData(node); 
+							QList<CRedlandNodeProcessingData*>* processingDataList = getNodeProcessingDataListFromNodeStreamWithNewHandling(createRedlandNodeStreamWrapper()->init(getPartialStatementFilteredTripleStream(getAdaptedPartialFilteringStatement(nullptr, nullptr, nextProcessingData->mRedlandNode, mPartialFilteringStatementForOWLAllRDFTypePredecessors)), 0), mNamedIndividualNodeIdentifierDataHash, [&](librdf_node* node)->CRedlandNodeProcessingData* {
+								return createNamedIndividualProcessingData(node);
 							});
 							if (processingDataList && !processingDataList->isEmpty()) {
 								for (CRedlandNodeProcessingData* processingData : *processingDataList) {
@@ -491,6 +491,17 @@ namespace Konclude {
 					}
 
 				}));
+
+				// Direct owl:sameAs / owl:differentFrom triples between two named
+				// individuals (as opposed to the owl:AllDifferent/members-list form
+				// handled above) are likewise identity axioms, not regular ABox
+				// assertions -- so, like the AllDifferent/NegativePropertyAssertion
+				// handling above, they are collected here unconditionally rather
+				// than through buildSimpleABoxAxioms() (which is only enabled for
+				// the SPARQL-querying mapper subclass).
+				collectBetweenIndividualsBasedAxiomExpression([&](const QList<CBuildExpression*>& expressionList)->CAxiomExpression* { return mOntologyBuilder->getDifferentIndividuals(expressionList); }, mPartialFilteringStatementForOWLDifferentIndividuals, axiomExpressionList);
+				collectBetweenIndividualsBasedAxiomExpression([&](const QList<CBuildExpression*>& expressionList)->CAxiomExpression* { return mOntologyBuilder->getSameIndividual(expressionList); }, mPartialFilteringStatementForOWLSameIndividuals, axiomExpressionList);
+
 				for (CAxiomExpression* axiomExpression : axiomExpressionList) {
 					handleParsedOntologyAxiomExpression(axiomExpression);
 				}
