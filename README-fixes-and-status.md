@@ -30,11 +30,11 @@ Additionally, adding support for approximate reasoning.
 
 | File | Individuals | Before | Now |
 |---|---|---|---|
-| DL-1 | 3,700 | 34 s, 3.5 GB | 7 s, 1.8 GB |
-| DL-2 | 7,000 | no answer in 900 s | 26 s, 3.7 GB |
-| DL-5 | 23,000 | no answer in 12 GB | 31 s, 2.1 GB |
-| DL-10 | 50,000 | no answer in 12 GB | 80 s, 3.3 GB |
-| DL-20 | 98,000 | no answer in 12 GB | 169 s, 5.4 GB |
+| DL-1 | 3.7K, 50K | 34 s, 3.5 GB | 7 s, 1.8 GB |
+| DL-2 | 7K, 99K | no answer in 900 s | 26 s, 3.7 GB |
+| DL-5 | 23K, 325K | no answer in 12 GB | 31 s, 2.1 GB |
+| DL-10 | 50K, 711K | no answer in 12 GB | 80 s, 3.3 GB |
+| DL-20 | 98K, 1.4M | no answer in 12 GB | 169 s, 5.4 GB |
 
 ### `materialize` (writes all facts)
 
