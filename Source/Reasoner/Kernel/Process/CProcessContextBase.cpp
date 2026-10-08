@@ -38,7 +38,11 @@ namespace Konclude {
 					mProcessTagger = CObjectAllocator<CProcessTagger>::allocateAndConstruct(mMemMan);
 					mUsedProcessTagger = mProcessTagger;
 #ifndef KONCLUDE_FORCE_STATISTIC_DEACTIVATED
-					mProcStatGath = CObjectAllocator<CProcessingStatisticGathering>::allocateAndConstruct(mMemMan);
+					if (CProcessingStatistics::collectionActive()) {
+						mProcStatGath = CObjectAllocator<CProcessingStatisticGathering>::allocateAndConstruct(mMemMan);
+					} else {
+						mProcStatGath = nullptr;
+					}
 					mUsedProcessStatGath = mProcStatGath;
 #else
 					mProcStatGath = nullptr;

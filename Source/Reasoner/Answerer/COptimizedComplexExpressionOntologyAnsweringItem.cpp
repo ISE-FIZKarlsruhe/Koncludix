@@ -18,6 +18,7 @@
  *
  */
 
+#include "Reasoner/Kernel/Process/CProcessingStatistics.h"
 #include "COptimizedComplexExpressionOntologyAnsweringItem.h"
 #include "COptimizedComplexBuildingIndividualMixedVariableCompositionsItem.h"
 
@@ -61,6 +62,7 @@ namespace Konclude {
 				mDeleteMoreCacheEntriesWhileQueryProcessing = true;
 
 				mConfCollectProcessStatistics = CConfigDataReader::readConfigBoolean(configuration, "Konclude.Calculation.Answering.CollectProcessStatistics", false);
+				if (mConfCollectProcessStatistics) { Konclude::Reasoner::Kernel::Process::CProcessingStatistics::collectionActive() = true; }
 
 			}
 

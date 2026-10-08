@@ -96,6 +96,7 @@ namespace Konclude {
 					mConfDebuggingWriteDataForAllTestsChecked = false;
 
 					mConfSuccessorConceptSaturationExpansionChecked = false;
+					mConfAtLeastBackendNeighbourSatisfactionChecked = false;
 					mConfSaturationCachingChecked = false;
 					mConfSaturationCriticalConceptTestingChecked = false;
 					mConfSaturationDirectCriticalToInsufficientChecked = false;
@@ -693,6 +694,15 @@ namespace Konclude {
 
 
 
+
+
+				bool CCalculationConfigurationExtension::isAtLeastBackendNeighbourSatisfactionActivated() {
+					if (!mConfAtLeastBackendNeighbourSatisfactionChecked) {
+						mConfAtLeastBackendNeighbourSatisfactionActivated = CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.Optimization.AtLeastBackendNeighbourSatisfaction",true);
+						mConfAtLeastBackendNeighbourSatisfactionChecked = true;
+					}
+					return mConfAtLeastBackendNeighbourSatisfactionActivated;
+				}
 
 
 				bool CCalculationConfigurationExtension::isSuccessorConceptSaturationExpansionActivated() {

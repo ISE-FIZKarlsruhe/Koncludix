@@ -32,6 +32,7 @@
 #include "ProcessSettings.h"
 #include "CProcessingStatisticDescription.h"
 #include "CProcessingStatisticRegistrator.h"
+#include <stdlib.h>
 
 
 // Other includes
@@ -62,6 +63,9 @@ namespace Konclude {
 					// public methods
 					public:
 						const static cint64 statisticVectorSize = 235;
+						// per-task statistics objects (about 1.9 KB per task) are only allocated when someone asks for them:
+						// environment KONCLUDE_KSTAT, or the answering option Konclude.Calculation.Answering.CollectProcessStatistics
+						static bool& collectionActive() { static bool active = (getenv("KONCLUDE_KSTAT") != 0); return active; }
 						static cint64 statisticCount;
 
 

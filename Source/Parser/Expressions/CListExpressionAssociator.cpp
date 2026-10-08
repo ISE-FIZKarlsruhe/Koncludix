@@ -105,8 +105,8 @@ namespace Konclude {
 				cint64 tmpValue1 = 0;
 				cint64 tmpValue2 = 1;
 				FOREACHIT (CBuildExpression* expression, mExpressionList) {
-					tmpValue1 += cint64(expression);
-					tmpValue2 *= cint64(expression);
+					tmpValue1 += (cint64)(expression->getSerial());
+					tmpValue2 *= (cint64)(expression->getSerial());
 				}
 				hashValue = tmpValue1+tmpValue2;
 				return hashValue;

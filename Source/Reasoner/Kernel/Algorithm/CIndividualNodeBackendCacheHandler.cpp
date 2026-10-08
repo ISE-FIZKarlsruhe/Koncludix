@@ -1007,6 +1007,8 @@ namespace Konclude {
 					CPROCESSSET<CBackendRepresentativeMemoryCacheTemporaryLabelReference>* neigbourRoleInstantiatedSetCompination = CObjectParameterizingAllocator< CPROCESSSET<CBackendRepresentativeMemoryCacheTemporaryLabelReference>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
 
 
+					// neighbours (nominal ids) for which links have been collected from the completion graph in this extraction
+					QSet<cint64> collectedLinkNeighbourIdSet;
 					CPROCESSSET<cint64>* connIndiSet = CObjectParameterizingAllocator< CPROCESSSET<cint64>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
 
 
@@ -1250,6 +1252,7 @@ namespace Konclude {
 
 
 									neigbourRoleInstantiatedSetCompination->insert(neighbourRoleSetLabelRef);
+									collectedLinkNeighbourIdSet.insert(connIndiMergedNominalId);
 
 
 									bool alreadyPresent = false;
@@ -1436,6 +1439,12 @@ namespace Konclude {
 												if (!connIndiSet->contains(-mergedIntoNeighbourId)) {
 													neighbourNodeConnectionAvailable = false;
 												}
+											}
+
+											// deterministic links of previous data cannot vanish; if the completion graph delivered no link to this neighbour (e.g., an asserted self loop whose
+											// role link is not part of the graph node) the previous link data has to be kept, otherwise the update would silently drop it
+											if (neighbourNodeConnectionAvailable && !hasNonDetElems && !collectedLinkNeighbourIdSet.contains(neighbourIndiId)) {
+												neighbourNodeConnectionAvailable = false;
 											}
 
 											if ((!hasNonDetElems || !propagationCut) && (!neighbourNodeConnectionAvailable || !neighbourNodeAvailable && hasNonDetElems && extractionIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFBACKENDEXPANSIONREUSINGINDIVIDUAL))) {

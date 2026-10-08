@@ -29,6 +29,7 @@ namespace Konclude {
 
 
 			CBuildExpression::CBuildExpression() {
+				static volatile long kSerialCounter = 0; mSerial = __sync_add_and_fetch(&kSerialCounter, 1);
 			}
 
 			bool CBuildExpression::visitSubExpressions(CSubExpressionVisitor* subExpressionVisitor) {

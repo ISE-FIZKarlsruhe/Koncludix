@@ -904,7 +904,11 @@ namespace Konclude {
 				if (!procReqIndiSet->isEmpty()) {
 					forceCompletionGraphConstruction = true;
 				}
-				if (!forceCompletionGraphConstruction && isAllAssertionIndividualSaturationSufficient(totallyPreCompItem)) {
+				// The shortcut via the merged all-assertion individual must not be taken when a full completion graph is requested and some
+				// individuals are only insufficiently saturated: only the full completion graph construction below marks those individuals as
+				// handled (setAllIncompletelyHandledIndividualsRetrieved). Otherwise the individual precomputation step never finishes, keeps
+				// its 'running' flag set and blocks all later steps, so classification/realization/materialization never terminate.
+				if (!forceCompletionGraphConstruction && !(fullCompletionGraphConstruction && totallyPreCompItem->hasInsufficientSaturationIndividuals()) && isAllAssertionIndividualSaturationSufficient(totallyPreCompItem)) {
 					consistencyDetected = true;
 					detectedConsistency = true;
 					LOG(INFO,getLogDomain(),logTr("Trivial consistency detected with merged individual."),getLogObject());

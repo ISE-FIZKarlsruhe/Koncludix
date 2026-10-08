@@ -19,6 +19,7 @@
  */
 
 #include "COptimizedRepresentativeKPSetOntologyRealizingThread.h"
+#include <algorithm>
 
 
 namespace Konclude {
@@ -2829,243 +2830,213 @@ namespace Konclude {
 
 				if (roleInstancesItem->hasOnlyTransitiveComplexRoleCandidates() && roleInstancesItem->hasOnlyDeterministicComplexRoleStarterCandidatesUsage()) {
 
-					class RecursiveComplexTransitiveProcessingData {
-					public:
-						~RecursiveComplexTransitiveProcessingData() {
-							if (mAdditionalPropgationList) {
-								delete mAdditionalPropgationList;
-							}
-						}
-
-						CRealizationIndividualInstanceItemReference mIndiItemRef;
-						COptimizedKPSetIndividualComplexRoleData* mIndiComplexRoleData = nullptr;
-						CBackendRepresentativeMemoryCacheIndividualAssociationData* mIndiAssData = nullptr;
-
-						bool mExpanded = false;
-
-						RecursiveComplexTransitiveProcessingData* mParentData = nullptr;
-						QList<RecursiveComplexTransitiveProcessingData*>* mAdditionalPropgationList = nullptr;
+					// Transitive closure over the known (deterministic) links of the role.
+					// The individuals reachable from the starting individual are grouped into strongly connected components (iterative Tarjan), so that
+					// the set of individuals reachable from a component is computed once per component and not once per ancestor of every individual
+					// (e.g., for a transitive and symmetric role all individuals of a connected group reach exactly the same individuals).
+					// Individuals that are already initialized are not expanded again, their (complete) links are reused.
+					struct TransitiveClosureNode {
+						cint64 mId = 0;
+						bool mTerminal = false;
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* mAssData = nullptr;
+						COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData* mLinkData = nullptr;
+						QVector<cint64> mSuccessors;
+						QVector<cint64> mStaticReach;
+						int mIndex = -1;
+						int mLowLink = -1;
+						int mScc = -1;
+						bool mOnStack = false;
+						bool mSelfLoop = false;
 					};
 
-
-
-					QList<RecursiveComplexTransitiveProcessingData*> processingList;
-					RecursiveComplexTransitiveProcessingData* basicProcessingData = new RecursiveComplexTransitiveProcessingData();
-					basicProcessingData->mIndiItemRef = indiRealItemRef;
-					basicProcessingData->mIndiComplexRoleData = indiComplexRoleData;
-					processingList.append(basicProcessingData);
-
-					QList<RecursiveComplexTransitiveProcessingData*> propagationList;
-
-					QHash<cint64, RecursiveComplexTransitiveProcessingData*> indiProcessingDataHash;
-					indiProcessingDataHash.insert(indiRealItemRef.getIndividualID(), basicProcessingData);
-
 					COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelHash* combinedNeighbourCacheLabelItemDataHash = roleInstancesItem->getCombinedNeighbourCacheLabelItemDataHash(inversed);
+					cint64 closureBaseIndiId = indiRealItemRef.getIndividualID();
 
-					while (!processingList.isEmpty()) {
-						RecursiveComplexTransitiveProcessingData* nextProcessingData = processingList.takeFirst();
+					QVector<TransitiveClosureNode> closureNodes;
+					QHash<cint64, int> closureIdNodeHash;
 
-#ifdef REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
-						mDebugTransitiveCollectionStringList.append(QString("Analysing %1").arg(CIRIName::getRecentIRIName(nextProcessingData->mIndiItemRef.getIndividual()->getIndividualNameLinker())));
-						mDebugTransitiveCollectionString = mDebugTransitiveCollectionStringList.join("\r\n");
-#endif // REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+					auto collectDirectKnownNeighbours = [&](CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData, QVector<cint64>& neighbourIds) {
+						CBackendRepresentativeMemoryLabelCacheItem* combinedNeigRoleSetLabel = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
+						CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* roleSetNeighbourArray = indiAssData->getRoleSetNeighbourArray();
+						COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelData* roleItemCompNeighLabelData = combinedNeighbourCacheLabelItemDataHash->value(combinedNeigRoleSetLabel);
+						if (roleItemCompNeighLabelData && roleItemCompNeighLabelData->hasKnownInstancesLabelItems()) {
+							QHash<CBackendRepresentativeMemoryLabelCacheItem*, COptimizedKPSetRoleInstancesSingleNeighbourRoleSetCacheLabelData*>* singleNeighLabelDataHash = roleItemCompNeighLabelData->getKnownInstancesLabelItemDataHash();
+							for (auto it = singleNeighLabelDataHash->constBegin(), itEnd = singleNeighLabelDataHash->constEnd(); it != itEnd; ++it) {
+								roleSetNeighbourArray->at(it.value()->getLabelArrayIndex()).visitNeighbourIndividualIds([&](cint64 neighbourId)->bool {
+									CRealizationIndividualInstanceItemReference neighbourIndiItemRef = reqConfPreCompItem->getInstanceItemReference(neighbourId, false);
+									if (!reqConfPreCompItem->isSameIndividualsMerged(neighbourIndiItemRef)) {
+										neighbourIds.append(neighbourId);
+									}
+									return true;
+								});
+							}
+						}
+						std::sort(neighbourIds.begin(), neighbourIds.end());
+						neighbourIds.erase(std::unique(neighbourIds.begin(), neighbourIds.end()), neighbourIds.end());
+					};
 
-						propagationList.append(nextProcessingData);
-						if (!nextProcessingData->mIndiComplexRoleData->isInitialized(inversed)) {
+					auto getClosureNode = [&](cint64 indiId)->int {
+						QHash<cint64, int>::const_iterator nodeIt = closureIdNodeHash.constFind(indiId);
+						if (nodeIt != closureIdNodeHash.constEnd()) {
+							return nodeIt.value();
+						}
+						int nodeIdx = closureNodes.size();
+						closureNodes.append(TransitiveClosureNode());
+						closureIdNodeHash.insert(indiId, nodeIdx);
+						TransitiveClosureNode& closureNode = closureNodes[nodeIdx];
+						closureNode.mId = indiId;
+						closureNode.mAssData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(indiId);
+						COptimizedKPSetIndividualComplexRoleData* complexData = (indiId == closureBaseIndiId) ? indiComplexRoleData : roleInstancesItem->getIndividualIdComplexRoleData(indiId, true);
+						closureNode.mLinkData = (COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData*)complexData;
+						collectDirectKnownNeighbours(closureNode.mAssData, closureNode.mSuccessors);
+						if (complexData->isInitialized(inversed)) {
+							// links are complete, reuse them
+							closureNode.mTerminal = true;
+							QSet<cint64> reachSet;
+							for (cint64 succId : closureNode.mSuccessors) {
+								reachSet.insert(succId);
+							}
+							COptimizedKPSetRoleInstancesHash* knownLinkHash = closureNode.mLinkData->getRoleNeighbourInstancesHash(inversed, false);
+							if (knownLinkHash) {
+								for (COptimizedKPSetRoleInstancesHash::const_iterator it = knownLinkHash->constBegin(), itEnd = knownLinkHash->constEnd(); it != itEnd; ++it) {
+									if (it.value().mInstanceItemData && it.value().mInstanceItemData->mKnownInstance) {
+										reachSet.insert(it.key());
+									}
+								}
+							}
+							for (cint64 reachId : reachSet) {
+								closureNode.mStaticReach.append(reachId);
+							}
+						} else {
+							complexData->setInitializing(inversed, true);
+						}
+						return nodeIdx;
+					};
 
-							CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(nextProcessingData->mIndiItemRef.getIndividualID());
-							nextProcessingData->mIndiAssData = indiAssData;
-							CBackendRepresentativeMemoryLabelCacheItem* combinedNeigRoleSetLabel = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
-							CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* roleSetNeighbourArray = indiAssData->getRoleSetNeighbourArray();
+					struct TransitiveClosureFrame {
+						int mNode;
+						int mNextSuccessor;
+					};
 
-#ifdef REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
-							mDebugTransitiveCollectionStringList.append(QString("Analysing neighours of %1").arg(CIRIName::getRecentIRIName(nextProcessingData->mIndiItemRef.getIndividual()->getIndividualNameLinker())));
-							mDebugTransitiveCollectionString = mDebugTransitiveCollectionStringList.join("\r\n");
-#endif // REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+					int closureCounter = 0;
+					QVector<int> closureSccStack;
+					QVector<TransitiveClosureFrame> closureCallStack;
+					QVector< QVector<cint64> > closureSccReach;
+					QHash<cint64, CRealizationIndividualInstanceItemReference> closureTargetRefHash;
 
+					auto startClosureVisit = [&](int nodeIdx) {
+						closureNodes[nodeIdx].mIndex = closureNodes[nodeIdx].mLowLink = closureCounter++;
+						closureNodes[nodeIdx].mOnStack = true;
+						closureSccStack.append(nodeIdx);
+						TransitiveClosureFrame frame;
+						frame.mNode = nodeIdx;
+						frame.mNextSuccessor = 0;
+						closureCallStack.append(frame);
+					};
 
-							COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelData* roleItemCompNeighLabelData = roleInstancesItem->getCombinedNeighbourCacheLabelItemDataHash(inversed)->value(combinedNeigRoleSetLabel);
-							if (roleItemCompNeighLabelData && roleItemCompNeighLabelData->hasKnownInstancesLabelItems()) {
-								QHash<CBackendRepresentativeMemoryLabelCacheItem*, COptimizedKPSetRoleInstancesSingleNeighbourRoleSetCacheLabelData*>* singleNeighLabelDataHash = roleItemCompNeighLabelData->getKnownInstancesLabelItemDataHash();
+					int closureBaseNode = getClosureNode(closureBaseIndiId);
+					if (!closureNodes[closureBaseNode].mTerminal) {
+						startClosureVisit(closureBaseNode);
+					}
 
-								for (auto it = singleNeighLabelDataHash->constBegin(), itEnd = singleNeighLabelDataHash->constEnd(); it != itEnd; ++it) {
-									roleSetNeighbourArray->at(it.value()->getLabelArrayIndex()).visitNeighbourIndividualIds([&](cint64 neighbourId)->bool {
-										// check same individual merged
-										CRealizationIndividualInstanceItemReference neighbourIndiItemRef = reqConfPreCompItem->getInstanceItemReference(neighbourId, false);
-										if (!reqConfPreCompItem->isSameIndividualsMerged(neighbourIndiItemRef)) {
-											// create new processing data
+					while (!closureCallStack.isEmpty()) {
+						int nodeIdx = closureCallStack.last().mNode;
+						if (closureCallStack.last().mNextSuccessor < closureNodes[nodeIdx].mSuccessors.size()) {
+							cint64 succId = closureNodes[nodeIdx].mSuccessors[closureCallStack.last().mNextSuccessor++];
+							if (succId == closureNodes[nodeIdx].mId) {
+								closureNodes[nodeIdx].mSelfLoop = true;
+								continue;
+							}
+							int succIdx = getClosureNode(succId);
+							if (closureNodes[succIdx].mTerminal) {
+								continue;
+							}
+							if (closureNodes[succIdx].mIndex < 0) {
+								startClosureVisit(succIdx);
+							} else if (closureNodes[succIdx].mOnStack) {
+								closureNodes[nodeIdx].mLowLink = qMin(closureNodes[nodeIdx].mLowLink, closureNodes[succIdx].mIndex);
+							}
+						} else {
+							closureCallStack.removeLast();
+							if (!closureCallStack.isEmpty()) {
+								int parentIdx = closureCallStack.last().mNode;
+								closureNodes[parentIdx].mLowLink = qMin(closureNodes[parentIdx].mLowLink, closureNodes[nodeIdx].mLowLink);
+							}
+							if (closureNodes[nodeIdx].mLowLink == closureNodes[nodeIdx].mIndex) {
+								// a strongly connected component is complete
+								int sccId = closureSccReach.size();
+								QVector<int> memberList;
+								int memberIdx = -1;
+								while (memberIdx != nodeIdx) {
+									memberIdx = closureSccStack.takeLast();
+									closureNodes[memberIdx].mOnStack = false;
+									closureNodes[memberIdx].mScc = sccId;
+									memberList.append(memberIdx);
+								}
 
-											RecursiveComplexTransitiveProcessingData*& successorProcessingData = indiProcessingDataHash[neighbourId];
-
-											if (successorProcessingData) {
-												// TODO: check and handle cycles
-												if (!successorProcessingData->mParentData) {
-													successorProcessingData->mParentData = nextProcessingData;
-
-
-#ifdef REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
-													mDebugTransitiveCollectionStringList.append(QString("Readding %1 as single").arg(CIRIName::getRecentIRIName(neighbourIndiItemRef.getIndividual()->getIndividualNameLinker())));
-													mDebugTransitiveCollectionString = mDebugTransitiveCollectionStringList.join("\r\n");
-#endif // REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
-
-												} else {
-													if (!successorProcessingData->mAdditionalPropgationList) {
-														successorProcessingData->mAdditionalPropgationList = new QList<RecursiveComplexTransitiveProcessingData*>();
-													}
-													successorProcessingData->mAdditionalPropgationList->append(nextProcessingData);
-
-#ifdef REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
-													mDebugTransitiveCollectionStringList.append(QString("Readding %1 as multiple").arg(CIRIName::getRecentIRIName(neighbourIndiItemRef.getIndividual()->getIndividualNameLinker())));
-													mDebugTransitiveCollectionString = mDebugTransitiveCollectionStringList.join("\r\n");
-#endif // REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
-
-												}
-
-											} else {
-												successorProcessingData = new RecursiveComplexTransitiveProcessingData();
-												successorProcessingData->mIndiItemRef = neighbourIndiItemRef;
-
-#ifdef REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
-												mDebugTransitiveCollectionStringList.append(QString("Adding %1").arg(CIRIName::getRecentIRIName(neighbourIndiItemRef.getIndividual()->getIndividualNameLinker())));
-												mDebugTransitiveCollectionString = mDebugTransitiveCollectionStringList.join("\r\n");
-#endif // REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
-
-												successorProcessingData->mIndiComplexRoleData = roleInstancesItem->getIndividualIdComplexRoleData(neighbourIndiItemRef.getIndividualID(), true);
-												successorProcessingData->mParentData = nextProcessingData;
-												successorProcessingData->mIndiComplexRoleData->setInitializing(inversed, true);
-												processingList.append(successorProcessingData);
-											}
-
+								bool cyclic = memberList.size() > 1;
+								for (int member : memberList) {
+									if (closureNodes[member].mSelfLoop) {
+										cyclic = true;
+									}
+								}
+								QSet<cint64> reachSet;
+								if (cyclic) {
+									for (int member : memberList) {
+										reachSet.insert(closureNodes[member].mId);
+									}
+								}
+								for (int member : memberList) {
+									for (cint64 succId : closureNodes[member].mSuccessors) {
+										int succIdx = closureIdNodeHash.value(succId);
+										if (closureNodes[succIdx].mScc == sccId) {
+											continue;
 										}
-										return true;
-									});
+										reachSet.insert(succId);
+										if (closureNodes[succIdx].mTerminal) {
+											for (cint64 reachId : closureNodes[succIdx].mStaticReach) {
+												reachSet.insert(reachId);
+											}
+										} else {
+											for (cint64 reachId : closureSccReach[closureNodes[succIdx].mScc]) {
+												reachSet.insert(reachId);
+											}
+										}
+									}
+								}
+								QVector<cint64> sccReachVector;
+								sccReachVector.reserve(reachSet.size());
+								for (cint64 reachId : reachSet) {
+									sccReachVector.append(reachId);
+								}
+								closureSccReach.append(sccReachVector);
+								const QVector<cint64>& sccReach = closureSccReach.last();
+
+								// every member of the component reaches the same individuals
+								for (int member : memberList) {
+									TransitiveClosureNode& memberNode = closureNodes[member];
+									CRealizationIndividualInstanceItemReference memberIndiRef = indiRealItemRef;
+									if (memberNode.mId != closureBaseIndiId) {
+										memberIndiRef = reqConfPreCompItem->getInstanceItemReference(memberNode.mId, false);
+									}
+									COptimizedKPSetRoleNeighbourInstancesHashData* indiRoleNeighbourHashData = nullptr;
+									CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* assNeighbourRoleSetHash = memberNode.mAssData->getNeighbourRoleSetHash();
+									CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetCompinationLabelItem = memberNode.mAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
+									COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelData* combinedNeighbourCacheLabelItemData = combinedNeighbourCacheLabelItemDataHash->value(neighbourRoleSetCompinationLabelItem);
+									for (cint64 reachId : sccReach) {
+										CRealizationIndividualInstanceItemReference& targetIndiRef = closureTargetRefHash[reachId];
+										if (targetIndiRef.isEmpty()) {
+											targetIndiRef = reqConfPreCompItem->getInstanceItemReference(reachId, false);
+										}
+										addComplexRoleExplicitIndirectNeighbourLink(roleInstancesItem, inversed, memberIndiRef, memberNode.mLinkData, indiRoleNeighbourHashData, combinedNeighbourCacheLabelItemData, assNeighbourRoleSetHash, targetIndiRef, nullptr, true, reqConfPreCompItem);
+									}
 								}
 							}
 						}
 					}
 
-
-					while (!propagationList.isEmpty()) {
-						RecursiveComplexTransitiveProcessingData* nextProcessingData = propagationList.takeLast();
-
-
-						//if (CIRIName::getRecentIRIName(nextProcessingData->mIndiItemRef.getIndividual()->getIndividualNameLinker()) == "http://ontology.dumontierlab.com/eswc-example-graph-3#plot") {
-						//	bool debug = true;
-						//}
-
-
-						if (nextProcessingData->mParentData) {
-							QList<RecursiveComplexTransitiveProcessingData*> parentDataList;
-							parentDataList.append(nextProcessingData->mParentData);
-							if (nextProcessingData->mAdditionalPropgationList) {
-								parentDataList.append(*nextProcessingData->mAdditionalPropgationList);
-							}
-
-							QList<RecursiveComplexTransitiveProcessingData*> propagationDataList;
-							for (RecursiveComplexTransitiveProcessingData* parentData : parentDataList) {
-								if (!nextProcessingData->mExpanded) {
-									propagationDataList.append(parentData);
-								} else {
-									if (parentData->mParentData) {
-										propagationDataList.append(parentData->mParentData);
-									}
-									if (parentData->mAdditionalPropgationList) {
-										propagationDataList.append(*parentData->mAdditionalPropgationList);
-									}
-								}
-							}
-
-							if (!propagationDataList.isEmpty()) {
-
-								// TODO: add successor itself
-
-								QList<CRealizationIndividualInstanceItemReference> linkAddingSuccessorIndividualReferenceList;
-								linkAddingSuccessorIndividualReferenceList.append(nextProcessingData->mIndiItemRef);
-
-
-								if (!nextProcessingData->mExpanded) {
-									CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(nextProcessingData->mIndiItemRef.getIndividualID());
-									nextProcessingData->mIndiAssData = indiAssData;
-									CBackendRepresentativeMemoryLabelCacheItem* combinedNeigRoleSetLabel = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
-									CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* roleSetNeighbourArray = indiAssData->getRoleSetNeighbourArray();
-
-									COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelData* roleItemCompNeighLabelData = roleInstancesItem->getCombinedNeighbourCacheLabelItemDataHash(inversed)->value(combinedNeigRoleSetLabel);
-									if (roleItemCompNeighLabelData && roleItemCompNeighLabelData->hasKnownInstancesLabelItems()) {
-										QHash<CBackendRepresentativeMemoryLabelCacheItem*, COptimizedKPSetRoleInstancesSingleNeighbourRoleSetCacheLabelData*>* singleNeighLabelDataHash = roleItemCompNeighLabelData->getKnownInstancesLabelItemDataHash();
-
-										for (auto it = singleNeighLabelDataHash->constBegin(), itEnd = singleNeighLabelDataHash->constEnd(); it != itEnd; ++it) {
-											roleSetNeighbourArray->at(it.value()->getLabelArrayIndex()).visitNeighbourIndividualIds([&](cint64 neighbourId)->bool {
-												// check same individual merged
-												CRealizationIndividualInstanceItemReference neighbourIndiItemRef = reqConfPreCompItem->getInstanceItemReference(neighbourId, false);
-												if (!reqConfPreCompItem->isSameIndividualsMerged(neighbourIndiItemRef)) {
-													linkAddingSuccessorIndividualReferenceList.append(neighbourIndiItemRef);
-												}
-												return true;
-											});
-										}
-									}
-								}
-
-								COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData* successorIndiExplicitIndirectLinkComplexRepresentationData = (COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData*)nextProcessingData->mIndiComplexRoleData;
-								COptimizedKPSetRoleInstancesHash* succInstanceDatahash = successorIndiExplicitIndirectLinkComplexRepresentationData->getRoleNeighbourInstancesHash(inversed, false);
-								if (succInstanceDatahash) {
-									for (COptimizedKPSetRoleInstancesHash::iterator it = succInstanceDatahash->begin(), itEnd = succInstanceDatahash->end(); it != itEnd; ++it) {
-										cint64 indiId = it.key();
-										COptimizedKPSetRoleInstancesHashData& instanceHashData = it.value();
-										if (instanceHashData.mInstanceItemData->mKnownInstance) {
-
-											CRealizationIndividualInstanceItemReference succIndiItemRef = reqConfPreCompItem->getInstanceItemReference(indiId, true);
-											linkAddingSuccessorIndividualReferenceList.append(succIndiItemRef);
-										}
-									}
-								}
-
-
-								for (CRealizationIndividualInstanceItemReference succIndiItemRef : linkAddingSuccessorIndividualReferenceList) {
-
-
-									QSet<RecursiveComplexTransitiveProcessingData*> propagatedDataSet;
-									QList<RecursiveComplexTransitiveProcessingData*> processingPropagationDataList(propagationDataList);
-									while (!processingPropagationDataList.isEmpty()) {
-										RecursiveComplexTransitiveProcessingData* nextPropagationData = processingPropagationDataList.takeFirst();
-
-										if (!propagatedDataSet.contains(nextPropagationData)) {
-											propagatedDataSet.insert(nextPropagationData);
-
-
-											COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData* indiExplicitIndirectLinkComplexRepresentationData = (COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData*)nextPropagationData->mIndiComplexRoleData;
-											CRealizationIndividualInstanceItemReference indiRealItemRef = nextPropagationData->mIndiItemRef;
-											CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = nextPropagationData->mIndiAssData;
-
-											// guaranteed to be deterministic, so no need to check possible neighbour instances
-											COptimizedKPSetRoleNeighbourInstancesHashData* indiRoleNeighbourHashData = nullptr;
-
-											CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* assNeighbourRoleSetHash = indiAssData->getNeighbourRoleSetHash();
-											CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetCompinationLabelItem = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
-											COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelData* combinedNeighbourCacheLabelItemData = combinedNeighbourCacheLabelItemDataHash->value(neighbourRoleSetCompinationLabelItem);
-
-
-											bool addedLink = addComplexRoleExplicitIndirectNeighbourLink(roleInstancesItem, inversed, indiRealItemRef, indiExplicitIndirectLinkComplexRepresentationData, indiRoleNeighbourHashData, combinedNeighbourCacheLabelItemData, assNeighbourRoleSetHash, succIndiItemRef, nullptr, true, reqConfPreCompItem);
-
-											if (nextPropagationData->mParentData) {
-												processingPropagationDataList.append(nextPropagationData->mParentData);
-											}
-											if (nextPropagationData->mAdditionalPropgationList) {
-												processingPropagationDataList.append(*nextPropagationData->mAdditionalPropgationList);
-											}
-										}
-									}
-								}
-
-							}
-						}
-					}
-
-
-
-					for (auto processingData : indiProcessingDataHash) {
-						processingData->mIndiComplexRoleData->setInitialized(inversed, true);
-						delete processingData;
+					for (const TransitiveClosureNode& closureNode : closureNodes) {
+						closureNode.mLinkData->setInitialized(inversed, true);
 					}
 					
 
@@ -3806,6 +3777,20 @@ namespace Konclude {
 
 												LOG(INFO, getDomain(), logTr("Role realization finished for ontology."), this);
 												reqConfPreCompItem->getRealizeRoleProcessingStep()->setStepFinished(true);
+											}
+										}
+										// all role realization work is done: release the requirements that are still attached to role items which finished without
+										// being re-checked (otherwise the dynamic requirement keeps a processing item count that is never decremented and the query never completes)
+										for (COptimizedKPSetRoleInstancesItem* pendingRoleItem : *reqConfPreCompItem->getRoleInstancesItemList()) {
+											CLinker<COntologyRealizingDynamicRequirmentProcessingData*>* pendingLinkers = pendingRoleItem ? pendingRoleItem->takeRequirmentProcessingDataLinkers() : nullptr;
+											if (pendingLinkers) {
+												setDynamicRequirementProcessed(reqConfPreCompItem, reqConfPreCompItem->getRealizeRoleProcessingStep(), pendingLinkers);
+											}
+										}
+										for (COptimizedKPSetRoleInstancesItem* pendingRoleItem : *reqConfPreCompItem->getComplexRoleInstancesItemList()) {
+											CLinker<COntologyRealizingDynamicRequirmentProcessingData*>* pendingLinkers = pendingRoleItem ? pendingRoleItem->takeRequirmentProcessingDataLinkers() : nullptr;
+											if (pendingLinkers) {
+												setDynamicRequirementProcessed(reqConfPreCompItem, reqConfPreCompItem->getRealizeRoleProcessingStep(), pendingLinkers);
 											}
 										}
 										reqConfPreCompItem->getRealizeRoleProcessingStep()->submitRequirementsUpdate();

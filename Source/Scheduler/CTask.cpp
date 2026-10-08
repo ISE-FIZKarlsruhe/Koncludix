@@ -292,12 +292,17 @@ namespace Konclude {
 		}
 
 
+		bool CTask::anyTaskDispenseMarkedEver = false;
+
 		bool CTask::isTaskDispenseMarked() {
 			return mTaskDispensMarked;
 		}
 
 		CTask* CTask::setTaskDispenseMarked(bool dispenseable) {
 			mTaskDispensMarked = dispenseable;
+			if (dispenseable) {
+				anyTaskDispenseMarkedEver = true;
+			}
 			return this;
 		}
 

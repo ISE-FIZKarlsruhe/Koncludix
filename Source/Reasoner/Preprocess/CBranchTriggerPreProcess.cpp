@@ -136,8 +136,16 @@ namespace Konclude {
 				disjInitList.append(TConNegPair(concept,negated));
 
 
+				// every (concept, negation) pair is expanded at most once: cyclic operand structures (e.g. a concept that
+				// transitively contains itself after absorption/normalization) otherwise keep the worklist growing forever
+				// (unbounded memory growth, hangs the reasoner during preprocessing)
+				QSet<TConNegPair> expandedPairSet;
 				while (!disjInitList.isEmpty()) {
 					TConNegPair disConNegPair(disjInitList.takeFirst());
+					if (expandedPairSet.contains(disConNegPair)) {
+						continue;
+					}
+					expandedPairSet.insert(disConNegPair);
 					CConcept *disCon = disConNegPair.first;
 					bool disNeg = disConNegPair.second;
 					qint64 disConOpCode = disCon->getOperatorCode();

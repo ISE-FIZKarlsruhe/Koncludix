@@ -154,6 +154,8 @@ namespace Konclude {
 				CTask* setTaskRelevant(bool relevant);
 
 				bool isTaskDispenseMarked();
+				// true as soon as any task has ever been marked as dispensable (nothing in the code base does this at the moment)
+				static bool anyTaskDispenseMarkedEver;
 				CTask* setTaskDispenseMarked(bool dispenseable);
 
 

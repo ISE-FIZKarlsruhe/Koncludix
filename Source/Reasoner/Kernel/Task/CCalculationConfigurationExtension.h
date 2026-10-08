@@ -139,6 +139,7 @@ namespace Konclude {
 
 
 						bool isSuccessorConceptSaturationExpansionActivated();
+						bool isAtLeastBackendNeighbourSatisfactionActivated();
 						bool isSaturationCachingActivated();
 						bool isSaturationCriticalConceptTestingActivated();
 						bool isSaturationDirectCriticalToInsufficientActivated();
@@ -283,6 +284,7 @@ namespace Konclude {
 						bool mConfDebuggingWriteDataForAllTestsActivated;
 
 						bool mConfSuccessorConceptSaturationExpansionActivated;
+						bool mConfAtLeastBackendNeighbourSatisfactionActivated;
 						bool mConfSaturationCachingActivated;
 						bool mConfSaturationCriticalConceptTestingActivated;
 						bool mConfSaturationDirectCriticalToInsufficientActivated;
@@ -438,6 +440,7 @@ namespace Konclude {
 						bool mConfDebuggingWriteDataForAllTestsChecked;
 
 						bool mConfSuccessorConceptSaturationExpansionChecked;
+						bool mConfAtLeastBackendNeighbourSatisfactionChecked;
 						bool mConfSaturationCachingChecked;
 						bool mConfSaturationCriticalConceptTestingChecked;
 						bool mConfSaturationDirectCriticalToInsufficientChecked;

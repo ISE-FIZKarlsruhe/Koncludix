@@ -120,6 +120,10 @@ namespace Konclude {
 					if (!indiLoadedAssoData) {
 						indiLoadedAssoData = getIndividualAssociationLoadingData(indiId, calcAlgContext);
 					}
+					if (!indiLoadedAssoData) {
+						// the individual has no data in the backend cache (e.g. a nominal that only occurs in the TBox)
+						return nullptr;
+					}
 					if (!indiLoadedAssoData->getLoadedNominalIndirectConnectionData()) {
 						indiLoadedAssoData->setLoadedNominalIndirectConnectionData(mAssBackCacheReader->getNominalIndirectConnectionData(indiId));
 						indiLoadedAssoData->setIndirectlyConnectedIndividualsIntegration(true);

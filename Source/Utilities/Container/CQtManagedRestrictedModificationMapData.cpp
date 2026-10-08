@@ -168,7 +168,9 @@ namespace Konclude {
 
 				++randomBits;
 				if (level == 3 && !insertInOrder)
-					randomBits = qrand();
+					{ // deterministic per-thread xorshift instead of the global qrand() (reproducible skip-list shapes)
+						static thread_local quint64 detS = 88172645463325252ULL; detS ^= detS << 13; detS ^= detS >> 7; detS ^= detS << 17; randomBits = (cint64)(detS & 0x7fffffff);
+					}
 
 				//void *concreteNode = strictAlignment ?
 				//					 qMallocAligned(offset + sizeof(Node) + level * sizeof(Node *), alignment) :

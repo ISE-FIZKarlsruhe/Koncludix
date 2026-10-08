@@ -66,9 +66,12 @@ namespace Konclude {
 						mTagPool[i] = i+mNextPoolStartTag;
 					}
 					mNextPoolStartTag += mPoolSize;
-					// build random permutation using Fisher-Yates algorithm
+					// build pseudo-random permutation using Fisher-Yates algorithm; local xorshift generator seeded from the pool start tag
+					// (instead of the process-global qrand()) so that runs are reproducible
+					quint64 detState = 88172645463325252ULL ^ (quint64)(mNextPoolStartTag + 1) * 2654435761ULL;
 					for (cint64 i = mPoolSize-1; i > 0; --i) {
-						cint64 randomIndex = qrand() % (i+1);
+						detState ^= detState << 13; detState ^= detState >> 7; detState ^= detState << 17;
+						cint64 randomIndex = (cint64)(detState % (quint64)(i+1));
 						cint64 tmpVal = mTagPool[randomIndex];
 						mTagPool[randomIndex] = mTagPool[i];
 						mTagPool[i] = tmpVal;

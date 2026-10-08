@@ -526,7 +526,9 @@ namespace Konclude {
 					}
 					reader->fixOntologyData(ontologyData);
 					mFixedOntologyIdentifierDataHashLock.unlock();
-					ontologyData->waitIndividualLabelAssociationIndexed();
+					if (ontologyData) {
+						ontologyData->waitIndividualLabelAssociationIndexed();
+					}
 					return reader;
 				}
 
@@ -2010,6 +2012,29 @@ namespace Konclude {
 							// create role set neighbour array and neighbour role set hash, if addition, then copy previous data
 
 							CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* newArrayIndexData = getIndividualNeighbourArrayIndexExtensionData(newNeighbourRoleSetCompLabel, ontologyData);
+
+							// concurrent updates of the same individual (e.g. from several workers) can deliver links whose role-set label is not part of the individual's neighbour combination label,
+							// extend the combination label for all added links, so that every added link has a position in the neighbour array
+							if (!linksRemoval) {
+								for (CBackendRepresentativeMemoryCacheTemporaryIndividualRoleSetNeighbourUpdateDataLinker* missLabelLinkerIt = roleSetNeighbourUpdateDataLinker; missLabelLinkerIt; missLabelLinkerIt = missLabelLinkerIt->getNext()) {
+									CBackendRepresentativeMemoryLabelCacheItem* missLabelItem = missLabelLinkerIt->getNeighbourRoleInstantiatedCompinationLabelReference().getReferredLabelData();
+									if (!missLabelItem) {
+										CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* missTmpLabelItem = missLabelLinkerIt->getNeighbourRoleInstantiatedCompinationLabelReference().getReferredTemporaryLabelData();
+										if (missTmpLabelItem) {
+											missLabelItem = (CBackendRepresentativeMemoryLabelCacheItem*)missTmpLabelItem->getTemporaryData();
+										}
+									}
+									if (missLabelItem && newArrayIndexData->getIndex(missLabelItem) < 0) {
+										CCacheValue missExtendingCacheValue;
+										missExtendingCacheValue.initCacheValue(missLabelItem->getCacheEntryID(), (cint64)missLabelItem, CCacheValue::CACHE_VALUE_TAG_AND_ENTRY);
+										CBackendRepresentativeMemoryLabelCacheItem* prevMissNeighbourRoleSetCompLabel = newNeighbourRoleSetCompLabel;
+										newNeighbourRoleSetCompLabel = getExtendedLabel(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL, prevMissNeighbourRoleSetCompLabel, missExtendingCacheValue, ontologyData);
+										locAssociationData->setLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL, newNeighbourRoleSetCompLabel);
+										updateIndexedAssociationCount(locAssociationData, prevMissNeighbourRoleSetCompLabel, CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL, ontologyData);
+										newArrayIndexData = getIndividualNeighbourArrayIndexExtensionData(newNeighbourRoleSetCompLabel, ontologyData);
+									}
+								}
+							}
 
 							CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* newNeighbourRoleSetHash = CObjectParameterizingAllocator< CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash, CBackendRepresentativeMemoryCacheContext* >::allocateAndConstructAndParameterize(context->getMemoryAllocationManager(), context);
 							CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* prevNeighbourRoleSetHash = nullptr;

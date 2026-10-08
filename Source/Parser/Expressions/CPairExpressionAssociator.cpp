@@ -58,12 +58,12 @@ namespace Konclude {
 				cint64 tmpValue1 = 0;
 				cint64 tmpValue2 = 1;
 				if (mFirstExpression) {
-					tmpValue1 += cint64(mFirstExpression);
-					tmpValue2 *= cint64(mFirstExpression);
+					tmpValue1 += (cint64)(mFirstExpression->getSerial());
+					tmpValue2 *= (cint64)(mFirstExpression->getSerial());
 				}
 				if (mSecondExpression) {
-					tmpValue1 += cint64(mSecondExpression);
-					tmpValue2 *= cint64(mSecondExpression);
+					tmpValue1 += (cint64)(mSecondExpression->getSerial());
+					tmpValue2 *= (cint64)(mSecondExpression->getSerial());
 				}
 				hashValue = tmpValue1*tmpValue2;
 				return hashValue;

@@ -22,6 +22,8 @@
 
 
 
+#include <QHash>
+#include <stdlib.h>
 #include <QCoreApplication>
 
 #include "CKoncludeInfo.h"
@@ -50,6 +52,13 @@ using namespace Konclude::Control::Interface::CommandLine;
 
 int main(int argc, char *argv[])
 {
+	// DETERMINISM FIX: Qt seeds its hash containers randomly per process; with a fixed seed (and address-independent expression hashing) the ontology build, concept numbering and therefore the search order are reproducible. Override with KONCLUDE_QHASH_SEED=<int> or -1 to keep Qt's random seed.
+	{
+		const char* kseedEnv = getenv("KONCLUDE_QHASH_SEED");
+		int kseed = kseedEnv ? atoi(kseedEnv) : 0;
+		if (kseed != -1) { qSetGlobalQHashSeed(kseed); }
+	}
+
 
 	QCoreApplication a(argc, argv);
 

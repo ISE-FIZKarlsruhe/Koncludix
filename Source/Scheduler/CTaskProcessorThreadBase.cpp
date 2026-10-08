@@ -446,6 +446,14 @@ namespace Konclude {
 
 
 		void CTaskProcessorThreadBase::organizeDispenseTasks(bool forceUpdate) {
+			if (!CTask::anyTaskDispenseMarkedEver) {
+				// no task is marked as dispensable, so the scan below would always yield 'no marked task' (priority 0);
+				// skipping it avoids walking the whole task queue on every scheduler notification (quadratic stalls with many queued tasks)
+				mMinTaskPriority = 0.;
+				mMinPriorityTask = nullptr;
+				mMinimalPriorityTaskInvalidated = false;
+				return;
+			}
 			if (mMinimalPriorityTaskInvalidated || forceUpdate) {
 				// count dispense task and find minimal priority
 				CTask* taskIt = mTaskProcessingQueue;

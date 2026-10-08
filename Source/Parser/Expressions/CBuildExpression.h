@@ -26,6 +26,7 @@
 
 
 // Namespace includes
+#include <type_traits>
 #include "ExpressionSettings.h"
 #include "CExpressionHashMixer.h"
 #include "CSubExpressionVisitor.h"
@@ -109,6 +110,11 @@ namespace Konclude {
 
 										};
 
+					long mSerial; long getSerial() const { return mSerial; }
+					// DETERMINISM FIX: containers keyed by expression pointers hash the creation serial, not the address (hidden friend: found by ADL only)
+					template<class T> friend typename std::enable_if<std::is_base_of<CBuildExpression, T>::value, uint>::type qHash(T* p, uint seed = 0) {
+						return ::qHash((quint64)(p ? p->getSerial() : 0), seed);
+					}
 					virtual ExpressionType getType() = 0;
 
 					virtual cint64 getStructuralHashValue() = 0;
@@ -125,7 +131,7 @@ namespace Konclude {
 				private:
 			};
 
-		}; // end namespace Expression
+				}; // end namespace Expression
 
 	}; // end namespace Parser
 

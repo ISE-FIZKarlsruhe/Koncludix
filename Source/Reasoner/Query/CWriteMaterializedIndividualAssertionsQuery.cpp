@@ -753,6 +753,19 @@ namespace Konclude {
 								foreach (const QString& sameName, mCurrentSameIndividualNameList) {
 									mSameIndividualEmittedSet.insert(sameName);
 								}
+								// the order in which the members of an equivalence class are found depends on the merge order of the reasoner, write them
+								// sorted by name so that the output is the same for every run
+								QList< QPair<QString,bool> > sortedSameIndividuals;
+								for (int sameIdx = 0; sameIdx < mCurrentSameIndividualNameList.size(); ++sameIdx) {
+									sortedSameIndividuals.append(qMakePair(mCurrentSameIndividualNameList.at(sameIdx), mCurrentSameIndividualAnonymousList.at(sameIdx)));
+								}
+								qSort(sortedSameIndividuals.begin(), sortedSameIndividuals.end());
+								mCurrentSameIndividualNameList.clear();
+								mCurrentSameIndividualAnonymousList.clear();
+								for (const QPair<QString,bool>& sortedSameIndi : sortedSameIndividuals) {
+									mCurrentSameIndividualNameList.append(sortedSameIndi.first);
+									mCurrentSameIndividualAnonymousList.append(sortedSameIndi.second);
+								}
 								writeIndividualEquivalenceRelations(mCurrentSameIndividualNameList, mCurrentSameIndividualAnonymousList);
 							} else {
 								mSameIndividualEmittedSet.insert(individualName);

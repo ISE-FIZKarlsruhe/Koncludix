@@ -25,6 +25,7 @@
 
 
 // Namespace includes
+#include <vector>
 #include "AlgorithmSettings.h"
 #include "CCalculationAlgorithmContextBase.h"
 #include "CCalculationStopProcessingException.h"
@@ -760,6 +761,7 @@ namespace Konclude {
 						bool hasRoleSuccessorConcept(CIndividualProcessNode*& processIndi, CRole* role, CConcept* concept, bool conceptNegation, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool hasRoleSuccessorConcepts(CIndividualProcessNode*& processIndi, CRole* role, CSortedNegLinker<CConcept*>* conceptLinkerIt, bool negate, CCalculationAlgorithmContextBase* calcAlgContext);
 						CIndividualProcessNode* getRoleSuccessorWithConcepts(CIndividualProcessNode*& processIndi, CRole* role, CSortedNegLinker<CConcept*>* conceptLinkerIt, bool negate, CCalculationAlgorithmContextBase* calcAlgContext);
+						cint64 getDistinctBackendRoleSuccessorConcepts(CIndividualProcessNode*& processIndi, CRole* role, CSortedNegLinker<CConcept*>* conceptLinker, cint64 distinctCount, std::vector<cint64>& chosenNodeIds, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool hasDistinctRoleSuccessorConcepts(CIndividualProcessNode*& processIndi, CRole* role, CSortedNegLinker<CConcept*>* conceptLinkerIt, bool negate, cint64 distinctCount, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						bool hasAncestorIndividualNode(CIndividualProcessNode*& processIndi, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -1324,6 +1326,7 @@ namespace Konclude {
 
 
 						bool mConfExpandCreatedSuccessorsFromSaturation;
+						bool mConfAtLeastBackendNeighbourSatisfaction;
 						bool mConfSuccessorSaturationExpansionRestrictionsResolving;
 						bool mConfCachingBlockingFromSaturation;
 

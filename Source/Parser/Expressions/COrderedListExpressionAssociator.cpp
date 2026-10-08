@@ -44,7 +44,7 @@ namespace Konclude {
 			cint64 COrderedListExpressionAssociator::getStructuralHashValue() {
 				cint64 hashValue = 0;
 				FOREACHIT (CBuildExpression* expression, mExpressionList) {
-					hashValue += CExpressionHashMixer::getHashValueMixed(hashValue,cint64(expression));
+					hashValue += CExpressionHashMixer::getHashValueMixed(hashValue,(cint64)(expression->getSerial()));
 				}
 				return hashValue;
 			}

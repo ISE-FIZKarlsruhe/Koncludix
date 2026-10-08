@@ -19,6 +19,7 @@
  */
 
 #include "CCalculationTableauCompletionTaskHandleAlgorithm.h"
+#include <vector>
 
 
 
@@ -188,6 +189,7 @@ namespace Konclude {
 					mConfDebuggingWriteDataForAllTests = false;
 
 					mConfExpandCreatedSuccessorsFromSaturation = true;
+					mConfAtLeastBackendNeighbourSatisfaction = true;
 					// dependencies are not yet generated correctly for resolvings (must include resolved foralls as dependency in addition to the existential restriction)
 					mConfSuccessorSaturationExpansionRestrictionsResolving = false;
 					mConfCachingBlockingFromSaturation = true;
@@ -548,6 +550,7 @@ namespace Konclude {
 							mConfDebuggingWriteDataForAllTests = config->isDebuggingWriteDataCompletionTasksForAllTestsActivated();
 
 							mConfExpandCreatedSuccessorsFromSaturation = config->isSuccessorConceptSaturationExpansionActivated();
+							mConfAtLeastBackendNeighbourSatisfaction = config->isAtLeastBackendNeighbourSatisfactionActivated();
 							mConfCachingBlockingFromSaturation = config->isSaturationCachingActivated();
 							mConfSaturationCachingWithNominals = config->isSaturationCachingWithNominalsByReactivationActivated();
 							mConfSaturationConceptUnsatisfiabilitySaturatedCacheWriting = config->isSaturationUnsatisfiabilityCacheWritingActivated();
@@ -654,6 +657,7 @@ namespace Konclude {
 							mConfDebuggingWriteDataForRepCacheIndiComputationTests = false;
 							mConfDebuggingWriteDataForAllTests = false;
 							mConfExpandCreatedSuccessorsFromSaturation = true;
+					mConfAtLeastBackendNeighbourSatisfaction = true;
 							mConfCachingBlockingFromSaturation = true;
 							mConfSaturationCachingWithNominals = true;
 							mConfSaturationConceptUnsatisfiabilitySaturatedCacheWriting = true;
@@ -16090,6 +16094,43 @@ namespace Konclude {
 
 					bool alreadyExistSuitableSuccessors = hasDistinctRoleSuccessorConcepts(processIndi,role,conceptOpLinkerIt,false,cardinality,calcAlgContext);
 					if (!alreadyExistSuitableSuccessors) {
+						if (mConfAtLeastBackendNeighbourSatisfaction && cardinality > 1) {
+							// the asserted neighbours of a backend synchronized individual are not expanded to role successors, but they still count for the restriction:
+							// if enough pairwise distinct ones with the required concepts exist nothing has to be created, otherwise only the missing successors are created
+							std::vector<cint64> existingNodeIds;
+							cint64 existingCount = getDistinctBackendRoleSuccessorConcepts(processIndi, role, conceptOpLinkerIt, cardinality, existingNodeIds, calcAlgContext);
+							if (existingCount >= cardinality) {
+								return;
+							}
+							if (existingCount > 0) {
+								if (calcAlgContext->getUsedUnsatisfiableCacheRetrievalStrategy()->testUnsatisfiableCacheForSuccessorGeneration(conProDes,processIndi)) {
+									testIndividualNodeUnsatisfiableCached(processIndi,calcAlgContext);
+								}
+								++mAppliedATLEASTRuleCount;
+								CDependencyTrackPoint* nextDepTrackPoint = nullptr;
+								CATLEASTDependencyNode* atleastDepNode = createATLEASTDependency(nextDepTrackPoint,processIndi,conDes,depTrackPoint,calcAlgContext);
+								CPROCESSINGLIST<CIndividualProcessNode*> indiList(calcAlgContext->getUsedTaskProcessorContext());
+								createDistinctSuccessorIndividuals(processIndi, conDes, indiList, role->getIndirectSuperRoleList(), role, conceptOpLinkerIt, false, nextDepTrackPoint, cardinality - existingCount, calcAlgContext);
+								// the new successors must be different from the (pairwise different) asserted ones that are used
+								for (cint64 existingNodeId : existingNodeIds) {
+									CIndividualProcessNode* existingNode = getCorrectedNominalIndividualNode(existingNodeId, calcAlgContext);
+									CIndividualProcessNode* locExistingNode = getLocalizedIndividual(existingNode, false, calcAlgContext);
+									for (CPROCESSINGLIST<CIndividualProcessNode*>::const_iterator it = indiList.constBegin(), itEnd = indiList.constEnd(); it != itEnd; ++it) {
+										CIndividualProcessNode* newSuccIndi = *it;
+										createIndividualsDistinct(newSuccIndi, locExistingNode, nextDepTrackPoint, calcAlgContext);
+									}
+								}
+								for (CPROCESSINGLIST<CIndividualProcessNode*>::const_iterator it = indiList.constBegin(), itEnd = indiList.constEnd(); it != itEnd; ++it) {
+									STATINC(DISTINCTSUCCESSORINDINODECREATIONCOUNT,calcAlgContext);
+									CIndividualProcessNode* succIndi = *it;
+									if (processIndi->isNominalIndividualNode() && processIndi->getIndividualNominalLevel() <= 0) {
+										succIndi->setExtendedQueueProcessing(true);
+									}
+									addIndividualToProcessingQueue(succIndi,calcAlgContext);
+								}
+								return;
+							}
+						}
 
 						if (mConfAtleastAtmostFastClashCheck) {
 							CReapplyConceptLabelSet* conSet = processIndi->getReapplyConceptLabelSet(false);
@@ -20189,6 +20230,63 @@ namespace Konclude {
 				}
 
 
+
+
+				cint64 CCalculationTableauCompletionTaskHandleAlgorithm::getDistinctBackendRoleSuccessorConcepts(CIndividualProcessNode*& processIndi, CRole* role, CSortedNegLinker<CConcept*>* conceptLinker, cint64 distinctCount, std::vector<cint64>& chosenNodeIds, CCalculationAlgorithmContextBase* calcAlgContext) {
+					chosenNodeIds.clear();
+					// the asserted (deterministic) role neighbours of a backend synchronized individual are not expanded to role successors of the node,
+					// but they are still successors: count the ones that have the required concepts and are known to be pairwise distinct
+					CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)processIndi->getIndividualBackendCacheSynchronisationData(false);
+					if (!backendSyncData || !backendSyncData->getAssocitaionData() || distinctCount <= 1) {
+						return 0;
+					}
+					std::vector<cint64> candidateNodeIds;
+					mBackendCacheHandler->visitNeighbourIndividualIdsForRole(backendSyncData->getAssocitaionData(), role, [&](cint64 neighbourIndividualId, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, bool nondeterministic)->bool {
+						if (!nondeterministic) {
+							CBackendRepresentativeMemoryCacheIndividualAssociationData* neighbourAssData = mBackendCacheHandler->getIndividualAssociationData(neighbourIndividualId, false, calcAlgContext);
+							if (neighbourAssData && !neighbourAssData->hasDeterministicSameIndividualMerging()) {
+								bool contained = true;
+								for (CSortedNegLinker<CConcept*>* conceptOpLinkerIt = conceptLinker; conceptOpLinkerIt && contained; conceptOpLinkerIt = conceptOpLinkerIt->getNext()) {
+									if (!mBackendCacheHandler->hasConceptInAssociatedFullConceptSetLabel(neighbourAssData, neighbourAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::FULL_CONCEPT_SET_LABEL), conceptOpLinkerIt->getData(), conceptOpLinkerIt->isNegated(), true, calcAlgContext)) {
+										contained = false;
+									}
+								}
+								if (contained) {
+									candidateNodeIds.push_back(-neighbourIndividualId);
+								}
+							}
+						}
+						return candidateNodeIds.size() < 256;
+					}, false, calcAlgContext);
+					if (candidateNodeIds.empty()) {
+						return 0;
+					}
+					// greedy search for up to distinctCount pairwise distinct candidates, keeps the best set
+					std::vector<cint64> bestChosen;
+					for (size_t startIdx = 0; startIdx < candidateNodeIds.size() && (cint64)bestChosen.size() < distinctCount; ++startIdx) {
+						std::vector<cint64> chosen;
+						chosen.push_back(candidateNodeIds[startIdx]);
+						for (size_t i = startIdx + 1; i < candidateNodeIds.size() && (cint64)chosen.size() < distinctCount; ++i) {
+							cint64 candId = candidateNodeIds[i];
+							CIndividualProcessNode* candNode = getCorrectedNominalIndividualNode(candId, calcAlgContext);
+							CDistinctHash* candDisHash = candNode ? candNode->getDistinctHash(false) : nullptr;
+							bool distinctToAll = candDisHash != nullptr;
+							for (size_t c = 0; c < chosen.size() && distinctToAll; ++c) {
+								if (!candDisHash->isIndividualDistinct(chosen[c])) {
+									distinctToAll = false;
+								}
+							}
+							if (distinctToAll) {
+								chosen.push_back(candId);
+							}
+						}
+						if (chosen.size() > bestChosen.size()) {
+							bestChosen = chosen;
+						}
+					}
+					chosenNodeIds = bestChosen;
+					return (cint64)bestChosen.size();
+				}
 
 
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::hasDistinctRoleSuccessorConcepts(CIndividualProcessNode*& processIndi, CRole* role, CSortedNegLinker<CConcept*>* conceptLinker, bool negate, cint64 distinctCount, CCalculationAlgorithmContextBase* calcAlgContext) {

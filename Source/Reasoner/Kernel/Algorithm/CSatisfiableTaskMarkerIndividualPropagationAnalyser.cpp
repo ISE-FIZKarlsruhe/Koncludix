@@ -77,6 +77,28 @@ namespace Konclude {
 						CProcessingDataBox* procDataBox = calcAlgContext->getProcessingDataBox();
 						cint64 maxDetBranchTag = procDataBox->getMaximumDeterministicBranchTag();
 						CIndividualVector* indiVec = procDataBox->getOntology()->getABox()->getIndividualVector();
+						// If the testing individual has been merged into another individual non-deterministically (e.g., a merging that was reused from the backend cache
+						// and that is only one of several possible choices of a cardinality restriction), then everything that is reached from the merged node depends
+						// on this choice, i.e., the reached individuals cannot be reported as deterministic candidates (they are confirmed by separate tests then).
+						bool testingIndividualNondeterministicallyMerged = false;
+						if (individualReference.isNonEmpty()) {
+							CIndividualProcessNodeVector* testIndiNodeVec = procDataBox->getIndividualProcessNodeVector();
+							CIndividualProcessNode* mergeIndiNode = testIndiNodeVec->getData(-individualReference.getIndividualID());
+							while (mergeIndiNode && mergeIndiNode->hasMergedIntoIndividualNodeID() && !testingIndividualNondeterministicallyMerged) {
+								CIndividualProcessNode* mergedIntoNode = testIndiNodeVec->getData(mergeIndiNode->getMergedIntoIndividualNodeID());
+								CIndividualMergingHash* mergeHash = mergedIntoNode ? mergedIntoNode->getIndividualMergingHash(false) : nullptr;
+								cint64 mergeIndiId = mergeIndiNode->getNominalIndividual() ? mergeIndiNode->getNominalIndividual()->getIndividualID() : -1;
+								if (mergeHash && mergeHash->contains(mergeIndiId)) {
+									CDependencyTrackPoint* mergeDepTrackPoint = mergeHash->value(mergeIndiId).getDependencyTrackPoint();
+									if (!mergeDepTrackPoint || mergeDepTrackPoint->getBranchingTag() > maxDetBranchTag) {
+										testingIndividualNondeterministicallyMerged = true;
+									}
+								} else {
+									testingIndividualNondeterministicallyMerged = true;
+								}
+								mergeIndiNode = mergedIntoNode;
+							}
+						}
 						CMarkerIndividualNodeHash* markerIndiNodeHash = procDataBox->getMarkerIndividualNodeHash(false);
 						if (markerIndiNodeHash) {
 							for (CPROCESSHASH< CConcept*, CMarkerIndividualNodeData >::const_iterator it = markerIndiNodeHash->constBegin(), itEnd = markerIndiNodeHash->constEnd(); it != itEnd; ++it) {
@@ -96,7 +118,7 @@ namespace Konclude {
 										} else {
 											tmpLinker->initLinker(candIndividual);
 										}
-										bool nondeterministicallyAdded = candIndiLinkerIt->isNegated();
+										bool nondeterministicallyAdded = candIndiLinkerIt->isNegated() || testingIndividualNondeterministicallyMerged;
 										if (nondeterministicallyAdded) {
 											ndetIndiCandLinker = tmpLinker->append(ndetIndiCandLinker);
 										} else {

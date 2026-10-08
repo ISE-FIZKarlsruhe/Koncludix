@@ -433,6 +433,10 @@ namespace Konclude {
 						"Determines whether the reasoner using saturated concepts for expanding newly created successor nodes.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.AtLeastBackendNeighbourSatisfaction",
+						"Determines whether minimum cardinality restrictions (at-least) of backend synchronized individuals take the asserted neighbours of the backend cache into account (and only create the missing successors).",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.SaturationCaching",
 						"Determines whether the reasoner using saturated concepts for caching.",
 						new CBooleanConfigType(true)),

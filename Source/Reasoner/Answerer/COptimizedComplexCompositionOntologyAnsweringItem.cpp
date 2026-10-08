@@ -18,6 +18,7 @@
  *
  */
 
+#include "Reasoner/Kernel/Process/CProcessingStatistics.h"
 #include "COptimizedComplexCompositionOntologyAnsweringItem.h"
 
 
@@ -33,6 +34,7 @@ namespace Konclude {
 				mDiffStoredStatCollStrings = nullptr;
 
 				mConfCollectProcessStatistics = CConfigDataReader::readConfigBoolean(configuration, "Konclude.Calculation.Answering.CollectProcessStatistics", false);
+				if (mConfCollectProcessStatistics) { Konclude::Reasoner::Kernel::Process::CProcessingStatistics::collectionActive() = true; }
 				mConfLogProcessingProgressStatistics = CConfigDataReader::readConfigBoolean(configuration, "Konclude.Answering.LogCompositionQueriesProcessingProgressStatistics", false);
 				mConfLogProcessingFinishedStatistics = CConfigDataReader::readConfigBoolean(configuration, "Konclude.Answering.LogCompositionQueriesProcessingFinishedStatistics", false);
 				mCurrentlyAnsweringQueryCount = 0;
