@@ -215,6 +215,7 @@ namespace Konclude {
 
 					mConfMergeConstructedIndividualNode = false;
 					mConfBranchingStatisticsAnalysing = true;
+					mConfBranchingStatisticsAnalysingMaximumDepth = 256;
 					mOptAnalogousPropagationPathBlocking = false;
 
 
@@ -551,6 +552,7 @@ namespace Konclude {
 
 							mConfExpandCreatedSuccessorsFromSaturation = config->isSuccessorConceptSaturationExpansionActivated();
 							mConfAtLeastBackendNeighbourSatisfaction = config->isAtLeastBackendNeighbourSatisfactionActivated();
+							mConfBranchingStatisticsAnalysingMaximumDepth = config->getBranchingStatisticsAnalysingMaximumDepth();
 							mConfCachingBlockingFromSaturation = config->isSaturationCachingActivated();
 							mConfSaturationCachingWithNominals = config->isSaturationCachingWithNominalsByReactivationActivated();
 							mConfSaturationConceptUnsatisfiabilitySaturatedCacheWriting = config->isSaturationUnsatisfiabilityCacheWritingActivated();
@@ -658,6 +660,7 @@ namespace Konclude {
 							mConfDebuggingWriteDataForAllTests = false;
 							mConfExpandCreatedSuccessorsFromSaturation = true;
 					mConfAtLeastBackendNeighbourSatisfaction = true;
+					mConfBranchingStatisticsAnalysingMaximumDepth = 256;
 							mConfCachingBlockingFromSaturation = true;
 							mConfSaturationCachingWithNominals = true;
 							mConfSaturationConceptUnsatisfiabilitySaturatedCacheWriting = true;
@@ -1783,8 +1786,26 @@ namespace Konclude {
 									if (conceptSetBackendLabelOnlyRelevant) {
 										CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHasher hasher = getIndividualRepresentativeBackendCacheConceptSetLabelProcessingHasher(assData, calcAlgContext);
 										if (conceptSetBackendLabelOnlyHasher == hasher) {
-											mergingTryable = true;
-											possiblyRequiresRuleApplication = false;
+											// the outcome for the tested node may depend on how many neighbours it has (at-most restrictions), which is not part of the concept set label
+											bool neighbourCountsCompatible = true;
+											CReapplyConceptLabelSet* testedLabelSet = processIndi->getReapplyConceptLabelSet(false);
+											if (testedLabelSet) {
+												for (CConceptDescriptor* testedConDesIt = testedLabelSet->getAddingSortedConceptDescriptionLinker(); testedConDesIt && neighbourCountsCompatible; testedConDesIt = testedConDesIt->getNext()) {
+													CConcept* testedCon = testedConDesIt->getData();
+													bool testedNeg = testedConDesIt->isNegated();
+													cint64 testedOp = testedCon->getOperatorCode();
+													if ((!testedNeg && testedOp == CCATMOST) || (testedNeg && testedOp == CCATLEAST)) {
+														cint64 testedCard = testedCon->getParameter() - 1*testedNeg;
+														if (mBackendCacheHandler->getNeighbourCountForRole(assData, testedCon->getRole(), calcAlgContext) > testedCard) {
+															neighbourCountsCompatible = false;
+														}
+													}
+												}
+											}
+											if (neighbourCountsCompatible) {
+												mergingTryable = true;
+												possiblyRequiresRuleApplication = false;
+											}
 										}
 									}
 
@@ -1819,6 +1840,24 @@ namespace Konclude {
 
 
 
+							if (mergingTryable) {
+								// the individual to merge may have more (backend) neighbours than allowed by an at-most restriction of the tested node
+								CBackendRepresentativeMemoryCacheIndividualAssociationData* candAssData = mBackendCacheHandler->getIndividualAssociationData(mergingIndiId, calcAlgContext);
+								CReapplyConceptLabelSet* testedLabelSet2 = processIndi->getReapplyConceptLabelSet(false);
+								if (candAssData && testedLabelSet2) {
+									for (CConceptDescriptor* testedConDesIt = testedLabelSet2->getAddingSortedConceptDescriptionLinker(); testedConDesIt && mergingTryable; testedConDesIt = testedConDesIt->getNext()) {
+										CConcept* testedCon = testedConDesIt->getData();
+										bool testedNeg = testedConDesIt->isNegated();
+										cint64 testedOp = testedCon->getOperatorCode();
+										if ((!testedNeg && testedOp == CCATMOST) || (testedNeg && testedOp == CCATLEAST)) {
+											cint64 testedCard = testedCon->getParameter() - 1*testedNeg;
+											if (mBackendCacheHandler->getNeighbourCountForRole(candAssData, testedCon->getRole(), calcAlgContext) > testedCard) {
+												mergingTryable = false;
+											}
+										}
+									}
+								}
+							}
 							if (mergingTryable) {
 								if (!possiblyRequiresRuleApplication) {
 
@@ -4465,7 +4504,10 @@ namespace Konclude {
 
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::analyseBranchingStatistics(CCalculationAlgorithmContextBase* calcAlgContext) {
 					CBranchTreeNode* branchTreeNode = calcAlgContext->getBranchTreeNode();
-					while (mConfBranchingStatisticsAnalysing && branchTreeNode) {
+					// only the nearest ancestors are updated: the statistics only guide the heuristics and walking up to the root is expensive for deep decision trees
+					cint64 remainingStatisticsDepth = mConfBranchingStatisticsAnalysingMaximumDepth;
+					while (mConfBranchingStatisticsAnalysing && branchTreeNode && remainingStatisticsDepth != 0) {
+						--remainingStatisticsDepth;
 
 						CNonDeterministicDependencyTrackPoint* nonDetDepTrackPoint = branchTreeNode->getDependencyTrackPoint();
 						if (nonDetDepTrackPoint) {
@@ -20642,6 +20684,17 @@ namespace Konclude {
 
 								cint64 usedCount = mergeIntoIndi1->getRoleSuccessorCount(role);
 								cint64 requiredCount = indi2->getRoleSuccessorCount(role);
+								// neighbours that are only present in the backend cache (not expanded to role successors) count for the restriction as well
+								{
+									CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* sd1 = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)mergeIntoIndi1->getIndividualBackendCacheSynchronisationData(false);
+									if (sd1 && sd1->getAssocitaionData() && !sd1->hasAllNeighbourForcedExpansion()) {
+										usedCount += getBackendCacheRoleRepresentativeNeighbourCount(mergeIntoIndi1, sd1, sd1->getAssocitaionData(), role, calcAlgContext);
+									}
+									CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* sd2 = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)indi2->getIndividualBackendCacheSynchronisationData(false);
+									if (sd2 && sd2->getAssocitaionData() && !sd2->hasAllNeighbourForcedExpansion()) {
+										requiredCount += getBackendCacheRoleRepresentativeNeighbourCount(indi2, sd2, sd2->getAssocitaionData(), role, calcAlgContext);
+									}
+								}
 
 								if (usedCount + requiredCount > cardinality) {
 									cint64 triviallyMergableCount = 0;

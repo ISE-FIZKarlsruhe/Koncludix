@@ -437,6 +437,10 @@ namespace Konclude {
 						"Determines whether minimum cardinality restrictions (at-least) of backend synchronized individuals take the asserted neighbours of the backend cache into account (and only create the missing successors).",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BranchingStatisticsAnalysingMaximumDepth",
+						"Maximum number of ancestor branching decisions that are updated with the branching statistics when a task finishes (the statistics only guide the heuristics, a complete walk up to the root is expensive for deep decision trees). A negative value updates all ancestors, 0 disables the statistics.",
+						new CIntegerConfigType(256)),
+						new CIntegerConfigType(256));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.SaturationCaching",
 						"Determines whether the reasoner using saturated concepts for caching.",
 						new CBooleanConfigType(true)),
@@ -3408,6 +3412,36 @@ namespace Konclude {
 						"Determines whether the results for anonymous individuals are written.",
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Materialize.ClassAssertions",
+						"Determines whether the class assertions (types of the individuals) are computed and written by the materialize command.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Materialize.ObjectPropertyAssertions",
+						"Determines whether the object property assertions are computed and written by the materialize command (usually the most expensive part).",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Materialize.DataPropertyAssertions",
+						"Determines whether the data property assertions are written by the materialize command.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Materialize.SameIndividuals",
+						"Determines whether the same individuals (owl:sameAs) are computed and written by the materialize command.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Materialize.ClassHierarchy",
+						"Determines whether the class hierarchy is written by the materialize command.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Materialize.PropertyHierarchy",
+						"Determines whether the object and data property hierarchies are written by the materialize command.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 

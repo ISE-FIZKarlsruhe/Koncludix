@@ -11,6 +11,7 @@ Additionally, adding support for approximate reasoning.
 - OWL2Bench DL files (DL-1 to DL-20): my shared folder with the OWL2Bench <https://github.com/kracr/owl2bench> data sets: <https://drive.google.com/drive/folders/1HYURRLaQkLK8cQwV-UBNKK4_Zur2nU68?usp=sharing>
 - 231 small random ontologies made for testing (hangs, crashes and output changes) using OWL2Gen <https://github.com/kracr/owl2gen> -- more to be added
 - InferTest (28 entailment tests and 9 inconsistency tests).
+- A second reasoner (Openllet) as an independent check: I compared its facts with Konclude's output on the random files.
 
 ## Why Konclude is fast
 
@@ -24,7 +25,7 @@ Additionally, adding support for approximate reasoning.
 
 ## Results
 
-"Before" means before my changes. "Now" is the final build.
+"Before" means before my changes. "Now" is the final build. Timings on my laptop vary by about 10 to 20 % from run to run.
 
 ### Consistency check (1 worker)
 
@@ -36,25 +37,40 @@ Additionally, adding support for approximate reasoning.
 | DL-10 | 50K, 711K | no answer in 12 GB | 80 s, 3.3 GB |
 | DL-20 | 98K, 1.4M | no answer in 12 GB | 169 s, 5.4 GB |
 
-### `materialize` (writes all facts)
+### `materialize` (writes all facts), 1 worker
 
-| File | Before | Now | Facts written |
-|---|---|---|---|
-| DL-1 | 820 s, 3.7 GB (4 workers) | 126 s, 3.7 GB (4 workers); 140 s, 2.2 GB (1 worker) | 1.44 million |
-| DL-2 | not tried | 773 s, 5.1 GB (1 worker) | 5.0 million |
-| DL-5 | not tried | **fails: out of memory** (stopped by the system at 10.9 GB while classifying) | none |
-| DL-10, DL-20 | not tried | not tried yet | |
+| File | Before | Now | Facts written | Instances of `PeopleWithManyHobbies` (check) |
+|---|---|---|---|---|
+| DL-1 | 820 s, 3.7 GB (4 workers) | about 3 to 4 minutes, 2.2 GB (1 worker); about 2 minutes, 3.8 GB (4 workers) | 1.44 million | 61 before, **536 now** (correct) |
+| DL-2 | 773 s, 5.1 GB | about 19 minutes, 5.4 GB | 5.0 million | 119 before, **1,142 now** |
+| DL-5 | not tried | **fails: out of memory** (the system stopped it at 10.9 GB while classifying) | none | |
+| DL-10, DL-20 | not tried | not tried yet | | |
 
-On DL-1 the output with 4 workers has exactly the same facts as before. Only the order in which equivalent class and property names are written can differ.
+The old runs were faster because they skipped tests they should have done, so their answers were incomplete (see the last column). The new runs do the tests, so they take longer but give the full answer.
+
+### Choosing what `materialize` computes (DL-1, 1 worker)
+
+| Selection | Time | Facts written |
+|---|---|---|
+| Class assertions only (no object properties, data properties, sameAs or hierarchies) | 115 s | 30,749 |
+| Everything except object property assertions | 138 s | 49,997 |
+| Everything | about 195 s | 1,444,364 |
+| Object property assertions only (types are computed but not written) | about 200 s | 1,398,129 |
+
+The object property assertions are the expensive part (about 1.4 million of the 1.44 million facts).
 
 ### Other tests
 
 | Test | Before | Now |
 |---|---|---|
-| 231 random small ontologies, `materialize` | about 1 in 4 hung or crashed (37 hangs, 17 crashes) | 1 still hangs, 1 changes output now and then, 229 give the same output every time (5 runs each) |
+| 231 random small ontologies, `materialize` | about 1 in 4 hung or crashed (37 hangs, 17 crashes) | 229 give the same output every time (5 runs each), 2 still change now and then, 1 runs a very long search. No file lost any fact compared with the old build, 9 files gained facts |
+| Verdict (consistent or not) on the 231 files | | 1 changed (`c0266` is now correctly inconsistent, as Openllet says) |
 | InferTest, each test run alone | 25 of 28 and 8 of 9 | 27 of 28 and 8 of 9 (only the `hasKey` inconsistency test fails) |
-| The two small repro files, run 24 times | output changed | same facts every time |
+| The small repro files, run 24 times | output changed | same facts every time |
 | Cardinality change: 185 files and 1,800 small tests | not applicable | same answers with the option on and off |
+| Comparison with Openllet on 51 consistent random files | not done | found the two problems that are fixed now (see below) and one that is still open |
+
+None of this proves the results are sound and complete. It only finds mistakes. The comparison with a second reasoner is the strongest check so far.
 
 ## What was wrong and what I changed
 
@@ -69,35 +85,67 @@ On DL-1 the output with 4 workers has exactly the same facts as before. Only the
 | A true fact was sometimes missing | A later cache update threw away an asserted link | Earlier links are kept unless the update restates them | Fixed |
 | A fact that is not true was sometimes written | A test treated one possible merge as certain | Results that depend on such a merge are confirmed by their own tests | Fixed |
 | `sameAs` pairs in a different order | Members were written in the order they were found | Members are sorted before writing | Fixed |
-| `materialize` slow when many individuals are linked to each other | The walk over the group was repeated for every individual | Each group is worked out once | DL-1: 820 s to 126 s |
+| `materialize` slow when many individuals are linked to each other | The walk over the group was repeated for every individual | Each group is worked out once | DL-1: 820 s to about 2 minutes |
+| **Many class assertions missing** (DL-1: 61 of 536) | Two shortcuts decided "not an instance" for many individuals without testing them, because they did not count neighbours that are stored only in the cache | Both shortcuts count those neighbours now | DL-1: 536, with 1 and with 4 workers |
+| **No object property facts at all** for small ontologies that use nominals (a class like `{a, b}`) | The cache was never published, so realization found no data | If the cache still has unfinished individuals at that point, it is completed with the data it has | The five small repro files now write their facts |
+| **Missed inconsistency** (`Irreflexive(t)`, `u` is the inverse of `t`, `u(a,a)`) | The check looked at the role but not at its inverse | The check looks at the inverse role too (also for asymmetric roles) | Found inconsistent |
 | Asymmetric, irreflexive and disjoint-property errors not found | A check was skipped for individuals that point at each other | The check always runs now | Fixed |
+| Statistics bookkeeping slowed deep searches (about 10 %) | After every finished test the whole decision tree up to the root was updated | Only the nearest 256 decisions are updated. New option `BranchingStatisticsAnalysingMaximumDepth` | About 10 % faster on DL-1, same answer |
 
 ## Features
 
 | Feature | Status |
 |---|---|
-| `materialize` command | Works. Fast on DL-1, slow on DL-2, out of memory on DL-5 |
+| `materialize` command | Works. Complete on DL-1 and DL-2, slow on DL-2, out of memory on DL-5 |
+| Choose what `materialize` computes | Done. Six on/off options, all on by default (see below) |
 | `AtLeastBackendNeighbourSatisfaction` option | Done, on by default, can be switched off |
+| `BranchingStatisticsAnalysingMaximumDepth` option | Done, default 256 (a negative value means no limit) |
 | Same output on every run | Done for the cases I found |
 | Lint report (warns about expensive axioms and data) | Separate tool (`tools/KoncludeLint.java`). Plan: build it into Konclude |
 | Explanations (why inconsistent, why something follows) | Separate tool (`tools/explain.py`). Plan: build it into Konclude. I want to use it later for noisy data |
 | Reason on a small ABox and copy the results to similar individuals | Separate tool (`tools/AboxReduce.java`, `tools/materialize-reduced.sh`). Plan: make it an option inside Konclude |
+| Single-file Linux image | Script `tools/make-appimage.sh`. An image built on Ubuntu 24.04 needs Ubuntu 24.04 or newer. For older systems it must be built on Ubuntu 22.04 |
 
 About the reduce-and-copy tool: on a test file with 9,215 individuals only 22 were needed. Time went from 3.3 s to 0.19 s and memory from 312 MB to 38 MB, with the same output. On OWL2Bench it saves nothing, because the links are random.
+
+### The options for choosing what to compute
+
+Put the keys you want to change in a config file and pass it with `-c`. Every key is `true` by default.
+
+| Key (all start with `Konclude.CLI.Materialize.`) | What it switches |
+|---|---|
+| `ClassAssertions` | the types of the individuals |
+| `ObjectPropertyAssertions` | object property facts (the expensive part) |
+| `DataPropertyAssertions` | data property facts |
+| `SameIndividuals` | `owl:sameAs` groups |
+| `ClassHierarchy` | subclass facts |
+| `PropertyHierarchy` | subproperty facts |
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#">
+  <Set key="Konclude.CLI.Materialize.ObjectPropertyAssertions"><Literal>false</Literal></Set>
+</RequestMessage>
+```
+```bash
+./Konclude materialize -w 1 -c types-only.xml -i ontology.owl -o inferred.nt
+```
+
+Object property facts need the class assertions to be computed first, so when you ask for object properties the types are computed too (but only written if you ask for them).
 
 ## Still open
 
 | Item | What I know |
 |---|---|
-| `materialize` on DL-5 runs out of memory | The consistency check needs only 2.1 GB, but `materialize` passes 10.9 GB while classifying. Not looked into yet |
-| One fact missing with 1 worker on DL-1 | One person is not listed as `PeopleWithManyHobbies` (60 instead of 61). With 4 workers it is found. Being checked |
-| DL-2 `materialize` is slow | 773 s. Not looked into yet |
-| One random file hangs | `materialize` stops at "Realizing ontology" (file `c0162`). It also happens when I undo my latest fixes |
-| One random file misses a fact now and then | File `c0314`. The same test gives different answers on different runs |
+| `materialize` on DL-5 runs out of memory | The consistency check needs only 2.1 GB, but `materialize` passes 10.9 GB while classifying. About 0.5 MB per individual is kept in the cache. Not fixed yet |
+| `materialize` is slow on big files | DL-2 takes about 19 minutes. The complete answer needs tests that the old shortcuts skipped. Other speed-ups are not done yet |
+| Two random files miss facts in some runs | Files `c0194` and `c0314`: a few entailed facts are written in some runs and not in others. They are ontologies with nominals, where some individuals stay unfinished in the cache |
+| One random file runs a very long search | File `c0162`: not a deadlock, one test searches for a very long time |
 | Not enforced | `hasKey`, inverse-functional properties, qualified cardinality |
 | Order of axioms | For a few ontologies the answer depends on the order of the axioms |
 | Several workers on big files | Memory grows (idle workers try alternatives early). Use `-w 1` |
 | Generated ontologies | One classification hang, and some searches that do a very large amount of work |
+| Not checked yet | `materialize` on DL-10 and DL-20, and the other OWL2Bench profiles (EL, QL, RL) |
 
 ## How to try it
 

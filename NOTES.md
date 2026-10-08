@@ -61,19 +61,32 @@ Very large ABoxes that still need a lot of memory:
 7. `materialize` was slow when many individuals are linked to each other.
    - Fix: the closure is now computed once per group, not again and again.
    - DL-1: from about 820 s to about 126 s.
+8. Many facts were missing from `materialize` on DL-1 (61 `PeopleWithManyHobbies` instead of 536).
+   - Cause: two shortcuts said "not an instance" without testing, because they did not count neighbours stored only in the cache.
+   - Fix: they count those neighbours now. DL-1 gives 536, DL-2 gives 1,142 (it was 119).
+9. Small ontologies with nominals wrote no object property facts at all.
+   - Cause: the cache was never published, so realization found no data.
+   - Fix: the cache is completed with the data it has.
+10. A missed inconsistency with an irreflexive role and its inverse.
+   - Fix: the check also looks at the inverse role.
+11. I checked the results against a second reasoner (Openllet). That is how 9 and 10 were found.
 
 ## 4. Where we are now
 
-- `materialize` works on the small random files (229 of 231 give the same output every time).
-- One random file still hangs, and one still misses a fact now and then.
-- With 1 worker, one fact is missing on DL-1 (60 instead of 61 `PeopleWithManyHobbies`). We are checking why.
+
+- `materialize` is now complete on DL-1 and DL-2, but it takes longer than before: about 3 to 4 minutes on DL-1 and about 19 minutes on DL-2. The old runs were faster because they skipped tests.
+- On DL-5 `materialize` runs out of memory (10.9 GB), although the consistency check needs only 2.1 GB. This is the next thing to look at.
+- You can now choose what `materialize` computes (types, object properties, data properties, sameAs, hierarchies). DL-1 with types only takes 115 s instead of about 195 s.
+- Two random files still miss facts in some runs, and one runs a very long search.
 - I am running Konclude on more benchmark files to check that it is fast and gives all the facts.
+- `materialize` should also be fast enough on larger datasets
 
 ## 5. Next steps
 
 - Other reasoners have features that Konclude does not have:
   - explanations (why is something true or inconsistent)
   - a lint check (warns about axioms that are too expensive)
+  - entailing on demand -- types, hierarchy, objectproperties.
   - other helper commands
 - We already have these as separate tools.
 - Plan: put them inside Konclude, so anyone can use them, and add simple hints for people who are new.
@@ -81,3 +94,4 @@ Very large ABoxes that still need a lot of memory:
   - If it can explain what is inconsistent, it can handle the noise.
 - Add the option to reason on a small ABox and copy the results to similar individuals (see section 2).
 - Keep testing on more benchmarks so we have a good reasoner for `materialize` (fast, complete and correct).
+- Perhaps also fidn a way to let konclude decide the worker nodes.

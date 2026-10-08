@@ -3737,7 +3737,14 @@ namespace Konclude {
 							}
 
 							bool forceCompletion = false;
-							if (mConfMaxIncompletelyHandledIndividualsRetrievalCount > 0 && ontologyData->getIncompletelyHandledIndividualsRetrievalCount() > mConfMaxIncompletelyHandledIndividualsRetrievalCount) {
+							if (limit == -2 && !ontologyData->isAssociationCompleted()) {
+								LOG(WARN, "::Konclude::RepresentativeBackendCache", logTr("Forcing association completion on request although %1 individuals are not completely handled.").arg(ontologyData->getIncompletelyHandledIndividualIdCount()), this);
+								forceCompletion = true;
+								count = 0;
+								if (newRetrievalHash) {
+									newRetrievalHash->clear();
+								}
+							} else if (mConfMaxIncompletelyHandledIndividualsRetrievalCount > 0 && ontologyData->getIncompletelyHandledIndividualsRetrievalCount() > mConfMaxIncompletelyHandledIndividualsRetrievalCount) {
 								LOG(WARN, "::Konclude::RepresentativeBackendCache", logTr("Forcing association completion with reached maximum of %1 retrievals.").arg(mConfMaxIncompletelyHandledIndividualsRetrievalCount), this);
 								forceCompletion = true;
 								count = 0;

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Konclude
+Exec=AppRun
+Icon=konclude
+Type=Application
+Categories=Utility;Science;
+Terminal=true
+Comment=OWL 2 DL reasoner with full ABox materialization

@@ -5147,7 +5147,8 @@ namespace Konclude {
 							// other's assertion is processed, in which case the code below falls into
 							// neither the "othIndiNode initialized" nor the "!othIndiNode" branch and a
 							// check placed inside either one is silently skipped.
-							if (othIndi != nominalIndi && role->isAsymmetric()) {
+							CRole* inverseOfRole = role->getInverseRole();
+							if (othIndi != nominalIndi && (role->isAsymmetric() || (inverseOfRole && inverseOfRole->isAsymmetric()))) {
 								for (CRoleAssertionLinker* revAssIt = othIndi->getAssertionRoleLinker(); revAssIt; revAssIt = revAssIt->getNext()) {
 									if (revAssIt->getRole() == role &&
 											revAssIt->getIndividual() == nominalIndi) {
@@ -5163,17 +5164,31 @@ namespace Konclude {
 							// irreflexive. Checked via raw individual identity (othIndi == nominalIndi)
 							// for the same reason as above -- not via saturation-node identity.
 							if (othIndi == nominalIndi) {
-								CSortedNegLinker<CRole*>* superRoleIt = role->getIndirectSuperRoleList();
-								while (superRoleIt) {
-									if (!superRoleIt->isNegated() &&
-											superRoleIt->getData()->isIrreflexive()) {
+								// r(a,a) is also inv(r)(a,a), i.e., an irreflexive (super-)role of the inverse role is violated as well
+								for (cint64 irreflexiveCheckIdx = 0; irreflexiveCheckIdx < 2; ++irreflexiveCheckIdx) {
+									CRole* irreflexiveCheckRole = irreflexiveCheckIdx == 0 ? role : inverseOfRole;
+									if (!irreflexiveCheckRole) {
+										continue;
+									}
+									if (irreflexiveCheckIdx == 1 && irreflexiveCheckRole->isIrreflexive()) {
 										updateDirectAddingIndividualStatusFlags(
 											indiProcSatNode,
 											CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCLASHED,
 											calcAlgContext);
 										return;
 									}
-									superRoleIt = superRoleIt->getNext();
+									CSortedNegLinker<CRole*>* superRoleIt = irreflexiveCheckRole->getIndirectSuperRoleList();
+									while (superRoleIt) {
+										if (!superRoleIt->isNegated() &&
+												superRoleIt->getData()->isIrreflexive()) {
+											updateDirectAddingIndividualStatusFlags(
+												indiProcSatNode,
+												CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCLASHED,
+												calcAlgContext);
+											return;
+										}
+										superRoleIt = superRoleIt->getNext();
+									}
 								}
 							}
 							if (othIndiNode && (othIndiNode->isInitialized() || othIndiNode == indiProcSatNode)) {

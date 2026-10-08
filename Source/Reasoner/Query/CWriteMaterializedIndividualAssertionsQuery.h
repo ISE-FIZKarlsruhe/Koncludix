@@ -302,6 +302,13 @@ namespace Konclude {
 					bool mUseAbbreviatedIRIs;
 					bool mWriteDeclarations;
 					bool mWriteOnlyDirectTypes;
+					// selection of the kinds of facts that are computed and written (Konclude.CLI.Materialize.*)
+					bool mWriteClassAssertions;
+					bool mWriteObjectPropertyAssertions;
+					bool mWriteDataPropertyAssertions;
+					bool mWriteSameIndividuals;
+					bool mWriteClassHierarchy;
+					bool mWritePropertyHierarchy;
 					bool mWriteSubClassOfInconsistency;
 					bool mWriteAnonymousIndividuals;
 

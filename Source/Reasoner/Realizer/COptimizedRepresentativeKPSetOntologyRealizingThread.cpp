@@ -2063,7 +2063,14 @@ namespace Konclude {
 						// mergeable if the node does not have n corresponding neighbours
 						CRole* role = concept->getRole();
 						CReapplyRoleSuccessorHash* roleSuccHash = indiNode->getReapplyRoleSuccessorHash(false);
-						if (roleSuccHash) {
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* kbackAss = nullptr;
+						if (indiNode->getIndividualNodeID() <= 0) {
+							kbackAss = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(-indiNode->getIndividualNodeID());
+						}
+						if (kbackAss) {
+							// neighbours of backend synchronised individuals are not role successors of the node, count them in the representative cache
+							checkTrivialInstanceConceptRepresentativeCacheBasedMerging(reqConfPreCompItem, concept, conceptNegation, kbackAss, &mergeable, &unmergeable, mergingOperationLimit);
+						} else if (roleSuccHash) {
 							cint64 succCount = roleSuccHash->getRoleSuccessorCount(role);
 							if (succCount <= cardinality) {
 								mergeable = true;

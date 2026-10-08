@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# AppImage entry point -- same interface as materialize.sh, single-file build.
+set -e
+HERE="$(cd "$(dirname "$(readlink -f "${0}")")" && pwd)"
+KONCLUDE="$HERE/Konclude"
+# use the libraries that are packed into this image
+export LD_LIBRARY_PATH="$HERE/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
+if [ "$1" = "-selftest" ]; then
+  TMP=$(mktemp -d)
+  cat > "$TMP/test.ofn" <<'ONT'
+Prefix(:=<http://example.org/infertest#>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Ontology(<http://example.org/infertest/selftest>
+    Declaration(ObjectProperty(:blankNodeLinksTo))
+    Declaration(ObjectProperty(:blankNodeConnectedTo))
+    Declaration(NamedIndividual(:Alpha))
+    Declaration(NamedIndividual(:Omega))
+    SubObjectPropertyOf(ObjectPropertyChain(:blankNodeLinksTo :blankNodeLinksTo) :blankNodeConnectedTo)
+    ObjectPropertyAssertion(:blankNodeLinksTo :Alpha _:b1)
+    ObjectPropertyAssertion(:blankNodeLinksTo _:b1 :Omega)
+)
+ONT
+  "$KONCLUDE" materialize -w AUTO -i "$TMP/test.ofn" -o "$TMP/out.owl.xml" >/dev/null
+  if grep -q "blankNodeConnectedTo" "$TMP/out.owl.xml"; then
+    echo "SELF-TEST PASSED: Konclude is working correctly."
+    rm -rf "$TMP"; exit 0
+  else
+    echo "SELF-TEST FAILED: expected entailment not found."
+    rm -rf "$TMP"; exit 1
+  fi
+fi
+
+# Raw Konclude subcommands (materialize/classification/consistency/...) pass straight through.
+case "$1" in
+  owllinkfile|owllinkserver|classification|consistency|satisfiability|realization|materialize|sparqlfile|sparqlserver|-h|--help)
+    exec "$KONCLUDE" "$@"
+    ;;
+esac
+
+if [ -z "$1" ] || [ -z "$2" ]; then
+  echo "Usage: Konclude.AppImage input-file output-file [-anon]"
+  echo "       Konclude.AppImage -selftest"
+  echo "       Konclude.AppImage materialize -w AUTO -i input -o output   (raw form, any Konclude subcommand)"
+  echo "Formats: Turtle, RDF/XML, N-Triples, OWL2-XML, OWL2-Functional (auto-detected)."
+  exit 1
+fi
+
+EXTRA_ARGS=()
+if [ "$3" = "-anon" ]; then
+  EXTRA_ARGS=(-c "$HERE/Configs/anon-config.xml")
+fi
+exec "$KONCLUDE" materialize -w AUTO "${EXTRA_ARGS[@]}" -i "$1" -o "$2"

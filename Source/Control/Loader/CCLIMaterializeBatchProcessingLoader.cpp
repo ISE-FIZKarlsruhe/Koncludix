@@ -104,8 +104,13 @@ namespace Konclude {
 				// markIntanceItemForRoleRealization). This properly, synchronously
 				// blocks until that is complete before the write step below reads
 				// anything.
-				CForceRoleRealizationQueryCommand* forceRoleRealizationCommand = new CForceRoleRealizationQueryCommand(testKB);
-				addProcessingCommand(forceRoleRealizationCommand);
+				// (selection of the facts to compute with Konclude.CLI.Materialize.*, all enabled by default)
+				bool materializeObjectPropertyAssertions = CConfigDataReader::readConfigBoolean(mLoaderConfig, "Konclude.CLI.Materialize.ObjectPropertyAssertions", true);
+				bool materializeSameIndividuals = CConfigDataReader::readConfigBoolean(mLoaderConfig, "Konclude.CLI.Materialize.SameIndividuals", true);
+				if (materializeObjectPropertyAssertions) {
+					CForceRoleRealizationQueryCommand* forceRoleRealizationCommand = new CForceRoleRealizationQueryCommand(testKB);
+					addProcessingCommand(forceRoleRealizationCommand);
+				}
 				// Same-individual merges (owl:FunctionalProperty, cardinality
 				// restrictions, hasKey, ...) are, like role instances above,
 				// only ever lazily/partially computed by plain realization --
@@ -115,8 +120,10 @@ namespace Konclude {
 				// individual's tableau-merged/nominal-equal set to be
 				// completely known before the write step below reads it via
 				// CRealization::getSameRealization().
-				CForceSameIndividualsRealizationQueryCommand* forceSameIndividualsRealizationCommand = new CForceSameIndividualsRealizationQueryCommand(testKB);
-				addProcessingCommand(forceSameIndividualsRealizationCommand);
+				if (materializeSameIndividuals) {
+					CForceSameIndividualsRealizationQueryCommand* forceSameIndividualsRealizationCommand = new CForceSameIndividualsRealizationQueryCommand(testKB);
+					addProcessingCommand(forceSameIndividualsRealizationCommand);
+				}
 				if (!mResponseFileString.isEmpty()) {
 					// Object/data property (sub-)classification is not a realization
 					// premise, so it is never computed as a side effect of the

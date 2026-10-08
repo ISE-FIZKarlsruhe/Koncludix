@@ -1327,6 +1327,7 @@ namespace Konclude {
 
 						bool mConfExpandCreatedSuccessorsFromSaturation;
 						bool mConfAtLeastBackendNeighbourSatisfaction;
+						cint64 mConfBranchingStatisticsAnalysingMaximumDepth;
 						bool mConfSuccessorSaturationExpansionRestrictionsResolving;
 						bool mConfCachingBlockingFromSaturation;
 

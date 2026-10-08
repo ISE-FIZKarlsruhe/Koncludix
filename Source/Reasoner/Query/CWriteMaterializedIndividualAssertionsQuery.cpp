@@ -52,9 +52,18 @@ namespace Konclude {
 				mOutputFileNameString = outputFileString;
 				mQueryAnswered = false;
 
-				mRequiresSameIndividualRealisation = true;
-				mRequiresConceptRealisation = true;
-				mRequiresRoleRealisation = true;
+				mWriteClassAssertions = CConfigDataReader::readConfigBoolean(configuration, "Konclude.CLI.Materialize.ClassAssertions", true);
+				mWriteObjectPropertyAssertions = CConfigDataReader::readConfigBoolean(configuration, "Konclude.CLI.Materialize.ObjectPropertyAssertions", true);
+				mWriteDataPropertyAssertions = CConfigDataReader::readConfigBoolean(configuration, "Konclude.CLI.Materialize.DataPropertyAssertions", true);
+				mWriteSameIndividuals = CConfigDataReader::readConfigBoolean(configuration, "Konclude.CLI.Materialize.SameIndividuals", true);
+				mWriteClassHierarchy = CConfigDataReader::readConfigBoolean(configuration, "Konclude.CLI.Materialize.ClassHierarchy", true);
+				mWritePropertyHierarchy = CConfigDataReader::readConfigBoolean(configuration, "Konclude.CLI.Materialize.PropertyHierarchy", true);
+
+				// only the requested kinds of facts are computed (e.g., the expensive role instances are skipped if no object property assertions are requested)
+				mRequiresSameIndividualRealisation = mWriteSameIndividuals;
+				// the role instance computation profits from the realized class instances, i.e., they are also computed (but not written) if object property assertions are requested
+				mRequiresConceptRealisation = mWriteClassAssertions || mWriteObjectPropertyAssertions;
+				mRequiresRoleRealisation = mWriteObjectPropertyAssertions;
 			}
 
 
@@ -461,17 +470,17 @@ namespace Konclude {
 					if (mWriteDeclarations) {
 						foreach (const QString& propertyName, nodeNameList) {
 							if (dataProperties) {
-								writeDataPropertyDeclaration(propertyName);
+								if (mWritePropertyHierarchy) { writeDataPropertyDeclaration(propertyName); }
 							} else {
-								writeObjectPropertyDeclaration(propertyName);
+								if (mWritePropertyHierarchy) { writeObjectPropertyDeclaration(propertyName); }
 							}
 						}
 					}
 					if (node->getEquivalentRoleCount() > 1) {
 						if (dataProperties) {
-							writeDataPropertyEquivalenceRelations(nodeNameList);
+							if (mWritePropertyHierarchy) { writeDataPropertyEquivalenceRelations(nodeNameList); }
 						} else {
-							writeObjectPropertyEquivalenceRelations(nodeNameList);
+							if (mWritePropertyHierarchy) { writeObjectPropertyEquivalenceRelations(nodeNameList); }
 						}
 					}
 					if (!nodeNameList.isEmpty() && node != bottomNode) {
@@ -482,9 +491,9 @@ namespace Konclude {
 								const QStringList& predNameList(predNode->getEquivalentRoleStringList(mUseAbbreviatedIRIs));
 								if (!predNameList.isEmpty()) {
 									if (dataProperties) {
-										writeSubDataPropertyRelation(nodeName,predNameList.first());
+										if (mWritePropertyHierarchy) { writeSubDataPropertyRelation(nodeName,predNameList.first()); }
 									} else {
-										writeSubObjectPropertyRelation(nodeName,predNameList.first());
+										if (mWritePropertyHierarchy) { writeSubObjectPropertyRelation(nodeName,predNameList.first()); }
 									}
 								}
 							}
@@ -519,12 +528,15 @@ namespace Konclude {
 			bool CWriteMaterializedIndividualAssertionsQuery::writeMaterializedAssertionsResult(CRealization* realization) {
 				if (startWritingOutput()) {
 
-					CConceptRealization* conRealization = realization->getConceptRealization();
-					CRoleRealization* roleRealization = realization->getRoleRealization();
+					CConceptRealization* conRealization = mWriteClassAssertions ? realization->getConceptRealization() : nullptr;
+					CRoleRealization* roleRealization = mWriteObjectPropertyAssertions ? realization->getRoleRealization() : nullptr;
 
 					writeOntologyStart();
 
-					writeTransitiveClassHierarchy();
+					if (mWriteClassHierarchy) {
+						writeTransitiveClassHierarchy();
+					}
+					// also called if the hierarchy is not written, because the sub-property relations are needed to propagate the property assertions
 					writeTransitivePropertyHierarchy(false);
 					writeTransitivePropertyHierarchy(true);
 
@@ -636,7 +648,7 @@ namespace Konclude {
 						// keeping collect/write separated here anyway for
 						// consistency and in case that ever changes).
 						CIndividual* individual = indiRef.getIndividual();
-						if (individual) {
+						if (individual && mWriteDataPropertyAssertions) {
 							QHash<CRole*, QSet<QPair<QString,QString> > > collectedDataAssertions;
 							for (CDataAssertionLinker* link = individual->getAssertionDataLinker(); link; link = link->getNext()) {
 								CRole* dataRole = link->getRole();
@@ -734,7 +746,7 @@ namespace Konclude {
 					// COptimizedRepresentativeKPSetOntologyRealizingItem::visitSameIndividuals),
 					// and if that set has more than one member, write it as one
 					// equivalence class and mark every member of it as covered.
-					CSameRealization* sameRealization = realization->getSameRealization();
+					CSameRealization* sameRealization = mWriteSameIndividuals ? realization->getSameRealization() : nullptr;
 					if (sameRealization) {
 						mSameIndividualEmittedSet.clear();
 						visitIndividuals([&](const CIndividualReference& indiRef)->bool {

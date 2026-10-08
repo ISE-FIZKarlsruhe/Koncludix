@@ -2557,6 +2557,12 @@ namespace Konclude {
 							mBackendAssocCache->getIncompletlyAssociationCachedIndividuals(totallyPreCompItem->getOntology()->getOntologyID(), nullptr, newRetrievalCoordHash, true, false, -1);
 							if (!newRetrievalCoordHash->isEmpty()) {
 								LOG(WARN, getLogDomain(), logTr("Representative cache has incompletely processed individuals although individual computation finished and ontology is consistent."), getLogObject());
+								// the individual precomputation is already finished here, but the cache still contains individuals that are not completely handled (e.g.,
+								// individuals that are merged non-deterministically with nominals), i.e., the cache would never be completed and realization would not find any
+								// data for the individuals: complete the association with the data available (limit -2 forces the completion)
+								CIndividualPrecomputationCoordinationHash* forcedCompletionCoordHash = new CIndividualPrecomputationCoordinationHash();
+								mBackendAssocCache->getIncompletlyAssociationCachedIndividuals(totallyPreCompItem->getOntology()->getOntologyID(), nullptr, forcedCompletionCoordHash, true, false, -2);
+								delete forcedCompletionCoordHash;
 							}
 							delete newRetrievalCoordHash;
 						}
