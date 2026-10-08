@@ -75,7 +75,8 @@ Very large ABoxes that still need a lot of memory:
 
 
 - `materialize` is now complete on DL-1 and DL-2, but it takes longer than before: about 3 to 4 minutes on DL-1 and about 19 minutes on DL-2. The old runs were faster because they skipped tests.
-- On DL-5 `materialize` runs out of memory (10.9 GB), although the consistency check needs only 2.1 GB. This is the next thing to look at.
+- On DL-5, DL-10 and DL-20 `materialize` runs out of memory (10.5 GB and more), although the consistency check needs only 2 to 5 GB.
+  - The memory goes in the class classification step, not in `materialize`: the tests load the neighbours of the 28 interest individuals (linked to thousands of persons) into every test.
 - You can now choose what `materialize` computes (types, object properties, data properties, sameAs, hierarchies). DL-1 with types only takes 115 s instead of about 195 s.
 - Two random files still miss facts in some runs, and one runs a very long search.
 - I am running Konclude on more benchmark files to check that it is fast and gives all the facts.

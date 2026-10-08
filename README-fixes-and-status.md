@@ -44,7 +44,7 @@ Additionally, adding support for approximate reasoning.
 | DL-1 | 820 s, 3.7 GB (4 workers) | about 3 to 4 minutes, 2.2 GB (1 worker); about 2 minutes, 3.8 GB (4 workers) | 1.44 million | 61 before, **536 now** (correct) |
 | DL-2 | 773 s, 5.1 GB | about 19 minutes, 5.4 GB | 5.0 million | 119 before, **1,142 now** |
 | DL-5 | not tried | **fails: out of memory** (the system stopped it at 10.9 GB while classifying) | none | |
-| DL-10, DL-20 | not tried | not tried yet | | |
+| DL-10, DL-20 | not tried | **fail: out of memory** in the classification step (stopped at 10.5 GB after 161 s and 207 s) | none | |
 
 The old runs were faster because they skipped tests they should have done, so their answers were incomplete (see the last column). The new runs do the tests, so they take longer but give the full answer.
 
@@ -137,7 +137,7 @@ Object property facts need the class assertions to be computed first, so when yo
 
 | Item | What I know |
 |---|---|
-| `materialize` on DL-5 runs out of memory | The consistency check needs only 2.1 GB, but `materialize` passes 10.9 GB while classifying. About 0.5 MB per individual is kept in the cache. Not fixed yet |
+| `materialize` on DL-5, DL-10 and DL-20 runs out of memory | Not `materialize` itself: the plain class classification step already uses more than 10 GB on DL-5 (DL-1: 0.3 s, DL-2: 0.9 s). The tableau tests of the classification load the neighbours of the nominal hub individuals (the 28 interests, linked to thousands of persons) into every test graph, up to the limit `BackendCriticalNeighbourExpansionLimit` (default 15000). With the limit lowered to 2000 the memory stays small (1.5 GB), but then the reasoner wrongly says DL-5 is **inconsistent** (with `AtLeastBackendNeighbourSatisfaction` switched off it says consistent). So I do not use a lower limit. The wrong clash is on a student who is asserted `Man` and gets `Woman` from the definition `WomenCollege = College and (all hasStudent are Woman)`, i.e. a choice that is only one possibility is applied as if it were certain. The `Woman` comes from the cached concept set of that student: it contains a stored (certain) "automaton" concept, the kind used for restrictions over role chains, and processing it on the student yields `Woman`. Leads: when the limit cuts the propagation, the cache installs the propagated concept directly into the cached description of the neighbours as a certain concept (`updatePropagationCutIndividualIncompletelyHandled`); with the lowered limit this happens 44 times on DL-5, with the default never. The concept is an automaton concept of a role chain. Also, in `expandDirectlyInfluencedNeighboursWithPropagation` a callback parameter hides the flag that says whether the concept itself is non-deterministic. Making that flag reach the cut data did not change the verdict, so the cause is not found yet. Switching the related backend options one by one does not help either, and neither does switching off any of the cache-writing options (completion graph, expansion, saturation: memory still passes 10.5 GB within 100 s). Switching off the direct installation makes the reasoner crash. Not fixed yet |
 | `materialize` is slow on big files | DL-2 takes about 19 minutes. The complete answer needs tests that the old shortcuts skipped. Other speed-ups are not done yet |
 | Two random files miss facts in some runs | Files `c0194` and `c0314`: a few entailed facts are written in some runs and not in others. They are ontologies with nominals, where some individuals stay unfinished in the cache |
 | One random file runs a very long search | File `c0162`: not a deadlock, one test searches for a very long time |
@@ -145,7 +145,7 @@ Object property facts need the class assertions to be computed first, so when yo
 | Order of axioms | For a few ontologies the answer depends on the order of the axioms |
 | Several workers on big files | Memory grows (idle workers try alternatives early). Use `-w 1` |
 | Generated ontologies | One classification hang, and some searches that do a very large amount of work |
-| Not checked yet | `materialize` on DL-10 and DL-20, and the other OWL2Bench profiles (EL, QL, RL) |
+| Not checked yet | The other OWL2Bench profiles (EL, QL, RL) |
 
 ## How to try it
 
