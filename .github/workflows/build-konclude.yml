@@ -28,7 +28,7 @@ jobs:
         include:
           - os: windows-latest
             artifact_name: Konclude-Windows-x64-MSVC-Dynamic-Qt5.15.2
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             artifact_name: Konclude-Linux-x64-GCC-Dynamic-Qt5.15.2
           - os: macos-latest
             artifact_name: Konclude-macOS-x64-Clang-Dynamic-Qt5.15.2
@@ -118,7 +118,7 @@ jobs:
       - uses: docker/setup-buildx-action@v3
 
       - name: Log in to GitHub Container Registry
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -136,5 +136,36 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
           tags: ghcr.io/${{ steps.image.outputs.owner }}/konclude:latest
+
+  appimage:
+    # Single-file Linux image built on Ubuntu 22.04 (older glibc than ubuntu-latest, so it also runs on older systems).
+    # It only uploads an artifact, nothing is published. A failure here does not fail the whole workflow.
+    runs-on: ubuntu-22.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y build-essential qtbase5-dev qt5-qmake pkg-config librdf0-dev libraptor2-dev librasqal3-dev libxml2-dev libjemalloc-dev
+          sudo ln -sf /usr/include/redland.h /usr/include/Redland.h
+
+      - name: Build (with Redland, as the Docker image)
+        run: |
+          qmake KoncludeRedlandLinux.pro
+          make -j"$(nproc)"
+
+      - name: Package the AppImage
+        run: |
+          wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+          chmod +x appimagetool tools/make-appimage.sh
+          mkdir -p out
+          KONCLUDE_VERSION="$(date +%d%m%Y)-${GITHUB_SHA::7}" tools/make-appimage.sh Release/Konclude out "$PWD/appimagetool"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Konclude-Linux-x64-AppImage
+          path: out/*.AppImage
