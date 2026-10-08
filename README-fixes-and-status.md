@@ -1,8 +1,10 @@
 # Koncludix: what I fixed, what works now, what is still open
 
-Koncludix is my version of the Konclude reasoner. I use it mostly for the `materialize` command. It reads an ontology with many individuals (an ABox) and writes out every fact that follows from it.
+Koncludix is my version of the Konclude reasoner. 
 
-Konclude is fast, but on large or unusual data it hung, crashed, ran out of memory, or gave different answers on different runs. This page lists what I found, what I changed, and what is still open. Shorter version: `NOTES.md`. Full story: `EXPLAINER-problems-and-fixes.md`.
+Goal is to improve memory requirements, add additional feaures that aren't yet supported such as explnation, lint, materialize dependign on required inference type such as inverse, transitivity, hierarchy etc etc.
+
+Additionally, adding support for approximate reasoning.
 
 ## Test data
 
