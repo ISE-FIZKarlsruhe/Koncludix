@@ -1776,6 +1776,8 @@ HEADERS += \
    ./Source\Reasoner\Ontology\COntologyProcessingConceptRealizationRequirement.h \
    ./Source\Reasoner\Ontology\COntologyLoadingData.h \
    ./Source\Reasoner\Ontology\COntologyLoadData.h \
+   ./Source\Reasoner\Ontology\CABoxReductionData.h \
+   ./Source\Reasoner\Generator\CABoxReducer.h \
    ./Source\Reasoner\Ontology\COntologyInspector.h \
    ./Source\Reasoner\Ontology\COntologyIncrementalRevisionData.h \
    ./Source\Reasoner\Ontology\COntologyIncrementalAxiomChangeData.h \
@@ -1983,6 +1985,20 @@ HEADERS += \
    ./Source\Control\Command\Instructions\CConstructForceSameIndividualsRealizationQueryCommand.h \
    ./Source\Control\Interface\CommandLine\CCLIMaterializeComandLinePreparationTranslator.h \
    ./Source\Control\Loader\CCLIMaterializeBatchProcessingLoader.h \
+   ./Source\Control\Interface\CommandLine\CCLIExplainComandLinePreparationTranslator.h \
+   ./Source\Control\Loader\CCLIExplainBatchProcessingLoader.h \
+   ./Source\Control\Loader\CExplainJustificationSearch.h \
+   ./Source\Control\Loader\CRunSupervisor.h \
+   ./Source\Renderer\COntologyFunctionalSyntaxWriter.h \
+   ./Source\Control\Interface\CommandLine\CCLILintComandLinePreparationTranslator.h \
+   ./Source\Control\Loader\CCLILintBatchProcessingLoader.h \
+   ./Source\Control\Loader\CLintOntologyAnalyser.h \
+   ./Source\Control\Loader\CIntervalAlgebra.h \
+   ./Source\Control\Loader\CIntervalOntologyAnalyser.h \
+   ./Source\Control\Loader\CCLIIntervalBatchProcessingLoader.h \
+   ./Source\Control\Interface\CommandLine\CCLIIntervalComandLinePreparationTranslator.h \
+   ./Source\Parser\CLintParseRecorder.h \
+   ./Source\Parser\CLintExpressionRenderer.h \
    ./Source\Reasoner\Query\CWriteClassSubsumptionsHierarchyQuery.h \
    ./Source\Reasoner\Query\CVariableBindingStringResult.h \
    ./Source\Reasoner\Query\CVariableBindingStringDataResult.h \
@@ -4407,6 +4423,8 @@ SOURCES += \
    ./Source/Reasoner/Ontology/COntologyProcessingConceptRealizationRequirement.cpp \
    ./Source/Reasoner/Ontology/COntologyLoadingData.cpp \
    ./Source/Reasoner/Ontology/COntologyLoadData.cpp \
+   ./Source/Reasoner/Ontology/CABoxReductionData.cpp \
+   ./Source/Reasoner/Generator/CABoxReducer.cpp \
    ./Source/Reasoner/Ontology/COntologyInspector.cpp \
    ./Source/Reasoner/Ontology/COntologyIncrementalRevisionData.cpp \
    ./Source/Reasoner/Ontology/COntologyIncrementalAxiomChangeData.cpp \
@@ -4608,6 +4626,20 @@ SOURCES += \
    ./Source/Control/Command/Instructions/CConstructForceSameIndividualsRealizationQueryCommand.cpp \
    ./Source/Control/Interface/CommandLine/CCLIMaterializeComandLinePreparationTranslator.cpp \
    ./Source/Control/Loader/CCLIMaterializeBatchProcessingLoader.cpp \
+   ./Source/Control/Interface/CommandLine/CCLIExplainComandLinePreparationTranslator.cpp \
+   ./Source/Control/Loader/CCLIExplainBatchProcessingLoader.cpp \
+   ./Source/Control/Loader/CExplainJustificationSearch.cpp \
+   ./Source/Control/Loader/CRunSupervisor.cpp \
+   ./Source/Renderer/COntologyFunctionalSyntaxWriter.cpp \
+   ./Source/Control/Interface/CommandLine/CCLILintComandLinePreparationTranslator.cpp \
+   ./Source/Control/Loader/CCLILintBatchProcessingLoader.cpp \
+   ./Source/Control/Loader/CLintOntologyAnalyser.cpp \
+   ./Source/Control/Loader/CIntervalAlgebra.cpp \
+   ./Source/Control/Loader/CIntervalOntologyAnalyser.cpp \
+   ./Source/Control/Loader/CCLIIntervalBatchProcessingLoader.cpp \
+   ./Source/Control/Interface/CommandLine/CCLIIntervalComandLinePreparationTranslator.cpp \
+   ./Source/Parser/CLintParseRecorder.cpp \
+   ./Source/Parser/CLintExpressionRenderer.cpp \
    ./Source/Reasoner/Query/CWriteClassSubsumptionsHierarchyQuery.cpp \
    ./Source/Reasoner/Query/CVariableBindingStringResult.cpp \
    ./Source/Reasoner/Query/CVariableBindingStringDataResult.cpp \

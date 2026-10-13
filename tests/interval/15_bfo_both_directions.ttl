@@ -1,0 +1,6 @@
+# The two directions side by side: the process is 'preceded by' the test and also 'precedes' it. Together impossible.
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix ex: <http://ex.org/> .
+
+ex:manufacturing obo:BFO_0000062 ex:test .
+ex:manufacturing obo:BFO_0000063 ex:test .

@@ -2027,6 +2027,10 @@ namespace Konclude {
 
 			CRealizationIndividualInstanceItemReference COptimizedRepresentativeKPSetOntologyRealizingItem::getInstanceItemReference(const CIndividualReference& indiRef, bool correctSameIndividualsMerging) {
 				COptimizedKPSetIndividualItem* indiItem = getInstanceItem(indiRef, correctSameIndividualsMerging);
+				if (indiItem && !indiItem->isConceptInstancesInitialized()) {
+					// the item exists only because of role instances or possible same individuals and carries no concept data: the types are those of the cache label
+					indiItem = nullptr;
+				}
 				return CRealizationIndividualInstanceItemReference(indiRef, indiItem);
 			}
 

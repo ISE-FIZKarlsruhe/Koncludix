@@ -570,6 +570,8 @@ namespace Konclude {
 
 			bool COptimizedRepresentativeKPSetOntologyRealizingThread::initializeRepresentativeIndividualProcessing(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, cint64 indiId, CBackendRepresentativeMemoryLabelCacheItem* conSetLabelItem, COptimizedRepresentativeKPSetConceptSetCacheLabelItemData* conSetLabelCacheItemData, QHash<cint64, QList<CIndividualReference> >** individualPossibleSameIndividualListHash) {
 
+				cint64 sameCheckIndiId = indiId;
+
 				CIndividualVector* indiVec = reqConfPreCompItem->getOntology()->getABox()->getIndividualVector(false);
 
 				// TODO: the known instance data may should not be represented in the individual item since this information can be resolved via the individual association data and, therefore, it would just waste some memory
@@ -606,6 +608,21 @@ namespace Konclude {
 					});
 				}
 
+				{
+					// The cached same individuals of an individual that was not completely handled (its completion was forced) depend on non-deterministic choices of the
+					// completion graph and are not certain (the same holds for entries that are individuals that were not completely handled): they are not used
+					// (they are neither written nor merged).
+					CBackendRepresentativeMemoryCacheIndividualAssociationData* sameCheckAssData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(sameCheckIndiId);
+					bool sameCheckSelfIncomplete = sameCheckAssData && !sameCheckAssData->isCompletelyHandled();
+					QList<CIndividualReference> certainSameIndividualList;
+					for (QList<CIndividualReference>::const_iterator sameIt = knownSameIndividualIdList.constBegin(), sameItEnd = knownSameIndividualIdList.constEnd(); sameIt != sameItEnd; ++sameIt) {
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* sameEntryAssData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData((*sameIt).getIndividualID());
+						if (!sameCheckSelfIncomplete && !(sameEntryAssData && !sameEntryAssData->isCompletelyHandled())) {
+							certainSameIndividualList.append(*sameIt);
+						}
+					}
+					knownSameIndividualIdList = certainSameIndividualList;
+				}
 				CIndividual* individual = indiVec->getData(indiId);
 				initializeKPSetsForIndividual(reqConfPreCompItem, indiId, individual, *knownInstancesItemList, *possibleInstancesItemList, knownSameIndividualIdList);
 
@@ -678,6 +695,9 @@ namespace Konclude {
 			COptimizedKPSetIndividualItem* COptimizedRepresentativeKPSetOntologyRealizingThread::initializeKPSetsForIndividualConcurrently(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, cint64 indiId, CIndividual* individual, QList<COptimizedKPSetConceptInstancesItem*>& knownInstancesList, QList<COptimizedKPSetConceptInstancesItem*>& possibleInstancesList, QList<CIndividualReference>& knownSameIndividualIdList) {
 				COptimizedKPSetIndividualItem* instantiatedItem = reqConfPreCompItem->getIndividualInstantiatedItem(indiId, true, individual);
 				cint64 indiVecPos = indiId % mConfConcurrentHandlingVectorSize;
+				if (!knownInstancesList.isEmpty() || !possibleInstancesList.isEmpty()) {
+					instantiatedItem->setConceptInstancesInitialized(true);
+				}
 
 				COptimizedKPSetConceptInstancesHash* knownPossibleInstancesHash = instantiatedItem->getKnownPossibleInstancesHash();
 				for (QList<COptimizedKPSetConceptInstancesItem*>::const_iterator it = knownInstancesList.constBegin(), itEnd = knownInstancesList.constEnd(); it != itEnd; ++it) {
@@ -719,6 +739,9 @@ namespace Konclude {
 
 			bool COptimizedRepresentativeKPSetOntologyRealizingThread::initializeKPSetsForIndividual(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, cint64 indiId, CIndividual* individual, QList<COptimizedKPSetConceptInstancesItem*>& knownInstancesList, QList<COptimizedKPSetConceptInstancesItem*>& possibleInstancesList, QList<CIndividualReference>& knownSameIndividualIdList) {
 				COptimizedKPSetIndividualItem* instantiatedItem = reqConfPreCompItem->getIndividualInstantiatedItem(indiId, true, individual);
+				if (!knownInstancesList.isEmpty() || !possibleInstancesList.isEmpty()) {
+					instantiatedItem->setConceptInstancesInitialized(true);
+				}
 				qSort(knownInstancesList.begin(),knownInstancesList.end(),itemSortLessThan);
 				qSort(possibleInstancesList.begin(),possibleInstancesList.end(),itemSortLessThan);
 
@@ -1195,6 +1218,22 @@ namespace Konclude {
 									});
 								}
 
+									cint64 sameCheckIndiId = indiId;
+									{
+										// The cached same individuals of an individual that was not completely handled (its completion was forced) depend on non-deterministic choices of the
+										// completion graph and are not certain (the same holds for entries that are individuals that were not completely handled): they are not used
+										// (they are neither written nor merged).
+										CBackendRepresentativeMemoryCacheIndividualAssociationData* sameCheckAssData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(sameCheckIndiId);
+										bool sameCheckSelfIncomplete = sameCheckAssData && !sameCheckAssData->isCompletelyHandled();
+										QList<CIndividualReference> certainSameIndividualList;
+										for (QList<CIndividualReference>::const_iterator sameIt = knownSameIndividualIdList.constBegin(), sameItEnd = knownSameIndividualIdList.constEnd(); sameIt != sameItEnd; ++sameIt) {
+											CBackendRepresentativeMemoryCacheIndividualAssociationData* sameEntryAssData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData((*sameIt).getIndividualID());
+											if (!sameCheckSelfIncomplete && !(sameEntryAssData && !sameEntryAssData->isCompletelyHandled())) {
+												certainSameIndividualList.append(*sameIt);
+											}
+										}
+										knownSameIndividualIdList = certainSameIndividualList;
+									}
 								CIndividual* individual = indiVec->getData(indiId);
 								COptimizedKPSetIndividualItem* indiItem = initializeKPSetsForIndividualConcurrently(reqConfPreCompItem, indiId, individual, *knownInstancesItemList, *possibleInstancesItemList, knownSameIndividualIdList);
 

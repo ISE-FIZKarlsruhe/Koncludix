@@ -19,6 +19,7 @@
  */
 
 #include "CXMLOWL2StreamHandler.h"
+#include "CLintParseRecorder.h"
 
 
 namespace Konclude {
@@ -569,7 +570,7 @@ namespace Konclude {
 			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("FacetRestriction"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDataFacetRestrictionNode,CStreamParseFunctionData::EPF_FACET_IRI));
 
 
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("HasKey"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("HasKey"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedHasKeyNode));
 			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DatatypeDefinition"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
 
 
@@ -2042,6 +2043,23 @@ namespace Konclude {
 				--mDataTypeReportErrorCount;
 				LOG(ERROR,getLogDomain(),logTr("Remaining not supported datatype expressions/axioms are ignored."),this);
 			}
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionUnsupportedHasKeyNode(CStreamParseStackObject* parseStackObj) {
+			// owl:hasKey is skipped like before; the "lint" command is only told about it
+			if (CLintParseRecorder::isRecording() && parseStackObj->hasExpressions()) {
+				QList<CBuildExpression*> keyExpressions;
+				CBuildExpression* classExpression = nullptr;
+				for (CBuildExpression* expression : *parseStackObj->getExpressions()) {
+					if (!classExpression && dynamic_cast<CClassTermExpression*>(expression)) {
+						classExpression = expression;
+					} else {
+						keyExpressions.append(expression);
+					}
+				}
+				CLintParseRecorder::recordHasKeyMixedProperties(classExpression, keyExpressions);
+			}
+			jumpFunctionUnsupportedDatatypeNode(parseStackObj);
 		}
 
 		void CXMLOWL2StreamHandler::jumpFunctionUnsupportedRDFNode(CStreamParseStackObject* parseStackObj) {

@@ -98,6 +98,7 @@ namespace Konclude {
 					mConfSuccessorConceptSaturationExpansionChecked = false;
 					mConfAtLeastBackendNeighbourSatisfactionChecked = false;
 					mConfBranchingStatisticsAnalysingMaximumDepthChecked = false;
+					mConfNominalSaturationMaxIndividualCountChecked = false;
 					mConfSaturationCachingChecked = false;
 					mConfSaturationCriticalConceptTestingChecked = false;
 					mConfSaturationDirectCriticalToInsufficientChecked = false;
@@ -703,6 +704,14 @@ namespace Konclude {
 						mConfBranchingStatisticsAnalysingMaximumDepthChecked = true;
 					}
 					return mConfBranchingStatisticsAnalysingMaximumDepth;
+				}
+
+				cint64 CCalculationConfigurationExtension::getNominalSaturationMaxIndividualCount() {
+					if (!mConfNominalSaturationMaxIndividualCountChecked) {
+						mConfNominalSaturationMaxIndividualCount = CConfigDataReader::readConfigInteger(this,"Konclude.Calculation.Optimization.NominalSaturationMaxIndividualCount",5000);
+						mConfNominalSaturationMaxIndividualCountChecked = true;
+					}
+					return mConfNominalSaturationMaxIndividualCount;
 				}
 
 				bool CCalculationConfigurationExtension::isAtLeastBackendNeighbourSatisfactionActivated() {

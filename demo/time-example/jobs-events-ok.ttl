@@ -1,0 +1,9 @@
+# The same two jobs as events, with only time stamps and one consistent claim; the module works out the order.
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix t: <http://example.org/time#> .
+@prefix ex: <http://ex.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:fizJob   prov:startedAtTime "2025-03-04T00:00:00Z"^^xsd:dateTime ; prov:endedAtTime "2027-03-03T23:59:59Z"^^xsd:dateTime .
+ex:otherJob prov:startedAtTime "2027-03-04T00:00:00Z"^^xsd:dateTime ; prov:endedAtTime "2031-03-03T23:59:59Z"^^xsd:dateTime .
+ex:fizJob t:before ex:otherJob .

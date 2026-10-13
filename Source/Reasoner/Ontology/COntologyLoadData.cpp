@@ -36,8 +36,10 @@ namespace Konclude {
 			COntologyLoadData* COntologyLoadData::referenceLoadData(COntologyLoadData* loadData) {
 				if (loadData) {
 					mOntologyIriResolvedHash = loadData->mOntologyIriResolvedHash;
+				mABoxReductionData = loadData->mABoxReductionData;
 				} else {
 					mOntologyIriResolvedHash.clear();
+					mABoxReductionData.clear();
 				}
 				return this;
 			}
@@ -47,6 +49,16 @@ namespace Konclude {
 				return this;
 			}
 
+
+
+			COntologyLoadData* COntologyLoadData::setABoxReductionData(const QSharedPointer<CABoxReductionData>& reductionData) {
+				mABoxReductionData = reductionData;
+				return this;
+			}
+
+			CABoxReductionData* COntologyLoadData::getABoxReductionData() {
+				return mABoxReductionData.data();
+			}
 
 
 			QList<QString> COntologyLoadData::getLoadedOntologyIRIs() {

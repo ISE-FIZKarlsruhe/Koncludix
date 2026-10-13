@@ -1,0 +1,11 @@
+Prefix(:=<http://ex.org/job#>)
+Ontology(<http://ex.org/job>
+Declaration(Class(:Person))
+Declaration(Class(:Employee))
+Declaration(Class(:FIZEmployee))
+Declaration(Class(:OtherEmployee))
+SubClassOf(:Employee :Person)
+SubClassOf(:FIZEmployee :Employee)
+SubClassOf(:OtherEmployee :Employee)
+DisjointClasses(:FIZEmployee :OtherEmployee)
+)

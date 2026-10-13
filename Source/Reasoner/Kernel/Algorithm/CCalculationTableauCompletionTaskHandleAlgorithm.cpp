@@ -20,6 +20,7 @@
 
 #include "CCalculationTableauCompletionTaskHandleAlgorithm.h"
 #include <vector>
+#include "Utilities/CRuleProfiler.h"
 
 
 
@@ -4300,6 +4301,14 @@ namespace Konclude {
 								if (testIndividualNodeBackendCacheExpansionBlockingCriticalCardinality(individualNode, calcAlgContext)) {
 									individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED);
 									individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED);
+								}
+							}
+
+							if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED)) {
+								if (testIndividualNodeBackendCacheUniversalRestrictionCritical(individualNode, calcAlgContext)) {
+									individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKEND);
+									individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED);
+									addIndividualToProcessingQueue(individualNode, calcAlgContext);
 								}
 							}
 
@@ -9565,11 +9574,20 @@ namespace Konclude {
 				}
 
 
+				static std::string ruleProfilerConceptName(const void* concept, bool negated) {
+					QString text = CConceptTextFormater::getConceptString((CConcept*)concept, negated);
+					return std::string(text.left(2500).toUtf8().constData());
+				}
+
+
 				void CCalculationTableauCompletionTaskHandleAlgorithm::tableauRuleChoice(CIndividualProcessNode*& indiProcNode,CConceptProcessDescriptor*& conProcDes, CCalculationAlgorithmContextBase* calcAlgContext) {
 					CConceptDescriptor* conDes = conProcDes->getConceptDescriptor();
 					bool conNeg = conDes->getNegation();
 					CConcept* concept = conDes->getConcept();
 					cint64 conOpCode = concept->getOperatorCode();
+
+					if (Konclude::Utilities::CRuleProfiler::enabled()) { Konclude::Utilities::CRuleProfiler::setNamer(&ruleProfilerConceptName); }
+					Konclude::Utilities::CRuleProfiler::Scope ruleProfileScope(concept, conNeg, conOpCode);
 
 					++mCurrentRecProcDepth;
 
@@ -15572,7 +15590,7 @@ namespace Konclude {
 
 
 				CSatisfiableCalculationTask* CCalculationTableauCompletionTaskHandleAlgorithm::createDistinctBranchingTask(CIndividualProcessNode*& processIndiNode, CConceptProcessDescriptor*& conProDes, CIndividualProcessNode*& distinctIndiNode, bool createAsNominal, CNonDeterministicDependencyNode* mergeDependencyNode, CBranchingMergingProcessingRestrictionSpecification* branchingMergingProcRest, CCalculationAlgorithmContextBase* calcAlgContext) {
-					STATINC(TASKDISTINCTMERGEBRANCHCREATIONCOUNT,calcAlgContext);
+					STATINC(TASKDISTINCTMERGEBRANCHCREATIONCOUNT,calcAlgContext); Konclude::Utilities::CRuleProfiler::branchCreated();
 					CConceptDescriptor* conDes = conProDes->getConceptDescriptor();
 					CRole* role = conDes->getConcept()->getRole();
 					CSatisfiableCalculationTask* newSatCalcTask = createDependendBranchingTaskList(1,calcAlgContext);
@@ -15653,7 +15671,7 @@ namespace Konclude {
 
 
 				CSatisfiableCalculationTask* CCalculationTableauCompletionTaskHandleAlgorithm::createMergeBranchingTask(CIndividualProcessNode*& processIndiNode, CConceptProcessDescriptor*& conProDes, CIndividualProcessNode*& distinctIndiNode, CIndividualProcessNode*& mergingIndiNode, CNonDeterministicDependencyNode* mergeDependencyNode, CBranchingMergingProcessingRestrictionSpecification* branchingMergingProcRest, CCalculationAlgorithmContextBase* calcAlgContext) {
-					STATINC(TASKINDINODEMERGEBRANCHCREATIONCOUNT,calcAlgContext);
+					STATINC(TASKINDINODEMERGEBRANCHCREATIONCOUNT,calcAlgContext); Konclude::Utilities::CRuleProfiler::branchCreated();
 
 					CConceptDescriptor* conDes = conProDes->getConceptDescriptor();
 					CSatisfiableCalculationTask* newSatCalcTask = createDependendBranchingTaskList(1,calcAlgContext);
@@ -15791,7 +15809,7 @@ namespace Konclude {
 									cint64 branchNumber = 1;
 									bool qualNeg = true;
 									while (newTaskIt) {
-										STATINC(TASKQUALIFYCHOOSEBRANCHCREATIONCOUNT,calcAlgContext);
+										STATINC(TASKQUALIFYCHOOSEBRANCHCREATIONCOUNT,calcAlgContext); Konclude::Utilities::CRuleProfiler::branchCreated();
 
 										CSatisfiableCalculationTask* newSatCalcTask = newTaskIt;
 										CProcessContext* newProcessContext = newSatCalcTask->getProcessContext(processorContext);
@@ -17023,7 +17041,7 @@ namespace Konclude {
 								CSortedNegLinker<CConcept*>* branchingOperandConcept = nullptr;
 								CPROCESSINGLIST< CSortedNegLinker<CConcept*>* >::const_iterator opIt = notContainedOperandsList.constBegin();
 								do {
-									STATINC(TASKORBRANCHCREATIONCOUNT,calcAlgContext);
+									STATINC(TASKORBRANCHCREATIONCOUNT,calcAlgContext); Konclude::Utilities::CRuleProfiler::branchCreated();
 
 									CSortedNegLinker<CConcept*>* operandConcept = *opIt;
 									bool posOperand = (opIt == branchOpConIt);
@@ -20827,14 +20845,15 @@ namespace Konclude {
 
 											if (conn1ID == indi1ID) {
 												if (!indi2->hasSuccessorIndividualNode(indi2ID)) {
-													if (neighbourRoleSetHash2->getNeighbourRoleSetLabel(indi2ID)) {
-														indi2ExpansionList.append(indi2ID);
+													// the cache is keyed by individual IDs, the node IDs of nominal nodes are negated individual IDs
+													if (neighbourRoleSetHash2->getNeighbourRoleSetLabel(-indi2ID)) {
+														indi2ExpansionList.append(-indi2ID);
 													}
 												}
 											} else if (conn1ID <= 0) {
 												if (!indi2->hasSuccessorIndividualNode(conn1ID)) {
-													if (neighbourRoleSetHash2->getNeighbourRoleSetLabel(conn1ID)) {
-														indi2ExpansionList.append(conn1ID);
+													if (neighbourRoleSetHash2->getNeighbourRoleSetLabel(-conn1ID)) {
+														indi2ExpansionList.append(-conn1ID);
 													}
 												}
 											}
@@ -22584,7 +22603,7 @@ namespace Konclude {
 
 				CIndividualProcessNode* CCalculationTableauCompletionTaskHandleAlgorithm::createNewEmptyIndividual(CCalculationAlgorithmContextBase* calcAlgContext) {
 					CMemoryAllocationManager* taskMemMan = nullptr;
-					STATINC(SUCCESSORINDINODECREATIONCOUNT,calcAlgContext);
+					STATINC(SUCCESSORINDINODECREATIONCOUNT,calcAlgContext); Konclude::Utilities::CRuleProfiler::nodeCreated();
 					taskMemMan = calcAlgContext->getUsedProcessTaskMemoryAllocationManager();
 					CIndividualProcessNodeVector* indiProcNodeVec = calcAlgContext->getProcessingDataBox()->getIndividualProcessNodeVector();
 					CIndividualProcessNode* newIndividual = CObjectParameterizingAllocator< CIndividualProcessNode,CProcessContext* >::allocateAndConstructAndParameterize(taskMemMan,calcAlgContext->getUsedProcessContext());
@@ -23339,6 +23358,39 @@ namespace Konclude {
 				}
 
 
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::testIndividualNodeBackendCacheUniversalRestrictionCritical(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext) {
+					// The universal restrictions of an individual that is synchronised with the backend cache are not processed, because the cache already contains the effects
+					// for the neighbours of the cache. A neighbour that is not an individual of the ontology (a new node of the completion graph) is not part of the cache.
+					bool critical = false;
+					CReapplyRoleSuccessorHash* roleSuccHash = indiNode->getReapplyRoleSuccessorHash(false);
+					CReapplyConceptLabelSet* conSet = indiNode->getReapplyConceptLabelSet(false);
+					if (roleSuccHash && conSet && indiNode->getLastAddedRoleLink()) {
+						for (CConceptDescriptor* conDesIt = conSet->getAddingSortedConceptDescriptionLinker(); conDesIt && !critical; conDesIt = conDesIt->getNext()) {
+							CConcept* concept = conDesIt->getConcept();
+							cint64 opCode = concept->getOperatorCode();
+							bool negated = conDesIt->isNegated();
+							bool universal = false;
+							if (!negated) {
+								universal = opCode == CCALL || opCode == CCIMPLALL || opCode == CCAQALL || opCode == CCIMPLAQALL;
+							} else {
+								universal = opCode == CCSOME || opCode == CCAQSOME;
+							}
+							if (universal && concept->getRole()) {
+								CRoleSuccessorLinkIterator roleSuccIt = roleSuccHash->getRoleSuccessorLinkIterator(concept->getRole());
+								while (roleSuccIt.hasNext() && !critical) {
+									CIndividualLinkEdge* link = roleSuccIt.next(true);
+									CIndividualProcessNode* succIndi = getSuccessorIndividual(indiNode, link, calcAlgContext);
+									if (succIndi && !succIndi->isNominalIndividualNode()) {
+										critical = true;
+									}
+								}
+							}
+						}
+					}
+					return critical;
+				}
+
+
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::testIndividualNodeBackendCacheExpansionBlockingCriticalCardinality(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext) {
 
 					bool expansionBlockingCritical = false;
@@ -24011,7 +24063,8 @@ namespace Konclude {
 					CDependencyTrackPoint* nominalConDepTrackPoint = nullptr;
 					if (locNominalIndi->getNominalIndividual() && -repNeighbourIndiId != locNominalIndi->getIndividualNodeID() && repNeighbourIndiId != locNominalIndi->getNominalIndividual()->getIndividualID() && locNominalIndi->getIndividualMergingHash(false)) {
 						nominalConDepTrackPoint = locNominalIndi->getIndividualMergingHash(false)->value(repNeighbourIndiId).getDependencyTrackPoint();
-						if (!nominalConDepTrackPoint || hasNondeterministicDependency(nominalConDepTrackPoint, calcAlgContext)) {
+						// the recursion has to continue with the nominal individual that the representative was merged into; if the neighbour already is this nominal individual (its representative node was merged into it), the recursive call would repeat the same call forever (stack overflow)
+						if ((!nominalConDepTrackPoint || hasNondeterministicDependency(nominalConDepTrackPoint, calcAlgContext)) && locNominalIndi->getNominalIndividual()->getIndividualID() != neighbourIndiId) {
 							CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationNeighbourExpansionData tmpNeighbourExpData;
 							expanded |= expandIndividualNeighbourNodeFromBackendCache(indiNode, assocData, locNominalIndi->getNominalIndividual()->getIndividualID(), tmpNeighbourExpData, forceExpansion, forceProcessing, nullptr, baseDepTrackPoint, calcAlgContext);
 						}

@@ -90,9 +90,9 @@ namespace Konclude {
 				// Parallelisation configurations
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.ProcessorCount",
-						"Number of Processor-Threads that are used for task based reasoning.",
-						new CStringConfigType("1")),
-						new CStringConfigType("1"));
+						"Number of Processor-Threads that are used for task based reasoning. A number, AUTO (number of cores) or SMART (Konclude decides from the size of the input and the available memory: up to 4 workers for small inputs, 1 for large ABoxes).",
+						new CStringConfigType("SMART")),
+						new CStringConfigType("SMART"));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.AdaptThreadPoolSizeProcessorCount",
 						"Determines whether the size of the Qt default thread pool is adapted to the processor count.",
 						new CBooleanConfigType(true)),
@@ -437,6 +437,10 @@ namespace Konclude {
 						"Determines whether minimum cardinality restrictions (at-least) of backend synchronized individuals take the asserted neighbours of the backend cache into account (and only create the missing successors).",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.NominalSaturationMaxIndividualCount",
+						"The saturation of nominals is only used if the ontology has at most this many individuals (a negative value: always). With many individuals the saturation copies the concept sets of nominal individuals that are linked to thousands of other individuals into every test, which can make the tests need many times more memory (OWL2Bench DL-5: more than 10 GB instead of 2 GB, depending on the order of the axioms).",
+						new CIntegerConfigType(5000)),
+						new CIntegerConfigType(5000));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BranchingStatisticsAnalysingMaximumDepth",
 						"Maximum number of ancestor branching decisions that are updated with the branching statistics when a task finishes (the statistics only guide the heuristics, a complete walk up to the root is expensive for deep decision trees). A negative value updates all ancestors, 0 disables the statistics.",
 						new CIntegerConfigType(256)),
@@ -1425,6 +1429,12 @@ namespace Konclude {
 
 				addConfigProperty(new CConfigDescription("Konclude.Ontology.Revision.IncrementalRebuild",
 						"Determines whether an ontology is incrementally rebuild.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Ontology.Revision.ReuseConsistencyModel",
+						"EXPERIMENTAL: determines whether the consistency test of a revision reuses the completion graph (model) of the previous revision (only with IncrementalRebuild). Off: the revision is built incrementally but reasoned over completely (correct). On: known to return wrong (empty) instance answers for ontologies with nominals.",
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
 
@@ -3413,6 +3423,56 @@ namespace Konclude {
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
 
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Interval.Consistency",
+						"Interval theory in the consistency check (and so in explain): auto (check the interval relations and time stamps of the individuals if the ontology has any), on (always) or off. A conflict makes the ontology inconsistent.",
+						new CStringConfigType("auto")),
+						new CStringConfigType("auto"));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Interval.AddDerivedRelations",
+						"Whether the consistency check adds the interval relations derived from the time stamps and from the composition to the ontology, so that its axioms can use them: auto (if the ontology declares properties named like Allen relations), true or false. The properties of the ontology are used for the derived relations; the intervals are grouped by the connectivity of the object property assertions (or by Konclude.CLI.Interval.GroupByProperty).",
+						new CStringConfigType("auto")),
+						new CStringConfigType("auto"));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Interval.RelationNamespace",
+						"Only object properties whose IRI starts with this namespace are read as interval relations by the interval command (empty: the local name decides, in any namespace).",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Interval.GroupByProperty",
+						"IRI of an object property that links the intervals of one process: relations are derived from the time stamps only between intervals of the same connected group (empty: one group for all intervals with time stamps).",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Interval.DeriveFromTimestamps",
+						"Determines whether the interval command derives the Allen relations between intervals with time stamps.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Interval.MaxDerivedPairs",
+						"Maximal number of pairs of intervals for which the interval command derives a relation from the time stamps.",
+						new CIntegerConfigType(1000000)),
+						new CIntegerConfigType(1000000));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Interval.MaxComponentSize",
+						"Largest group of individuals with asserted interval relations for which the interval command runs the full path consistency check.",
+						new CIntegerConfigType(150)),
+						new CIntegerConfigType(150));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Interval.MaxMinimizationSize",
+						"Largest group for which the interval command searches a minimal set of conflicting facts.",
+						new CIntegerConfigType(60)),
+						new CIntegerConfigType(60));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Interval.OutputVocabulary",
+						"Names of the derived relations written by the interval command: owltime (time:intervalBefore, ...) or allen (before, ...).",
+						new CStringConfigType("owltime")),
+						new CStringConfigType("owltime"));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Interval.OutputNamespace",
+						"Namespace of the derived relations if the output vocabulary is allen.",
+						new CStringConfigType("http://konclude.com/interval#")),
+						new CStringConfigType("http://konclude.com/interval#"));
+
 				addConfigProperty(new CConfigDescription("Konclude.CLI.Materialize.ClassAssertions",
 						"Determines whether the class assertions (types of the individuals) are computed and written by the materialize command.",
 						new CBooleanConfigType(true)),
@@ -3432,6 +3492,10 @@ namespace Konclude {
 						"Determines whether the same individuals (owl:sameAs) are computed and written by the materialize command.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Materialize.CopyFactsToSameIndividuals",
+						"Determines whether the types, object property facts and data property values of individuals that are the same (owl:sameAs) are written for all of them. This makes the output complete even if the realization found a fact for only one individual of the group.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 				addConfigProperty(new CConfigDescription("Konclude.CLI.Materialize.ClassHierarchy",
 						"Determines whether the class hierarchy is written by the materialize command.",
@@ -3442,6 +3506,43 @@ namespace Konclude {
 						"Determines whether the object and data property hierarchies are written by the materialize command.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Materialize.ReduceABox",
+						"Optional ABox reduction for the materialize command: individuals that are interchangeable (same asserted types, same data shape and same neighbour classes) are represented by one individual, the ontology is materialized with the reduced ABox and the results are copied to the individuals that were left out. "
+						"off: never reduce (default); on: reduce whenever individuals can be removed; auto: reduce only if the ABox is large (see Konclude.CLI.Materialize.ReduceABoxMinIndividuals and Konclude.CLI.Materialize.ReduceABoxMemoryPercent) and enough individuals can be removed. "
+						"Individuals that occur in the TBox/RBox, in sameAs/differentFrom/negative assertions, at roles with cardinality/functional/transitive/chain/... axioms (and their neighbours) are never merged. Only applied for ontologies in OWL functional syntax or OWL/XML that are loaded in a single step.",
+						new CStringConfigType("off")),
+						new CStringConfigType("off"));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Realization.ReduceABox",
+						"Optional ABox reduction for the realization command (same as Konclude.CLI.Materialize.ReduceABox: off | on | auto, the thresholds Konclude.CLI.Materialize.ReduceABoxMinIndividuals, ...MemoryPercent, ...MinReductionPercent are shared): interchangeable individuals are represented by one individual and the types of the representatives are copied to the individuals that were left out.",
+						new CStringConfigType("off")),
+						new CStringConfigType("off"));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Materialize.ReduceABoxMinIndividuals",
+						"For Konclude.CLI.Materialize.ReduceABox=auto: the ABox reduction is applied if the ontology has at least this number of individuals (0 deactivates this criterion).",
+						new CIntegerConfigType(100000)),
+						new CIntegerConfigType(100000));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Materialize.ReduceABoxMemoryPercent",
+						"For Konclude.CLI.Materialize.ReduceABox=auto: the ABox reduction is applied if the estimated memory demand of the materialization of the unreduced ABox (individuals * ReduceABoxBytesPerIndividual + assertions * ReduceABoxBytesPerAssertion) exceeds this percentage of the currently available main memory (/proc/meminfo MemAvailable, GlobalMemoryStatusEx).",
+						new CIntegerConfigType(50)),
+						new CIntegerConfigType(50));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Materialize.ReduceABoxMinReductionPercent",
+						"For Konclude.CLI.Materialize.ReduceABox=auto: the ABox reduction is only applied if at least this percentage of the individuals can be removed.",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Materialize.ReduceABoxBytesPerIndividual",
+						"Rough estimate of the memory (in bytes) that the materialization needs per individual (used by Konclude.CLI.Materialize.ReduceABox=auto).",
+						new CIntegerConfigType(20000)),
+						new CIntegerConfigType(20000));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Materialize.ReduceABoxBytesPerAssertion",
+						"Rough estimate of the memory (in bytes) that the materialization needs per ABox assertion (used by Konclude.CLI.Materialize.ReduceABox=auto).",
+						new CIntegerConfigType(2000)),
+						new CIntegerConfigType(2000));
 
 
 

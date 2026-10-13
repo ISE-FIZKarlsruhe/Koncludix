@@ -1,0 +1,8 @@
+# BFO relations as used by PMD: a precedes b, b precedes c, c precedes a. 'x precedes y' = the end of x is not after the start of y (before or meets).
+# No pair of these facts is contradictory; the cycle is (composition).
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix ex: <http://ex.org/> .
+
+ex:a obo:BFO_0000063 ex:b .
+ex:b obo:BFO_0000063 ex:c .
+ex:c obo:BFO_0000063 ex:a .

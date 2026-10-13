@@ -283,6 +283,8 @@ namespace Konclude {
 						CCommandDelegater *defaultCommandDelegater;
 
 						bool mConfLogProcessingTimes;
+						//! the optional reduction of the ABox (Konclude.CLI.Materialize.ReduceABox) is only allowed if the ontology is loaded in one step
+						bool mABoxReductionAllowed;
 
 						CQtHttpTransactionManager* mNetworkManager;
 

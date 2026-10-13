@@ -1,0 +1,17 @@
+Prefix(:=<http://hr.example/o#>)
+Ontology(<http://hr.example/o>
+Declaration(Class(:Employee))
+Declaration(Class(:Manager))
+Declaration(Class(:Student))
+Declaration(Class(:Contractor))
+Declaration(Class(:FormerEmployee))
+Declaration(Class(:Alumnus))
+Declaration(ObjectProperty(:worksFor))
+SubClassOf(:Manager :Employee)
+SubClassOf(:Contractor :Employee)
+DisjointClasses(:Employee :Student)
+ObjectPropertyDomain(:worksFor :Employee)
+# a derived class (see the temporal definition of FormerEmployee) takes part in the ordinary reasoning:
+SubClassOf(:FormerEmployee :Alumnus)
+DisjointClasses(:Alumnus :Student)
+)

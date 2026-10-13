@@ -41,6 +41,7 @@ namespace Konclude {
 					defaultCommandDelegater = preSynchronizer;
 
 					mConfLogProcessingTimes = false;
+					mABoxReductionAllowed = false;
 
 					mNetworkManager = nullptr;
 
@@ -77,6 +78,7 @@ namespace Konclude {
 
 
 					COntologyMultiAutoParsingLoader loader;
+					loader.setABoxReductionAllowed(mABoxReductionAllowed);
 					bool loaded = loader.parseOntology(device, ontoIRI, resolvedIRI, ont, ontConfig, importOntologiesList, parserErrorList, commandRecordRouter);
 
 
@@ -637,6 +639,9 @@ namespace Konclude {
 											QList<CLoadKnowledgeBaseData*> loadDataList(chPaInKBOntComm->getLoadDataList());
 
 											bool allParsingSucceeded = true;
+
+											// the ABox can only be reduced if all axioms are loaded in a single step
+											mABoxReductionAllowed = (loadDataList.count() == 1);
 
 											for (QList<CLoadKnowledgeBaseData*>::const_iterator loadDataIt = loadDataList.constBegin(), loadDataItEnd = loadDataList.constEnd(); loadDataIt != loadDataItEnd; ++loadDataIt) {
 												CLoadKnowledgeBaseData* loadData = *loadDataIt;

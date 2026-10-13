@@ -1457,13 +1457,17 @@ CBuildExpressionPtr datatypeDefinition():
 /* 9.5 Keys */
 CBuildExpressionPtr hasKey():
 {
+	CBuildExpressionPtr lintClassExp = nullptr;
+	QList<CBuildExpression*> lintObjKeys, lintDataKeys;
+	CBuildExpressionPtr lintKey;
 }{
 	<HAS_KEY> <OPEN_BRACKET>
 		axiomAnnotations()
-		classExpression()
-		<OPEN_BRACKET> ( objectPropertyExpression() )* <CLOSE_BRACKET>
-		<OPEN_BRACKET> ( objectPropertyExpression() )* <CLOSE_BRACKET>
+		lintClassExp = classExpression()
+		<OPEN_BRACKET> ( lintKey = objectPropertyExpression() { lintObjKeys.append(lintKey); } )* <CLOSE_BRACKET>
+		<OPEN_BRACKET> ( lintKey = objectPropertyExpression() { lintDataKeys.append(lintKey); } )* <CLOSE_BRACKET>
 	<CLOSE_BRACKET> {
+		if (!hasError && Konclude::Parser::CLintParseRecorder::isRecording()) { Konclude::Parser::CLintParseRecorder::recordHasKey(lintClassExp, lintObjKeys, lintDataKeys); }
 		return nullptr;
 	}
 }

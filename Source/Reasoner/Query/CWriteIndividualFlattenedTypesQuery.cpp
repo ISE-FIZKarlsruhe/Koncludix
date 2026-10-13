@@ -54,6 +54,48 @@ namespace Konclude {
 
 				mRequiresSameIndividualRealisation = true;
 				mRequiresConceptRealisation = true;
+
+				mReduction = nullptr;
+				mCurrentIndividualMembers = nullptr;
+				if (ontology && mIndividualNameString.isEmpty() && ontology->getLoadData()) {
+					CABoxReductionData* reduction = ontology->getLoadData()->getABoxReductionData();
+					if (reduction && reduction->isReduced() && !reduction->isInvalid()) {
+						mReduction = reduction;
+					}
+				}
+			}
+
+
+			bool CWriteIndividualFlattenedTypesQuery::visitIndividual(const CIndividualReference& indiRef, CSameRealization* sameRealization) {
+				mCheckSameIndividualNameList.append(mOntology->getIndividualNameResolver()->getIndividualName(indiRef, false));
+				return true;
+			}
+
+
+			bool CWriteIndividualFlattenedTypesQuery::checkABoxReductionApplicable(CRealization* realization, QString& problem) {
+				CSameRealization* sameRealization = realization->getSameRealization();
+				if (!sameRealization) {
+					problem = QString("the same individuals are not available");
+					return false;
+				}
+				bool applicable = true;
+				visitIndividuals([&](const CIndividualReference& indiRef)->bool {
+					QString individualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, false);
+					mCheckSameIndividualNameList.clear();
+					sameRealization->visitSameIndividuals(indiRef, this);
+					if (mCheckSameIndividualNameList.size() > 1) {
+						// merges of individuals that are not told to be the same depend on the ABox, the reduction is only used if there are none
+						foreach (const QString& sameName, mCheckSameIndividualNameList) {
+							if (!mReduction->mToldSameIndividuals.contains(sameName)) {
+								problem = QString("the reasoner derived that '%1' is the same as other individuals (e.g., '%2')").arg(individualName).arg(sameName);
+								applicable = false;
+								return false;
+							}
+						}
+					}
+					return true;
+				});
+				return applicable;
 			}
 
 
@@ -64,9 +106,16 @@ namespace Konclude {
 
 			CQuery* CWriteIndividualFlattenedTypesQuery::addQueryError(CQueryError* queryError) {
 				if (CQueryInconsitentOntologyError::hasInconsistentOntologyError(queryError)) {
-					// write inconsistency
-					if (!writeInconsistentIndividualTypes()) {
-						addQueryError(new CQueryUnspecifiedStringError(QString("Could not write individual types to file '%1'.").arg(mOutputFileNameString)));
+					if (mReduction) {
+						// the individuals that were removed by the ABox reduction would have to be written as well, the computation is repeated without the reduction
+						QString reason = QString("the ontology with the reduced ABox is inconsistent");
+						mReduction->setInvalid(reason);
+						CABoxReductionControl::requestFallback(reason);
+					} else {
+						// write inconsistency
+						if (!writeInconsistentIndividualTypes()) {
+							addQueryError(new CQueryUnspecifiedStringError(QString("Could not write individual types to file '%1'.").arg(mOutputFileNameString)));
+						}
 					}
 				}
 				CQuery::addQueryError(queryError);
@@ -186,6 +235,12 @@ namespace Konclude {
 						writeClassDeclaration(conceptString);
 					}
 					writeIndividualType(mCurrentIndividualName, mCurrentIndividualAnonymous, conceptString);
+					if (mCurrentIndividualMembers) {
+						// individuals that were removed by the ABox reduction have the same types as their representative
+						foreach (const QString& memberName, *mCurrentIndividualMembers) {
+							writeIndividualType(memberName, false, conceptString);
+						}
+					}
 				}
 				return true;
 			}
@@ -210,6 +265,15 @@ namespace Konclude {
 
 
 			bool CWriteIndividualFlattenedTypesQuery::writeIndividualTypesResult(CRealization* realization) {
+				if (mReduction) {
+					QString problem;
+					if (!checkABoxReductionApplicable(realization, problem)) {
+						// nothing is written, the realization is computed again without the reduction
+						mReduction->setInvalid(problem);
+						CABoxReductionControl::requestFallback(problem);
+						return true;
+					}
+				}
 				if (startWritingOutput()) {
 
 					CConceptRealization* conRealization = realization->getConceptRealization();
@@ -225,7 +289,14 @@ namespace Konclude {
 							if (mWriteDeclarations) {
 								writeIndividualDeclaration(mCurrentIndividualName, anonymous);
 							}
+							mCurrentIndividualMembers = mReduction ? mReduction->getRemovedMembers(mCurrentIndividualName) : nullptr;
+							if (mWriteDeclarations && mCurrentIndividualMembers) {
+								foreach (const QString& memberName, *mCurrentIndividualMembers) {
+									writeIndividualDeclaration(memberName, false);
+								}
+							}
 							conRealization->visitTypes(indiRef, mWriteOnlyDirectTypes, this);
+							mCurrentIndividualMembers = nullptr;
 						}
 						return true;
 					});

@@ -60,10 +60,23 @@ namespace Konclude {
 				mWritePropertyHierarchy = CConfigDataReader::readConfigBoolean(configuration, "Konclude.CLI.Materialize.PropertyHierarchy", true);
 
 				// only the requested kinds of facts are computed (e.g., the expensive role instances are skipped if no object property assertions are requested)
-				mRequiresSameIndividualRealisation = mWriteSameIndividuals;
+				mCopyFactsToSameIndividuals = CConfigDataReader::readConfigBoolean(configuration, "Konclude.CLI.Materialize.CopyFactsToSameIndividuals", true);
+				mRequiresSameIndividualRealisation = mWriteSameIndividuals || (mCopyFactsToSameIndividuals && (mWriteClassAssertions || mWriteObjectPropertyAssertions || mWriteDataPropertyAssertions));
 				// the role instance computation profits from the realized class instances, i.e., they are also computed (but not written) if object property assertions are requested
 				mRequiresConceptRealisation = mWriteClassAssertions || mWriteObjectPropertyAssertions;
 				mRequiresRoleRealisation = mWriteObjectPropertyAssertions;
+
+				mReduction = nullptr;
+				mCurrentIndividualMembers = nullptr;
+				mCountAllSameIndividuals = false;
+				if (ontology && mIndividualNameString.isEmpty() && ontology->getLoadData()) {
+					CABoxReductionData* reduction = ontology->getLoadData()->getABoxReductionData();
+					if (reduction && reduction->isReduced() && !reduction->isInvalid()) {
+						mReduction = reduction;
+						// the representatives must not be merged with other individuals, this is verified before the results are written
+						mRequiresSameIndividualRealisation = true;
+					}
+				}
 			}
 
 
@@ -74,9 +87,18 @@ namespace Konclude {
 
 			CQuery* CWriteMaterializedIndividualAssertionsQuery::addQueryError(CQueryError* queryError) {
 				if (CQueryInconsitentOntologyError::hasInconsistentOntologyError(queryError)) {
-					// write inconsistency
-					if (!writeInconsistentIndividualAssertions()) {
-						addQueryError(new CQueryUnspecifiedStringError(QString("Could not write materialized individual assertions to file '%1'.").arg(mOutputFileNameString)));
+					if (mReduction) {
+						// the individuals that were removed by the ABox reduction would have to be written as well, since the inconsistency
+						// could also be caused by the reduction the computation is repeated for the unreduced ABox
+						QString reason = QString("the ontology with the reduced ABox is inconsistent");
+						mReduction->setInvalid(reason);
+						CABoxReductionControl::requestFallback(reason);
+						LOG(WARNING, "::Konclude::CLIBatchProcessor", logTr("ABox reduction: %1, the materialization is computed again without the reduction.").arg(reason), this);
+					} else {
+						// write inconsistency
+						if (!writeInconsistentIndividualAssertions()) {
+							addQueryError(new CQueryUnspecifiedStringError(QString("Could not write materialized individual assertions to file '%1'.").arg(mOutputFileNameString)));
+						}
 					}
 				}
 				CQuery::addQueryError(queryError);
@@ -201,7 +223,19 @@ namespace Konclude {
 					// altogether -- see visitRoleInstance()'s comment for why
 					// that distinction matters.
 					if (mWriteAnonymousIndividuals || !mCurrentIndividualAnonymous) {
-						writeIndividualType(mCurrentIndividualName, mCurrentIndividualAnonymous, conceptString);
+						QHash<QString,int>::const_iterator sameGroupIt = mSameGroupOfIndividual.constFind(mCurrentIndividualName);
+						if (sameGroupIt != mSameGroupOfIndividual.constEnd()) {
+							// the type holds for all individuals of the group, it is written for all of them after all individuals are visited
+							mSameGroupTypes[sameGroupIt.value()].insert(conceptString);
+						} else {
+							writeIndividualType(mCurrentIndividualName, mCurrentIndividualAnonymous, conceptString);
+						}
+						if (mCurrentIndividualMembers) {
+							// individuals that were removed by the ABox reduction have the same types as their representative
+							foreach (const QString& memberName, *mCurrentIndividualMembers) {
+								writeIndividualType(memberName, false, conceptString);
+							}
+						}
 					}
 				}
 				return true;
@@ -211,7 +245,7 @@ namespace Konclude {
 			bool CWriteMaterializedIndividualAssertionsQuery::visitIndividual(const CIndividualReference& indiRef, CSameRealization* sameRealization) {
 				QString individualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, mUseAbbreviatedIRIs);
 				bool anonymous = isEffectivelyAnonymous(mOntology->getIndividualNameResolver()->isAnonymous(indiRef), individualName);
-				if (mWriteAnonymousIndividuals || !anonymous) {
+				if (mWriteAnonymousIndividuals || !anonymous || mCountAllSameIndividuals) {
 					mCurrentSameIndividualNameList.append(individualName);
 					mCurrentSameIndividualAnonymousList.append(anonymous);
 				}
@@ -234,10 +268,151 @@ namespace Konclude {
 				// subject/target in the WRITTEN output is decided later, at
 				// each write call site, not here at collection time.
 				QString targetName = mOntology->getIndividualNameResolver()->getIndividualName(indiRealItemRef, mUseAbbreviatedIRIs);
+				QHash<QString,QString>::const_iterator namePoolIt = mIndividualNamePool.constFind(targetName);
+				if (namePoolIt != mIndividualNamePool.constEnd()) {
+					targetName = namePoolIt.value();
+				} else {
+					mIndividualNamePool.insert(targetName, targetName);
+				}
 				bool targetAnonymous = isEffectivelyAnonymous(mOntology->getIndividualNameResolver()->isAnonymous(indiRealItemRef), targetName);
+				if (mReduction && mReduction->isReasonerFactReplaced(mCurrentIndividualName, targetName)) {
+					// facts between individuals of the reduced ABox that are not valid for all individuals of the original ABox (e.g., edges that are
+					// the result of the reduction): the facts are rebuilt from the asserted edges, see writeReducedAssertionEdges()
+					return true;
+				}
 				mGlobalSubjectRoleTargets[mCurrentIndividualName][mCurrentRole].insert(targetName, targetAnonymous);
 				mIndividualAnonymousHash.insert(targetName, targetAnonymous);
 				return true;
+			}
+
+
+			void CWriteMaterializedIndividualAssertionsQuery::collectSameIndividualGroups(CSameRealization* sameRealization) {
+				if (!sameRealization) {
+					return;
+				}
+				visitIndividuals([&](const CIndividualReference& indiRef)->bool {
+					QString individualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, mUseAbbreviatedIRIs);
+					if (mSameGroupOfIndividual.contains(individualName)) {
+						return true;
+					}
+					mCurrentSameIndividualNameList.clear();
+					mCurrentSameIndividualAnonymousList.clear();
+					sameRealization->visitSameIndividuals(indiRef, this);
+					if (mCurrentSameIndividualNameList.size() > 1) {
+						QList< QPair<QString,bool> > members;
+						for (int sameIdx = 0; sameIdx < mCurrentSameIndividualNameList.size(); ++sameIdx) {
+							members.append(qMakePair(mCurrentSameIndividualNameList.at(sameIdx), mCurrentSameIndividualAnonymousList.at(sameIdx)));
+						}
+						qSort(members.begin(), members.end());
+						int groupId = mSameGroups.size();
+						mSameGroups.append(members);
+						for (int memberIdx = 0; memberIdx < members.size(); ++memberIdx) {
+							mSameGroupOfIndividual.insert(members.at(memberIdx).first, groupId);
+						}
+					}
+					return true;
+				});
+				mCurrentSameIndividualNameList.clear();
+				mCurrentSameIndividualAnonymousList.clear();
+			}
+
+
+			void CWriteMaterializedIndividualAssertionsQuery::writeFactsOfSameIndividualGroups() {
+				// types and data property values of the individuals of a group are written for every member of the group
+				for (QHash<int, QSet<QString> >::const_iterator typeIt = mSameGroupTypes.constBegin(), typeItEnd = mSameGroupTypes.constEnd(); typeIt != typeItEnd; ++typeIt) {
+					QList<QString> sortedTypes(typeIt.value().toList());
+					qSort(sortedTypes.begin(), sortedTypes.end());
+					const QList< QPair<QString,bool> >& members = mSameGroups.at(typeIt.key());
+					for (int memberIdx = 0; memberIdx < members.size(); ++memberIdx) {
+						if (mWriteAnonymousIndividuals || !members.at(memberIdx).second) {
+							foreach (const QString& conceptString, sortedTypes) {
+								writeIndividualType(members.at(memberIdx).first, members.at(memberIdx).second, conceptString);
+							}
+						}
+					}
+				}
+				for (QHash<int, QHash<CRole*, QSet< QPair<QString,QString> > > >::const_iterator dataIt = mSameGroupDataAssertions.constBegin(), dataItEnd = mSameGroupDataAssertions.constEnd(); dataIt != dataItEnd; ++dataIt) {
+					const QList< QPair<QString,bool> >& members = mSameGroups.at(dataIt.key());
+					for (int memberIdx = 0; memberIdx < members.size(); ++memberIdx) {
+						if (mWriteAnonymousIndividuals || !members.at(memberIdx).second) {
+							for (QHash<CRole*, QSet< QPair<QString,QString> > >::const_iterator dpIt = dataIt.value().constBegin(), dpItEnd = dataIt.value().constEnd(); dpIt != dpItEnd; ++dpIt) {
+								const QString& propertyName = mDataPropertyNameHash.value(dpIt.key());
+								if (propertyName.isEmpty()) {
+									continue;
+								}
+								for (QSet< QPair<QString,QString> >::const_iterator litIt = dpIt.value().constBegin(), litItEnd = dpIt.value().constEnd(); litIt != litItEnd; ++litIt) {
+									writeDataPropertyAssertion(members.at(memberIdx).first, members.at(memberIdx).second, propertyName, litIt->first, litIt->second);
+								}
+							}
+						}
+					}
+				}
+				mSameGroupTypes.clear();
+				mSameGroupDataAssertions.clear();
+			}
+
+
+			void CWriteMaterializedIndividualAssertionsQuery::copyObjectPropertyFactsToSameIndividuals() {
+				// every object property fact between individuals of groups holds for all pairs of members of the groups
+				if (mSameGroups.isEmpty()) {
+					return;
+				}
+				struct TSameAddition {
+					QString subject;
+					bool subjectAnonymous;
+					CRole* role;
+					QString target;
+					bool targetAnonymous;
+				};
+				QList<TSameAddition> additions;
+				for (QHash<QString, QHash<CRole*, QHash<QString,bool> > >::const_iterator subjIt = mGlobalSubjectRoleTargets.constBegin(), subjItEnd = mGlobalSubjectRoleTargets.constEnd(); subjIt != subjItEnd; ++subjIt) {
+					const QString& subjectName = subjIt.key();
+					bool subjectAnonymous = mIndividualAnonymousHash.value(subjectName, false);
+					QHash<QString,int>::const_iterator subjectGroupIt = mSameGroupOfIndividual.constFind(subjectName);
+					bool subjectInGroup = subjectGroupIt != mSameGroupOfIndividual.constEnd();
+					const QHash<CRole*, QHash<QString,bool> >& roleMap = subjIt.value();
+					for (QHash<CRole*, QHash<QString,bool> >::const_iterator roleIt = roleMap.constBegin(), roleItEnd = roleMap.constEnd(); roleIt != roleItEnd; ++roleIt) {
+						const QHash<QString,bool>& targets = roleIt.value();
+						for (QHash<QString,bool>::const_iterator it = targets.constBegin(), itEnd = targets.constEnd(); it != itEnd; ++it) {
+							QHash<QString,int>::const_iterator targetGroupIt = mSameGroupOfIndividual.constFind(it.key());
+							bool targetInGroup = targetGroupIt != mSameGroupOfIndividual.constEnd();
+							if (!subjectInGroup && !targetInGroup) {
+								continue;
+							}
+							QList< QPair<QString,bool> > subjectMembers;
+							QList< QPair<QString,bool> > targetMembers;
+							if (subjectInGroup) {
+								subjectMembers = mSameGroups.at(subjectGroupIt.value());
+							} else {
+								subjectMembers.append(qMakePair(subjectName, subjectAnonymous));
+							}
+							if (targetInGroup) {
+								targetMembers = mSameGroups.at(targetGroupIt.value());
+							} else {
+								targetMembers.append(qMakePair(it.key(), it.value()));
+							}
+							for (int subjectIdx = 0; subjectIdx < subjectMembers.size(); ++subjectIdx) {
+								for (int targetIdx = 0; targetIdx < targetMembers.size(); ++targetIdx) {
+									if (subjectMembers.at(subjectIdx).first == subjectName && targetMembers.at(targetIdx).first == it.key()) {
+										continue;
+									}
+									TSameAddition addition;
+									addition.subject = subjectMembers.at(subjectIdx).first;
+									addition.subjectAnonymous = subjectMembers.at(subjectIdx).second;
+									addition.role = roleIt.key();
+									addition.target = targetMembers.at(targetIdx).first;
+									addition.targetAnonymous = targetMembers.at(targetIdx).second;
+									additions.append(addition);
+								}
+							}
+						}
+					}
+				}
+				foreach (const TSameAddition& addition, additions) {
+					mGlobalSubjectRoleTargets[addition.subject][addition.role].insert(addition.target, addition.targetAnonymous);
+					mIndividualAnonymousHash.insert(addition.subject, addition.subjectAnonymous);
+					mIndividualAnonymousHash.insert(addition.target, addition.targetAnonymous);
+				}
 			}
 
 
@@ -372,6 +547,168 @@ namespace Konclude {
 							}
 						}
 					}
+				}
+			}
+
+
+
+
+			bool CWriteMaterializedIndividualAssertionsQuery::checkABoxReductionApplicable(CRealization* realization, QString& problem) {
+				CSameRealization* sameRealization = realization->getSameRealization();
+				if (!sameRealization) {
+					problem = QString("the same individuals of the representatives are not available");
+					return false;
+				}
+				bool applicable = true;
+				mCountAllSameIndividuals = true;
+				visitIndividuals([&](const CIndividualReference& indiRef)->bool {
+					QString individualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, false);
+					mCurrentSameIndividualNameList.clear();
+					mCurrentSameIndividualAnonymousList.clear();
+					sameRealization->visitSameIndividuals(indiRef, this);
+					if (mCurrentSameIndividualNameList.size() > 1) {
+						// merges of individuals that are not told to be the same (e.g., by functional roles or nominals) depend on the ABox,
+						// the reduction is only used if the reasoner does not derive such merges
+						foreach (const QString& sameName, mCurrentSameIndividualNameList) {
+							if (!mReduction->mToldSameIndividuals.contains(sameName)) {
+								problem = QString("the reasoner derived that '%1' is the same as other individuals (e.g., '%2')").arg(individualName).arg(sameName);
+								applicable = false;
+								return false;
+							}
+						}
+					}
+					return true;
+				});
+				mCountAllSameIndividuals = false;
+				mCurrentSameIndividualNameList.clear();
+				mCurrentSameIndividualAnonymousList.clear();
+				return applicable;
+			}
+
+
+			void CWriteMaterializedIndividualAssertionsQuery::writeCollectedDataAssertions(const QString& individualName, bool anonymous, QHash<CRole*, QSet<QPair<QString,QString> > >& collectedDataAssertions) {
+				QList<CRole*> collectedDataRoleList(collectedDataAssertions.keys());
+				foreach (CRole* role, collectedDataRoleList) {
+					const QSet<QPair<QString,QString> > literals(collectedDataAssertions.value(role));
+					const QSet<CRole*>& superRoles = mDataPropertySuperRolesHash.value(role);
+					foreach (CRole* superRole, superRoles) {
+						collectedDataAssertions[superRole].unite(literals);
+					}
+				}
+				if (mWriteAnonymousIndividuals || !anonymous) {
+					for (QHash<CRole*, QSet<QPair<QString,QString> > >::const_iterator dpIt = collectedDataAssertions.constBegin(), dpItEnd = collectedDataAssertions.constEnd(); dpIt != dpItEnd; ++dpIt) {
+						const QString& propertyName = mDataPropertyNameHash.value(dpIt.key());
+						if (propertyName.isEmpty()) {
+							continue;
+						}
+						for (QSet<QPair<QString,QString> >::const_iterator litIt = dpIt.value().constBegin(), litItEnd = dpIt.value().constEnd(); litIt != litItEnd; ++litIt) {
+							writeDataPropertyAssertion(individualName, anonymous, propertyName, litIt->first, litIt->second);
+						}
+					}
+				}
+			}
+
+
+			void CWriteMaterializedIndividualAssertionsQuery::writeRemovedMemberDataAssertions(const QStringList& members) {
+				foreach (const QString& memberName, members) {
+					const QVector<CABoxReductionData::CDataAssertion>* dataAssertions = mReduction->getDataAssertions(memberName);
+					if (!dataAssertions || dataAssertions->isEmpty()) {
+						continue;
+					}
+					QHash<CRole*, QSet<QPair<QString,QString> > > collectedDataAssertions;
+					for (int i = 0; i < dataAssertions->size(); ++i) {
+						const CABoxReductionData::CDataAssertion& dataAssertion = dataAssertions->at(i);
+						CRole* dataRole = mDataPropertyIRIRoleHash.value(dataAssertion.mPropertyIRI, nullptr);
+						if (dataRole && mDataPropertyNameHash.contains(dataRole)) {
+							collectedDataAssertions[dataRole].insert(qMakePair(dataAssertion.mLexicalValue, dataAssertion.mDatatypeIRI));
+						}
+					}
+					writeCollectedDataAssertions(memberName, false, collectedDataAssertions);
+				}
+			}
+
+
+			const CWriteMaterializedIndividualAssertionsQuery::CReductionClosure& CWriteMaterializedIndividualAssertionsQuery::getReductionClosure(CRole* role) {
+				QHash<CRole*, CReductionClosure>::iterator closureIt = mReductionClosureHash.find(role);
+				if (closureIt != mReductionClosureHash.end()) {
+					return closureIt.value();
+				}
+				// the facts that follow for an asserted edge are computed with the same propagation that is used for the facts of the reasoner
+				QHash<QString, QHash<CRole*, QHash<QString,bool> > > savedSubjectRoleTargets;
+				savedSubjectRoleTargets.swap(mGlobalSubjectRoleTargets);
+				QHash<QString, bool> savedIndividualAnonymousHash;
+				savedIndividualAnonymousHash.swap(mIndividualAnonymousHash);
+
+				QString sourceName(QString(QChar(1)) + QString("source"));
+				QString targetName(QString(QChar(1)) + QString("target"));
+				mGlobalSubjectRoleTargets[sourceName][role].insert(targetName, false);
+				propagateSubProperties();
+				propagateInverseRoles();
+				propagateSubProperties();
+				propagateInverseRoles();
+				propagateSubProperties();
+
+				CReductionClosure closure;
+				QHash<QString, QHash<CRole*, QHash<QString,bool> > >::const_iterator sourceIt = mGlobalSubjectRoleTargets.constFind(sourceName);
+				if (sourceIt != mGlobalSubjectRoleTargets.constEnd()) {
+					for (QHash<CRole*, QHash<QString,bool> >::const_iterator roleIt = sourceIt.value().constBegin(), roleItEnd = sourceIt.value().constEnd(); roleIt != roleItEnd; ++roleIt) {
+						if (roleIt.value().contains(targetName) && mObjectPropertyNameHash.contains(roleIt.key())) {
+							closure.mForward.append(roleIt.key());
+						}
+					}
+				}
+				QHash<QString, QHash<CRole*, QHash<QString,bool> > >::const_iterator targetIt = mGlobalSubjectRoleTargets.constFind(targetName);
+				if (targetIt != mGlobalSubjectRoleTargets.constEnd()) {
+					for (QHash<CRole*, QHash<QString,bool> >::const_iterator roleIt = targetIt.value().constBegin(), roleItEnd = targetIt.value().constEnd(); roleIt != roleItEnd; ++roleIt) {
+						if (roleIt.value().contains(sourceName) && mObjectPropertyNameHash.contains(roleIt.key())) {
+							closure.mBackward.append(roleIt.key());
+						}
+					}
+				}
+
+				mGlobalSubjectRoleTargets.swap(savedSubjectRoleTargets);
+				mIndividualAnonymousHash.swap(savedIndividualAnonymousHash);
+				return mReductionClosureHash.insert(role, closure).value();
+			}
+
+
+			void CWriteMaterializedIndividualAssertionsQuery::writeReducedAssertionEdges() {
+				const CABoxReductionData& reduction = *mReduction;
+				int edgeCount = reduction.mEdgeSubject.size();
+				int i = 0;
+				while (i < edgeCount) {
+					int lo = qMin(reduction.mEdgeSubject.at(i), reduction.mEdgeObject.at(i));
+					int hi = qMax(reduction.mEdgeSubject.at(i), reduction.mEdgeObject.at(i));
+					QSet<QPair<int, CRole*> > written;
+					int j = i;
+					while (j < edgeCount && qMin(reduction.mEdgeSubject.at(j), reduction.mEdgeObject.at(j)) == lo && qMax(reduction.mEdgeSubject.at(j), reduction.mEdgeObject.at(j)) == hi) {
+						CRole* role = mObjectPropertyIRIRoleHash.value(reduction.mEdgePropertyIRIs.at(reduction.mEdgeProperty.at(j)), nullptr);
+						if (role) {
+							const CReductionClosure& closure = getReductionClosure(role);
+							int sourceIndex = reduction.mEdgeSubject.at(j);
+							int targetIndex = reduction.mEdgeObject.at(j);
+							const QString& sourceName = reduction.mEdgeIndividualNames.at(sourceIndex);
+							const QString& targetName = reduction.mEdgeIndividualNames.at(targetIndex);
+							// direction 0: from the individual with the smaller index to the other one
+							int forwardDirection = (sourceIndex == lo) ? 0 : 1;
+							foreach (CRole* factRole, closure.mForward) {
+								QPair<int, CRole*> key(forwardDirection, factRole);
+								if (!written.contains(key)) {
+									written.insert(key);
+									writeObjectPropertyAssertion(sourceName, false, mObjectPropertyNameHash.value(factRole), targetName, false);
+								}
+							}
+							foreach (CRole* factRole, closure.mBackward) {
+								QPair<int, CRole*> key(1 - forwardDirection, factRole);
+								if (!written.contains(key)) {
+									written.insert(key);
+									writeObjectPropertyAssertion(targetName, false, mObjectPropertyNameHash.value(factRole), sourceName, false);
+								}
+							}
+						}
+						++j;
+					}
+					i = j;
 				}
 			}
 
@@ -526,6 +863,17 @@ namespace Konclude {
 
 
 			bool CWriteMaterializedIndividualAssertionsQuery::writeMaterializedAssertionsResult(CRealization* realization) {
+				if (mReduction) {
+					QString problem;
+					if (!checkABoxReductionApplicable(realization, problem)) {
+						// nothing is written, the materialization is computed again without the reduction
+						mReduction->setInvalid(problem);
+						CABoxReductionControl::requestFallback(problem);
+						LOG(WARNING, "::Konclude::CLIBatchProcessor", logTr("ABox reduction: %1, the materialization is computed again without the reduction.").arg(problem), this);
+						return true;
+					}
+					LOG(INFO, "::Konclude::CLIBatchProcessor", logTr("ABox reduction: copying the results of %1 representatives to %2 removed individuals.").arg(mReduction->mMembersOfRepresentative.size()).arg(mReduction->getRemovedIndividualCount()), this);
+				}
 				if (startWritingOutput()) {
 
 					CConceptRealization* conRealization = mWriteClassAssertions ? realization->getConceptRealization() : nullptr;
@@ -592,8 +940,33 @@ namespace Konclude {
 						}
 					}
 
+					mObjectPropertyIRIRoleHash.clear();
+					mDataPropertyIRIRoleHash.clear();
+					mReductionClosureHash.clear();
+					if (mReduction) {
+						// all names of the properties are needed to find the roles of the asserted edges and data assertions of removed individuals
+						foreach (CRole* role, mObjectPropertyRoleList) {
+							foreach (const QString& iriName, CIRIName::getIRINames(role->getPropertyNameLinker(), -1)) {
+								mObjectPropertyIRIRoleHash.insert(iriName, role);
+							}
+						}
+						foreach (CRole* role, mDataPropertyRoleList) {
+							foreach (const QString& iriName, CIRIName::getIRINames(role->getPropertyNameLinker(), -1)) {
+								mDataPropertyIRIRoleHash.insert(iriName, role);
+							}
+						}
+					}
+
 					mGlobalSubjectRoleTargets.clear();
 					mIndividualAnonymousHash.clear();
+					mSameGroupOfIndividual.clear();
+					mIndividualNamePool.clear();
+					mSameGroups.clear();
+					mSameGroupTypes.clear();
+					mSameGroupDataAssertions.clear();
+					if (mCopyFactsToSameIndividuals) {
+						collectSameIndividualGroups(realization->getSameRealization());
+					}
 
 					visitIndividuals([&](const CIndividualReference& indiRef)->bool {
 						// Every individual is always visited here -- named or
@@ -616,11 +989,25 @@ namespace Konclude {
 						// found, even though _:b never appears in the final
 						// A--Q-->C fact that IS supposed to be written).
 						mCurrentIndividualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, mUseAbbreviatedIRIs);
+						{
+							QHash<QString,QString>::const_iterator subjectPoolIt = mIndividualNamePool.constFind(mCurrentIndividualName);
+							if (subjectPoolIt != mIndividualNamePool.constEnd()) {
+								mCurrentIndividualName = subjectPoolIt.value();
+							} else {
+								mIndividualNamePool.insert(mCurrentIndividualName, mCurrentIndividualName);
+							}
+						}
 						bool anonymous = isEffectivelyAnonymous(mOntology->getIndividualNameResolver()->isAnonymous(indiRef), mCurrentIndividualName);
 						mCurrentIndividualAnonymous = anonymous;
 						mIndividualAnonymousHash.insert(mCurrentIndividualName, anonymous);
+						mCurrentIndividualMembers = mReduction ? mReduction->getRemovedMembers(mCurrentIndividualName) : nullptr;
 						if (mWriteDeclarations && (mWriteAnonymousIndividuals || !anonymous)) {
 							writeIndividualDeclaration(mCurrentIndividualName, anonymous);
+							if (mCurrentIndividualMembers) {
+								foreach (const QString& memberName, *mCurrentIndividualMembers) {
+									writeIndividualDeclaration(memberName, false);
+								}
+							}
 						}
 						if (conRealization) {
 							conRealization->visitTypes(indiRef, mWriteOnlyDirectTypes, this);
@@ -667,7 +1054,14 @@ namespace Konclude {
 									collectedDataAssertions[superRole].unite(literals);
 								}
 							}
-							if (mWriteAnonymousIndividuals || !anonymous) {
+							QHash<QString,int>::const_iterator dataGroupIt = mSameGroupOfIndividual.constFind(mCurrentIndividualName);
+							if (dataGroupIt != mSameGroupOfIndividual.constEnd()) {
+								// the values hold for all individuals of the group, they are written for all of them after all individuals are visited
+								QHash<CRole*, QSet<QPair<QString,QString> > >& groupData = mSameGroupDataAssertions[dataGroupIt.value()];
+								for (QHash<CRole*, QSet<QPair<QString,QString> > >::const_iterator dpIt = collectedDataAssertions.constBegin(), dpItEnd = collectedDataAssertions.constEnd(); dpIt != dpItEnd; ++dpIt) {
+									groupData[dpIt.key()].unite(dpIt.value());
+								}
+							} else if (mWriteAnonymousIndividuals || !anonymous) {
 								for (QHash<CRole*, QSet<QPair<QString,QString> > >::const_iterator dpIt = collectedDataAssertions.constBegin(), dpItEnd = collectedDataAssertions.constEnd(); dpIt != dpItEnd; ++dpIt) {
 									const QString& propertyName = mDataPropertyNameHash.value(dpIt.key());
 									if (propertyName.isEmpty()) {
@@ -679,10 +1073,17 @@ namespace Konclude {
 								}
 							}
 						}
+						if (mCurrentIndividualMembers && mWriteDataPropertyAssertions) {
+							writeRemovedMemberDataAssertions(*mCurrentIndividualMembers);
+						}
+						mCurrentIndividualMembers = nullptr;
 						return true;
 					});
 
+					writeFactsOfSameIndividualGroups();
+
 					if (roleRealization) {
+						copyObjectPropertyFactsToSameIndividuals();
 						// Every fact is now collected in mGlobalSubjectRoleTargets, across
 						// every individual. Propagate sub-properties up to their
 						// transitive super-roles, then propagate declared inverse roles
@@ -703,10 +1104,12 @@ namespace Konclude {
 						propagatePropertyChains();
 						propagateInverseRoles();
 						propagateSubProperties();
+						copyObjectPropertyFactsToSameIndividuals();
 
 						for (QHash<QString, QHash<CRole*, QHash<QString,bool> > >::const_iterator subjIt = mGlobalSubjectRoleTargets.constBegin(), subjItEnd = mGlobalSubjectRoleTargets.constEnd(); subjIt != subjItEnd; ++subjIt) {
 							const QString& subjectName = subjIt.key();
 							bool subjectAnonymous = mIndividualAnonymousHash.value(subjectName, false);
+							const QStringList* subjectMembers = mReduction ? mReduction->getRemovedMembers(subjectName) : nullptr;
 							const QHash<CRole*, QHash<QString,bool> >& roleMap = subjIt.value();
 							for (QHash<CRole*, QHash<QString,bool> >::const_iterator roleIt = roleMap.constBegin(), roleItEnd = roleMap.constEnd(); roleIt != roleItEnd; ++roleIt) {
 								const QString& propertyName = mObjectPropertyNameHash.value(roleIt.key());
@@ -727,9 +1130,37 @@ namespace Konclude {
 										continue;
 									}
 									writeObjectPropertyAssertion(subjectName, subjectAnonymous, propertyName, it.key(), targetAnonymous);
+									if (mReduction && !subjectAnonymous) {
+										// facts between a representative and a pinned individual (or itself) hold for all individuals that the representative stands for
+										const QString& factTargetName = it.key();
+										if (subjectMembers) {
+											if (factTargetName == subjectName) {
+												foreach (const QString& memberName, *subjectMembers) {
+													writeObjectPropertyAssertion(memberName, false, propertyName, memberName, false);
+												}
+											} else if (mReduction->isPinned(factTargetName)) {
+												foreach (const QString& memberName, *subjectMembers) {
+													writeObjectPropertyAssertion(memberName, false, propertyName, factTargetName, targetAnonymous);
+												}
+											}
+										}
+										if (factTargetName != subjectName && mReduction->isPinned(subjectName)) {
+											const QStringList* targetMembers = mReduction->getRemovedMembers(factTargetName);
+											if (targetMembers) {
+												foreach (const QString& memberName, *targetMembers) {
+													writeObjectPropertyAssertion(subjectName, subjectAnonymous, propertyName, memberName, false);
+												}
+											}
+										}
+									}
 								}
 							}
 						}
+					}
+
+					if (roleRealization && mReduction) {
+						// object property assertions between individuals that are not pinned (at least one of them is in a reduced group)
+						writeReducedAssertionEdges();
 					}
 
 					// Same-individual equivalences: functional/inverse-functional
@@ -762,6 +1193,19 @@ namespace Konclude {
 							mCurrentSameIndividualAnonymousList.clear();
 							sameRealization->visitSameIndividuals(indiRef, this);
 							if (mCurrentSameIndividualNameList.size() > 1) {
+								if (mReduction) {
+									// removed individuals are the same as the individuals of their representatives
+									int representativeCount = mCurrentSameIndividualNameList.size();
+									for (int representativeIdx = 0; representativeIdx < representativeCount; ++representativeIdx) {
+										const QStringList* members = mReduction->getRemovedMembers(mCurrentSameIndividualNameList.at(representativeIdx));
+										if (members) {
+											foreach (const QString& memberName, *members) {
+												mCurrentSameIndividualNameList.append(memberName);
+												mCurrentSameIndividualAnonymousList.append(false);
+											}
+										}
+									}
+								}
 								foreach (const QString& sameName, mCurrentSameIndividualNameList) {
 									mSameIndividualEmittedSet.insert(sameName);
 								}

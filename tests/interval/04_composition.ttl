@@ -1,0 +1,6 @@
+# No time stamps. a meets b and b meets c; the composition meets o meets = before gives: a is before c (derived, not asserted).
+@prefix t: <http://example.org/time#> .
+@prefix ex: <http://ex.org/> .
+
+ex:a t:meets ex:b .
+ex:b t:meets ex:c .

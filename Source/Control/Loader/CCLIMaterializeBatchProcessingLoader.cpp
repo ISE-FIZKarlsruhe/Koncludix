@@ -54,6 +54,7 @@ namespace Konclude {
 
 
 			CCLIMaterializeBatchProcessingLoader::CCLIMaterializeBatchProcessingLoader() {
+				mABoxReductionFallbackStarted = false;
 			}
 
 
@@ -74,7 +75,30 @@ namespace Konclude {
 				} else {
 					logOutputMessage(QString("Starting materialization processing of individual '%1' for ontology '%2'.").arg(mIRINameString).arg(mRequestFileString));
 				}
-				QString testKB = QString("http://konclude.com/test/kb");
+				addMaterializeCommands(QString("http://konclude.com/test/kb"));
+				processNextCommand();
+			}
+
+
+			COWLlinkProcessor* CCLIMaterializeBatchProcessingLoader::concludeOWLlinkContent() {
+				// the optional ABox reduction (Konclude.CLI.Materialize.ReduceABox) can turn out to be not applicable after the reasoning (e.g., a
+				// representative is merged with other individuals or the reduced ontology is inconsistent), then everything is repeated without it
+				QString reason;
+				if (!mABoxReductionFallbackStarted && CABoxReductionControl::takeFallbackRequest(&reason)) {
+					mABoxReductionFallbackStarted = true;
+					logOutputMessage(QString("ABox reduction is not applicable (%1), computing the materialization again without the reduction.").arg(reason));
+					// the computation is repeated by a new process with the same arguments, so that the result is exactly the result of the unreduced computation
+					runWithoutABoxReduction();
+					finishCommandProcessing();
+					finishProcessing();
+					terminateProcessing();
+					return this;
+				}
+				return CCLIBatchProcessingLoader::concludeOWLlinkContent();
+			}
+
+
+			void CCLIMaterializeBatchProcessingLoader::addMaterializeCommands(const QString& testKB) {
 				CCreateKnowledgeBaseCommand* createKBCommand = new CCreateKnowledgeBaseCommand(testKB);
 				QStringList ontoIRIList;
 				ontoIRIList.append(mRequestFileString);
@@ -120,7 +144,10 @@ namespace Konclude {
 				// individual's tableau-merged/nominal-equal set to be
 				// completely known before the write step below reads it via
 				// CRealization::getSameRealization().
-				if (materializeSameIndividuals) {
+				bool copyFactsToSameIndividuals = CConfigDataReader::readConfigBoolean(mLoaderConfig, "Konclude.CLI.Materialize.CopyFactsToSameIndividuals", true);
+				// the ABox reduction needs the same individuals to verify that the representatives are not merged with other individuals
+				bool reduceABox = CABoxReducer::readReductionMode(mLoaderConfig) != CABoxReducer::REDUCTIONOFF;
+				if (materializeSameIndividuals || copyFactsToSameIndividuals || reduceABox) {
 					CForceSameIndividualsRealizationQueryCommand* forceSameIndividualsRealizationCommand = new CForceSameIndividualsRealizationQueryCommand(testKB);
 					addProcessingCommand(forceSameIndividualsRealizationCommand);
 				}
@@ -144,7 +171,6 @@ namespace Konclude {
 					CWriteCustomQueryCommand* writeAssertionsCommand = new CWriteCustomQueryCommand(testKB,CWriteQuery::WRITEMATERIALIZEDINDIVIDUALASSERTIONS,createMaterializeSerializer(mResponseFileString));
 					addProcessingCommand(writeAssertionsCommand);
 				}
-				processNextCommand();
 			}
 
 

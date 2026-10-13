@@ -72,6 +72,8 @@ namespace Konclude {
 				protected:
 
 					void createConsistencyTestingCommands();
+					void startConsistencyReasoning(const QString& knowledgeBase);
+					void handleIntervalStage(CGetCurrentKnowledgeBaseRevisionCommand* revisionCommand, const QString& outputFileName);
 					virtual void createTestingCommands();
 
 					virtual void writeCommandOutput(const QString& outputFileName, CCommand* processedCommand);
@@ -84,6 +86,9 @@ namespace Konclude {
 				private:
 					CIsConsistentQueryCommand* mConsistencyKBCommand;
 					CIsTriviallyConsistentQueryCommand* mTriviallyConsistencyKBCommand;
+					CGetCurrentKnowledgeBaseRevisionCommand* mIntervalRevisionCommand;
+					QString mTestKB;
+					QString mDerivedRelationsFile;
 
 
 				// private variables

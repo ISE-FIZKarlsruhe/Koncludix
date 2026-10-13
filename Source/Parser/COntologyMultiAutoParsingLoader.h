@@ -41,6 +41,7 @@
 #include "Control/Command/Records/CUnspecifiedMessageErrorRecord.h"
 
 #include "Reasoner/Generator/CConcreteOntologyUpdateCollectorBuilder.h"
+#include "Reasoner/Generator/CABoxReducer.h"
 #include "Reasoner/Generator/CConcreteOntologyRedlandTriplesDataExpressionMapper.h"
 
 #include "Reasoner/Revision/COntologyConfigurationExtension.h"
@@ -94,6 +95,10 @@ namespace Konclude {
 
 				QStringList getParserOrderFromFileName(const QString& fileName);
 
+				//! allows the optional reduction of the ABox (Konclude.CLI.Materialize.ReduceABox) after the ontology has been parsed, only valid
+				//! if the ontology is loaded in one step (the individuals that are removed must not be mentioned by later loaded axioms)
+				COntologyMultiAutoParsingLoader* setABoxReductionAllowed(bool allowed);
+
 
 			// protected methods
 			protected:
@@ -108,6 +113,7 @@ namespace Konclude {
 
 				CConcreteOntology* mOnt;
 				COntologyConfigurationExtension* mOntConfig;
+				bool mABoxReductionAllowed;
 
 			// private methods
 			private:

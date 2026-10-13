@@ -27,6 +27,7 @@
 // Namespace includes
 #include "OntologySettings.h"
 #include "COntologyContext.h"
+#include "CABoxReductionData.h"
 
 
 // Other includes
@@ -62,6 +63,10 @@ namespace Konclude {
 
 					QList<QString> getLoadedOntologyIRIs();
 
+					// reduction of the ABox (optional, see CABoxReducer); shared by all revisions of the ontology
+					COntologyLoadData* setABoxReductionData(const QSharedPointer<CABoxReductionData>& reductionData);
+					CABoxReductionData* getABoxReductionData();
+
 				// protected methods
 				protected:
 
@@ -69,6 +74,7 @@ namespace Konclude {
 				protected:
 					COntologyContext* mOntoContext;
 					QHash<QString, QString> mOntologyIriResolvedHash;
+					QSharedPointer<CABoxReductionData> mABoxReductionData;
 
 				// private methods
 				private:

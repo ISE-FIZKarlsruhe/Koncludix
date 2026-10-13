@@ -29,6 +29,7 @@ namespace Konclude {
 
 
 			CCLIRealizationBatchProcessingLoader::CCLIRealizationBatchProcessingLoader() {
+				mABoxReductionFallbackStarted = false;
 			}
 
 
@@ -50,7 +51,29 @@ namespace Konclude {
 				} else {
 					logOutputMessage(QString("Starting realization processing of individual '%1' for ontology '%2'.").arg(mIRINameString).arg(mRequestFileString));
 				}
-				QString testKB = QString("http://konclude.com/test/kb");
+				addRealizationCommands(QString("http://konclude.com/test/kb"));
+				processNextCommand();
+			}
+
+
+			COWLlinkProcessor* CCLIRealizationBatchProcessingLoader::concludeOWLlinkContent() {
+				// the optional ABox reduction can turn out to be not applicable after the reasoning, then everything is repeated without it
+				QString reason;
+				if (!mABoxReductionFallbackStarted && CABoxReductionControl::takeFallbackRequest(&reason)) {
+					mABoxReductionFallbackStarted = true;
+					CABoxReductionControl::setReductionSuppressed(true);
+					logOutputMessage(QString("ABox reduction is not applicable (%1), computing the realization again without the reduction.").arg(reason));
+					runWithoutABoxReduction();
+					finishCommandProcessing();
+					finishProcessing();
+					terminateProcessing();
+					return this;
+				}
+				return CCLIBatchProcessingLoader::concludeOWLlinkContent();
+			}
+
+
+			void CCLIRealizationBatchProcessingLoader::addRealizationCommands(const QString& testKB) {
 				CCreateKnowledgeBaseCommand* createKBCommand = new CCreateKnowledgeBaseCommand(testKB);
 				QStringList ontoIRIList;
 				ontoIRIList.append(mRequestFileString);
@@ -60,11 +83,14 @@ namespace Konclude {
 				addProcessingCommand(createKBCommand);
 				addProcessingCommand(loadKBCommand);
 				addProcessingCommand(realizeKBCommand);
+				if (CABoxReducer::readReductionMode(mLoaderConfig) != CABoxReducer::REDUCTIONOFF) {
+					// the ABox reduction needs the same individuals to verify that no individuals are merged by the reasoner
+					addProcessingCommand(new CForceSameIndividualsRealizationQueryCommand(testKB));
+				}
 				if (!mResponseFileString.isEmpty()) {
 					CWriteCustomQueryCommand* writeTypesCommand = new CWriteCustomQueryCommand(testKB,CWriteQuery::WRITEINDIVIDUALFLATTENEDTYPES,new CWriteQueryFileOWL2XMLSerializer(mResponseFileString));
 					addProcessingCommand(writeTypesCommand);
 				}
-				processNextCommand();
 			}
 
 

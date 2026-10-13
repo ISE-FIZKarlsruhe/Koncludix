@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#">
+<Set key="Konclude.CLI.Interval.GroupByProperty"><Literal>http://example.org/time#sameSample</Literal></Set>
+<Set key="Konclude.CLI.Interval.OutputVocabulary"><Literal>allen</Literal></Set>
+</RequestMessage>

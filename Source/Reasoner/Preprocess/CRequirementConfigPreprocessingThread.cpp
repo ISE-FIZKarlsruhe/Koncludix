@@ -19,6 +19,8 @@
  */
 
 #include "CRequirementConfigPreprocessingThread.h"
+#include "Config/CConfigDataReader.h"
+#include "Reasoner/Kernel/Task/CConsistenceTaskData.h"
 
 
 namespace Konclude {
@@ -424,7 +426,13 @@ namespace Konclude {
 				while (prevOntology && !lastConsOntology) {
 					CConsistence* prevConsistenceData = prevOntology->getConsistence();
 					if (prevConsistenceData && prevConsistenceData->isOntologyConsistent()) {
-						if (prevConsistenceData->areAllIndividualsRepresentativelyStored() || prevConsistenceData->hasConsistenceModelData()) {
+						// the incremental consistency test needs the model of the previous revision as tasks (a completion graph that can be extended); a previous revision that only stored its individuals in the representative cache cannot be extended incrementally and the ontology is processed completely instead
+bool prevUsableConsistencyModel = false;
+if (prevConsistenceData->hasConsistenceModelData()) {
+	Konclude::Reasoner::Kernel::Task::CConsistenceTaskData* prevModelTaskData = dynamic_cast<Konclude::Reasoner::Kernel::Task::CConsistenceTaskData*>(prevConsistenceData->getConsistenceModelData());
+	prevUsableConsistencyModel = prevModelTaskData && prevModelTaskData->getDeterministicSatisfiableTask(); if (!CConfigDataReader::readConfigBoolean(reqConfPreCompItem->getOntology()->getConfiguration(),"Konclude.Ontology.Revision.ReuseConsistencyModel")) { prevUsableConsistencyModel = false; }
+}
+if (prevUsableConsistencyModel) {
 							lastConsOntology = prevOntology;
 						}
 					}

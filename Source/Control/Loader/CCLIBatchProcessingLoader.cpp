@@ -160,6 +160,18 @@ namespace Konclude {
 			void CCLIBatchProcessingLoader::writeCommandOutput(const QString& outputFileName, CCommand* processedCommand) {
 			}
 
+			int CCLIBatchProcessingLoader::runWithoutABoxReduction() {
+				QStringList arguments = QCoreApplication::arguments();
+				if (!arguments.isEmpty()) {
+					arguments.removeFirst();
+				}
+				arguments.append(QString("+=Konclude.CLI.Materialize.ReduceABox=off"));
+				arguments.append(QString("+=Konclude.CLI.Realization.ReduceABox=off"));
+				CLogger::getInstance()->waitSynchronization();
+				return QProcess::execute(QCoreApplication::applicationFilePath(), arguments);
+			}
+
+
 			void CCLIBatchProcessingLoader::finishCommandProcessing() {
 				if (mProcessingCommandData) {
 					if (mProcessingCommandData->mMeasureTime) {

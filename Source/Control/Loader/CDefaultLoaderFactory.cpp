@@ -107,6 +107,12 @@ namespace Konclude {
 					loader = new CCLIRealizationBatchProcessingLoader();
 				} else if (loaderName == "CLIMaterializeBatchProcessingLoader") {
 					loader = new CCLIMaterializeBatchProcessingLoader();
+				} else if (loaderName == "CLIExplainBatchProcessingLoader") {
+					loader = new CCLIExplainBatchProcessingLoader();
+				} else if (loaderName == "CLILintBatchProcessingLoader") {
+					loader = new CCLILintBatchProcessingLoader();
+				} else if (loaderName == "CLIIntervalBatchProcessingLoader") {
+					loader = new CCLIIntervalBatchProcessingLoader();
 				} else if (loaderName == "LoggerConfigurationLoader") {
 					loader = new CLoggerConfigurationLoader();
 				} else if (loaderName == "JNICommandProcessorLoader") {
@@ -194,6 +200,12 @@ namespace Konclude {
 				} else if (loaderName == "CLIRealizationBatchProcessingLoader") {
 					canLoad = true;
 				} else if (loaderName == "CLIMaterializeBatchProcessingLoader") {
+					canLoad = true;
+				} else if (loaderName == "CLILintBatchProcessingLoader") {
+					canLoad = true;
+				} else if (loaderName == "CLIIntervalBatchProcessingLoader") {
+					canLoad = true;
+				} else if (loaderName == "CLIExplainBatchProcessingLoader") {
 					canLoad = true;
 				} else if (loaderName == "LoggerConfigurationLoader") {
 					canLoad = true;

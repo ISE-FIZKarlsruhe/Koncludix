@@ -32,6 +32,8 @@
 #include "CCLIBatchProcessingLoader.h"
 
 // Other includes
+#include "Reasoner/Generator/CABoxReducer.h"
+#include "Reasoner/Ontology/CABoxReductionData.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -73,11 +75,16 @@ namespace Konclude {
 				protected:
 
 					void createMaterializeTestingCommands();
+					void addMaterializeCommands(const QString& testKB);
 					virtual void createTestingCommands();
+
+					// repeats the materialization without ABox reduction if the reduced result cannot be used
+					virtual COWLlinkProcessor* concludeOWLlinkContent();
 
 
 				// protected variables
 				protected:
+					bool mABoxReductionFallbackStarted;
 
 				// private methods
 				private:

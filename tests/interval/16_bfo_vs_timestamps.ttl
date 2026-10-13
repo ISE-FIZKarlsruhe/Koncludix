@@ -1,0 +1,8 @@
+# a precedes b (BFO) but the time stamps say a ends (30) after b starts (10).
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix ex: <http://ex.org/> .
+
+ex:a obo:BFO_0000063 ex:b .
+ex:a prov:startedAtTime 20 ; prov:endedAtTime 30 .
+ex:b prov:startedAtTime 10 ; prov:endedAtTime 15 .

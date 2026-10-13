@@ -30,6 +30,8 @@
 // Namespace includes
 #include "LoaderSettings.h"
 #include "CCLIBatchProcessingLoader.h"
+#include "Reasoner/Generator/CABoxReducer.h"
+#include "Reasoner/Ontology/CABoxReductionData.h"
 
 // Other includes
 
@@ -72,11 +74,16 @@ namespace Konclude {
 				protected:
 
 					void createRealizationTesingCommands();
+					void addRealizationCommands(const QString& testKB);
 					virtual void createTestingCommands();
+
+					// repeats the realization without ABox reduction if the reduced result cannot be used
+					virtual COWLlinkProcessor* concludeOWLlinkContent();
 
 
 				// protected variables
 				protected:
+					bool mABoxReductionFallbackStarted;
 
 				// private methods
 				private:

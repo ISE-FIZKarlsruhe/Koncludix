@@ -1,0 +1,14 @@
+Prefix(:=<http://uni.example/o#>)
+Ontology(<http://uni.example/o>
+Declaration(Class(:Person))
+Declaration(Class(:Director))
+Declaration(Class(:Professor))
+Declaration(Class(:Staff))
+Declaration(Class(:FormerDirector))
+Declaration(Class(:Alumni))
+SubClassOf(:Director :Staff)
+SubClassOf(:Professor :Staff)
+# a person holds only one of these main roles at a time
+DisjointClasses(:Director :Professor)
+SubClassOf(:FormerDirector :Alumni)
+)

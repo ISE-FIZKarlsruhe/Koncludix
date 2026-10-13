@@ -182,6 +182,7 @@ namespace Konclude {
 						virtual CSaturationCache* getSaturationAssociationExpansionCache();
 
 						virtual CReasonerManager *initializeManager(CConfigurationProvider *configurationProvider);
+						cint64 getSmartWorkerCount();
 
 						virtual CTaskHandleAlgorithm *createTaskHandleAlgorithm();
 

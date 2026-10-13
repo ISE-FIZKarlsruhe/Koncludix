@@ -186,6 +186,11 @@ namespace Konclude {
 							mConfCheckCriticalConcepts = config->isSaturationCriticalConceptTestingActivated();
 							mConfConceptsExtensionProcessing = config->isSaturationSuccessorExtensionActivated();
 							mConfNominalProcessing = config->isNominalSaturationActivated();
+							cint64 nominalSaturationMaxIndividualCount = config->getNominalSaturationMaxIndividualCount();
+							if (mConfNominalProcessing && nominalSaturationMaxIndividualCount >= 0 && ontology->getABox()->getIndividualCount() > nominalSaturationMaxIndividualCount) {
+								// many individuals: nominals are handled by the tableau algorithm only (see the description of the option)
+								mConfNominalProcessing = false;
+							}
 
 							mConfReferredNodeManyConceptCount = config->getSaturationReferredNodeManyConceptCount();
 							mConfManyConceptReferredNodeCountProcessLimit = config->getSaturationManyConceptReferredNodeCountProcessLimit();

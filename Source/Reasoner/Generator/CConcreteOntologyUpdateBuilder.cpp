@@ -1408,7 +1408,9 @@ namespace Konclude {
 					FOREACHIT (CAssertionAxiomExpression* assAxiom, indiAssAxiomList) {
 
 						CBuildExpression::ExpressionType expType = assAxiom->getType();
-						if (!mRetractUpdatedAxiomSet->contains(assAxiom)) {
+						// an assertion counts as retracted if it is in the retracted set of this revision or is not told any more: when a Retract and a later Tell were
+						// not built one after the other, the retracted set of the last revision alone does not know the earlier Retract
+						if (mTellAxiomSet->contains(assAxiom) && !mRetractUpdatedAxiomSet->contains(assAxiom)) {
 							mIndiTermAssertionAxiomHash->insertMulti(indiTermExp,assAxiom);
 
 							if (expType == CBuildExpression::BETCLASSASSERTION) {	
@@ -1472,6 +1474,9 @@ namespace Konclude {
 									}
 								}
 							}
+						} else {
+							// retracted: forget the pair, otherwise the assertion is not taken up again when it is told once more later (the check in the update loop above sees it as already known)
+							mIndiTermAssertionAxiomSet->remove(QPair<CIndividualTermExpression*,CAssertionAxiomExpression*>(indiTermExp,assAxiom));
 						}
 					}
 				}
@@ -2546,6 +2551,12 @@ namespace Konclude {
 
 			bool CConcreteOntologyUpdateBuilder::buildIndividualIDs() {
 				cint64 nextIndiID = aBox->getIndividualCount();
+				// A revision that is rebuilt from the basement starts with an empty individual vector, but the individuals found by name keep the IDs they got in the previous
+				// revision (they are installed into the vector below). New individuals must therefore start after the highest ID of the individuals that are already waiting
+				// for installation, otherwise they get an ID that is already in use and overwrite an old individual in the vector (its instances disappear after a Tell).
+				FOREACHIT (CIndividual* installIndi, mInstallIndividualList) {
+					nextIndiID = qMax(nextIndiID, installIndi->getIndividualID() + 1);
+				}
 
 
 

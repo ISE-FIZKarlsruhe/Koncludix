@@ -1,0 +1,12 @@
+Prefix(:=<http://hr.example/o#>)
+Ontology(<http://hr.example/o>
+Declaration(Class(:Employee))
+Declaration(Class(:Manager))
+Declaration(Class(:Student))
+Declaration(Class(:Contractor))
+Declaration(ObjectProperty(:worksFor))
+SubClassOf(:Manager :Employee)
+SubClassOf(:Contractor :Employee)
+DisjointClasses(:Employee :Student)
+ObjectPropertyDomain(:worksFor :Employee)
+)

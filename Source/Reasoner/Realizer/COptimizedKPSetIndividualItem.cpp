@@ -137,6 +137,15 @@ namespace Konclude {
 				return this;
 			}
 
+			bool COptimizedKPSetIndividualItem::isConceptInstancesInitialized() {
+				return mConceptInstancesInitializedFlag;
+			}
+
+			COptimizedKPSetIndividualItem* COptimizedKPSetIndividualItem::setConceptInstancesInitialized(bool initialized) {
+				mConceptInstancesInitializedFlag = initialized;
+				return this;
+			}
+
 			COptimizedKPSetIndividualItem* COptimizedKPSetIndividualItem::initInstantiatedItem(cint64 indiId, CIndividual* individual) {
 				mIndividual = individual;
 				mIndividualId = indiId;
@@ -147,6 +156,7 @@ namespace Konclude {
 				mPossibleRoleInstantiatedCount = 0;
 				mPossibleSameIndividualCount = 0;
 				mToProcessPossibleSameIndividualsFlag = false;
+				mConceptInstancesInitializedFlag = false;
 				mPossibleSameIndividualsProcessingQueuedFlag = false;
 				mItemSameIndividualMerged = nullptr;
 				mInitializingRoleCandidateCount = 0;

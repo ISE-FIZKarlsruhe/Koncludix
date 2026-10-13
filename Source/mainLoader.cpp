@@ -37,6 +37,7 @@
 
 #include "Control/Loader/CCommandLineLoader.h"
 #include "Control/Loader/CDefaultLoaderFactory.h"
+#include "Control/Loader/CRunSupervisor.h"
 
 #include "Control/Interface/CommandLine/CCommandLinePreparationTranslatorSelector.h"
 
@@ -52,6 +53,14 @@ using namespace Konclude::Control::Interface::CommandLine;
 
 int main(int argc, char *argv[])
 {
+	// memory supervision for large inputs (Linux): runs the command in a child process that is restarted with another hash seed when it needs too much memory
+	{
+		int supervisorExitCode = 0;
+		if (Konclude::Control::Loader::CRunSupervisor::runSupervised(argc, argv, supervisorExitCode)) {
+			return supervisorExitCode;
+		}
+	}
+
 	// DETERMINISM FIX: Qt seeds its hash containers randomly per process; with a fixed seed (and address-independent expression hashing) the ontology build, concept numbering and therefore the search order are reproducible. Override with KONCLUDE_QHASH_SEED=<int> or -1 to keep Qt's random seed.
 	{
 		const char* kseedEnv = getenv("KONCLUDE_QHASH_SEED");
@@ -98,7 +107,7 @@ int main(int argc, char *argv[])
 
 	logger->shutdownLogger();
 
-	return 0;
+	return Konclude::Control::Loader::CCLIExplainBatchProcessingLoader::getProcessExitCode();
 }
 
 

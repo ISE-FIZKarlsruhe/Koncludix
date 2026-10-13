@@ -19,6 +19,8 @@
  */
 
 #include "CReasonerManagerThread.h"
+#include <QFileInfo>
+#include <QFile>
 
 
 namespace Konclude {
@@ -37,6 +39,43 @@ namespace Konclude {
 					mPreprocessingManager = 0;
 					mRealizationManager = 0;
 					mAnswererManager = 0;
+				}
+
+
+				// Decides the number of worker threads when no number is given: Konclude looks at the size of the input file and at the available memory.
+				// Several workers explore sibling alternatives of the search speculatively, which needs several times the memory (OWL2Bench DL-5, 32 MB: about
+				// 2 GB with one worker, more than 10 GB with four), and large ABoxes are not faster with more workers. Small inputs use up to four workers.
+				cint64 CReasonerManagerThread::getSmartWorkerCount() {
+					cint64 cores = qMax(1, CThread::idealThreadCount());
+					QString inputFile = CConfigDataReader::readConfigString(configProvider,"Konclude.CLI.RequestFile",QString());
+					cint64 workers = 1;
+					if (!inputFile.isEmpty()) {
+						qint64 inputSize = QFileInfo(inputFile).size();
+						if (inputSize > 0) {
+							if (inputSize <= 1024*1024) {
+								workers = qMin(cores, (cint64)4);
+							} else if (inputSize <= 8*1024*1024) {
+								workers = qMin(cores, (cint64)2);
+							}
+						}
+					}
+#ifdef Q_OS_LINUX
+					QFile memInfoFile("/proc/meminfo");
+					if (memInfoFile.open(QIODevice::ReadOnly)) {
+						// files in /proc report the size 0, so the whole content is read at once
+						QByteArray memInfoContent = memInfoFile.readAll();
+						foreach (QByteArray memLine, memInfoContent.split('\n')) {
+							if (memLine.startsWith("MemAvailable:")) {
+								qint64 availableMB = memLine.mid(13).trimmed().split(' ').first().toLongLong() / 1024;
+								// about 1.5 GB per worker are kept free
+								workers = qMin(workers, qMax((qint64)1, availableMB / 1536));
+								break;
+							}
+						}
+					}
+#endif
+					LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Using %1 worker thread(s) (chosen from input size and available memory; set the number explicitly with -w).").arg(workers),this);
+					return workers;
 				}
 
 
@@ -66,6 +105,8 @@ namespace Konclude {
 					if (!configErrorFlag) {
 						if (processorCountString == "AUTO") {
 							processorCount = CThread::idealThreadCount();
+						} else if (processorCountString == "SMART") {
+							processorCount = getSmartWorkerCount();
 						} else {
 							qint64 convertedWorkerCount = processorCountString.toInt(&configErrorFlag);
 							if (configErrorFlag) {

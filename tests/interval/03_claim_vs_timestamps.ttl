@@ -1,0 +1,9 @@
+# A claim that contradicts the time stamps: the stamps say that a ends (10:00) before b starts (11:00), the claim says that a is after b.
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix t: <http://example.org/time#> .
+@prefix ex: <http://ex.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:a prov:startedAtTime "2026-01-01T08:00:00Z"^^xsd:dateTime ; prov:endedAtTime "2026-01-01T10:00:00Z"^^xsd:dateTime .
+ex:b prov:startedAtTime "2026-01-01T11:00:00Z"^^xsd:dateTime ; prov:endedAtTime "2026-01-01T12:00:00Z"^^xsd:dateTime .
+ex:a t:after ex:b .

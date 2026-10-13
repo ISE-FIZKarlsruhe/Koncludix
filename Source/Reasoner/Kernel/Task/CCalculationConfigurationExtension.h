@@ -141,6 +141,7 @@ namespace Konclude {
 						bool isSuccessorConceptSaturationExpansionActivated();
 						bool isAtLeastBackendNeighbourSatisfactionActivated();
 						cint64 getBranchingStatisticsAnalysingMaximumDepth();
+						cint64 getNominalSaturationMaxIndividualCount();
 						bool isSaturationCachingActivated();
 						bool isSaturationCriticalConceptTestingActivated();
 						bool isSaturationDirectCriticalToInsufficientActivated();
@@ -287,6 +288,7 @@ namespace Konclude {
 						bool mConfSuccessorConceptSaturationExpansionActivated;
 						bool mConfAtLeastBackendNeighbourSatisfactionActivated;
 						cint64 mConfBranchingStatisticsAnalysingMaximumDepth;
+						cint64 mConfNominalSaturationMaxIndividualCount;
 						bool mConfSaturationCachingActivated;
 						bool mConfSaturationCriticalConceptTestingActivated;
 						bool mConfSaturationDirectCriticalToInsufficientActivated;
@@ -444,6 +446,7 @@ namespace Konclude {
 						bool mConfSuccessorConceptSaturationExpansionChecked;
 						bool mConfAtLeastBackendNeighbourSatisfactionChecked;
 						bool mConfBranchingStatisticsAnalysingMaximumDepthChecked;
+						bool mConfNominalSaturationMaxIndividualCountChecked;
 						bool mConfSaturationCachingChecked;
 						bool mConfSaturationCriticalConceptTestingChecked;
 						bool mConfSaturationDirectCriticalToInsufficientChecked;

@@ -1,0 +1,9 @@
+# Warnings: x has the same start and end (not an interval), y has a time value that is not a date or a number.
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix ex: <http://ex.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:x prov:startedAtTime "2026-01-01T08:00:00Z"^^xsd:dateTime ; prov:endedAtTime "2026-01-01T08:00:00Z"^^xsd:dateTime .
+ex:y prov:startedAtTime "yesterday" ; prov:endedAtTime "2026-01-01T09:00:00Z"^^xsd:dateTime .
+ex:z prov:startedAtTime "2026-01-01T08:00:00Z"^^xsd:dateTime ; prov:endedAtTime "2026-01-01T09:00:00Z"^^xsd:dateTime .
+ex:w prov:startedAtTime "2026-01-01T09:30:00Z"^^xsd:dateTime ; prov:endedAtTime "2026-01-01T10:00:00Z"^^xsd:dateTime .

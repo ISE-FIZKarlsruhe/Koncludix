@@ -117,7 +117,7 @@ namespace Konclude {
 												}
 											}
 										}
-										if (!indi->getIndividualNominalConcept() && prevIndividual->getIndividualNominalConcept()) {
+										if (prevIndividual && !indi->getIndividualNominalConcept() && prevIndividual->getIndividualNominalConcept()) {      // prevIndividual is null for an individual that is new in this revision
 											indi->setIndividualNominalConcept(prevIndividual->getIndividualNominalConcept());											
 										}
 									}

@@ -50,6 +50,7 @@
 #include "Reasoner/Ontology/CDataLiteral.h"
 #include "Reasoner/Ontology/CDatatype.h"
 #include "Reasoner/Ontology/CIndividual.h"
+#include "Reasoner/Ontology/CABoxReductionData.h"
 
 #include "Reasoner/Taxonomy/CTaxonomy.h"
 #include "Reasoner/Taxonomy/CHierarchyNode.h"
@@ -173,6 +174,28 @@ namespace Konclude {
 					// those (and call them again afterward so a chain-derived fact
 					// still rolls up to Q's own super-roles / gets its own inverse).
 					void propagatePropertyChains();
+
+
+					// ---- optional ABox reduction (Konclude.CLI.Materialize.ReduceABox, see CABoxReducer) ----
+					// If the ontology was loaded with a reduced ABox, interchangeable individuals are represented by one individual in the reasoner.
+					// The results of such a representative are copied to the removed individuals while writing:
+					//  - class assertions and same individuals: copied from the representative,
+					//  - data property assertions: the asserted values of the individual itself (and their super properties),
+					//  - object property assertions between a representative and a pinned individual (or itself): copied from the representative,
+					//  - object property assertions between two individuals that are not pinned: rebuilt from the asserted edges (sub-property
+					//    and inverse closure computed with the same propagation as for the unreduced ABox).
+					// Before anything is written it is verified that the representatives are not merged with other individuals, otherwise
+					// the fallback to the unreduced computation is requested (CABoxReductionControl).
+					struct CReductionClosure {
+						QList<CRole*> mForward;
+						QList<CRole*> mBackward;
+					};
+
+					bool checkABoxReductionApplicable(CRealization* realization, QString& problem);
+					void writeCollectedDataAssertions(const QString& individualName, bool anonymous, QHash<CRole*, QSet<QPair<QString,QString> > >& collectedDataAssertions);
+					void writeRemovedMemberDataAssertions(const QStringList& members);
+					const CReductionClosure& getReductionClosure(CRole* role);
+					void writeReducedAssertionEdges();
 
 					virtual void writeOntologyStart() = 0;
 					virtual void writeOntologyEnd() = 0;
@@ -298,6 +321,29 @@ namespace Konclude {
 					// written exactly once (when the first of its members is
 					// visited) rather than once per member.
 					QSet<QString> mSameIndividualEmittedSet;
+
+					// Individuals that are the same (owl:sameAs, e.g. merged by a functional property) share all their facts. The groups are determined before the facts are
+					// collected, so that the facts of one member can be copied to all members (option Konclude.CLI.Materialize.CopyFactsToSameIndividuals). This also
+					// makes the output complete when the realization has the data of only one member of a group.
+					bool mCopyFactsToSameIndividuals;
+					QHash<QString,int> mSameGroupOfIndividual;
+					// one shared copy of the name of every individual: the collected facts (one entry per object property fact) then share the string data of the names
+					// instead of holding a separate copy per fact (saves a few hundred bytes per fact on large ABoxes)
+					QHash<QString,QString> mIndividualNamePool;
+					QList< QList< QPair<QString,bool> > > mSameGroups;
+					QHash<int, QSet<QString> > mSameGroupTypes;
+					QHash<int, QHash<CRole*, QSet< QPair<QString,QString> > > > mSameGroupDataAssertions;
+					void collectSameIndividualGroups(CSameRealization* sameRealization);
+					void writeFactsOfSameIndividualGroups();
+					void copyObjectPropertyFactsToSameIndividuals();
+
+					// reduction of the ABox, null if the ABox is not reduced
+					CABoxReductionData* mReduction;
+					const QStringList* mCurrentIndividualMembers;
+					bool mCountAllSameIndividuals;
+					QHash<QString, CRole*> mObjectPropertyIRIRoleHash;
+					QHash<QString, CRole*> mDataPropertyIRIRoleHash;
+					QHash<CRole*, CReductionClosure> mReductionClosureHash;
 
 					bool mUseAbbreviatedIRIs;
 					bool mWriteDeclarations;

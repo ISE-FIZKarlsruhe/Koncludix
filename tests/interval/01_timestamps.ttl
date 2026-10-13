@@ -1,0 +1,9 @@
+# Three activities with PROV-O time stamps. The interval command derives the Allen relations between them.
+#   casting 08:00-10:00, forging 10:00-12:00 (starts when casting ends: meets), testing 11:00-15:00 (starts while forging runs: overlaps)
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix ex: <http://ex.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:casting a prov:Activity ; prov:startedAtTime "2026-01-01T08:00:00Z"^^xsd:dateTime ; prov:endedAtTime "2026-01-01T10:00:00Z"^^xsd:dateTime .
+ex:forging a prov:Activity ; prov:startedAtTime "2026-01-01T10:00:00Z"^^xsd:dateTime ; prov:endedAtTime "2026-01-01T12:00:00Z"^^xsd:dateTime .
+ex:testing a prov:Activity ; prov:startedAtTime "2026-01-01T11:00:00Z"^^xsd:dateTime ; prov:endedAtTime "2026-01-01T15:00:00Z"^^xsd:dateTime .

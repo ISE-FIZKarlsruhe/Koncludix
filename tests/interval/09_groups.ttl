@@ -1,0 +1,10 @@
+# Two samples with two steps each. With Konclude.CLI.Interval.GroupByProperty = sameSample the relations are derived only inside a sample (2 pairs instead of 6).
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix t: <http://example.org/time#> .
+@prefix ex: <http://ex.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:s1a prov:startedAtTime "1"^^xsd:integer ; prov:endedAtTime "5"^^xsd:integer ; t:sameSample ex:s1b .
+ex:s1b prov:startedAtTime "6"^^xsd:integer ; prov:endedAtTime "9"^^xsd:integer .
+ex:s2a prov:startedAtTime "20"^^xsd:integer ; prov:endedAtTime "25"^^xsd:integer ; t:sameSample ex:s2b .
+ex:s2b prov:startedAtTime "22"^^xsd:integer ; prov:endedAtTime "30"^^xsd:integer .

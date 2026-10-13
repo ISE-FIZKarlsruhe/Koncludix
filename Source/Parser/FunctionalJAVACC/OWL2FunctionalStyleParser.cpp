@@ -1,5 +1,6 @@
 /* OWL2FunctionalStyleParser.cc */
 #include "OWL2FunctionalStyleParser.h"
+#include "Parser/CLintParseRecorder.h"
 namespace Konclude {
 namespace Parser {
 namespace FunctionalJAVACC {
@@ -2969,7 +2970,7 @@ assert(false);
   }
 
 
-CBuildExpressionPtr OWL2FunctionalStyleParser::hasKey() {if (!hasError) {
+CBuildExpressionPtr OWL2FunctionalStyleParser::hasKey() {CBuildExpressionPtr lintClassExp = nullptr; QList<CBuildExpression*> lintObjKeys, lintDataKeys; if (!hasError) {
     
     jj_consume_token(HAS_KEY);
     }
@@ -2983,7 +2984,7 @@ CBuildExpressionPtr OWL2FunctionalStyleParser::hasKey() {if (!hasError) {
     }
     if (!hasError) {
     
-    classExpression();
+    lintClassExp = classExpression();
     }
     if (!hasError) {
     
@@ -3004,7 +3005,7 @@ CBuildExpressionPtr OWL2FunctionalStyleParser::hasKey() {if (!hasError) {
         goto end_label_13;
       }if (!hasError) {
       
-      objectPropertyExpression();
+      lintObjKeys.append(objectPropertyExpression());
       }
       
     }
@@ -3033,7 +3034,7 @@ CBuildExpressionPtr OWL2FunctionalStyleParser::hasKey() {if (!hasError) {
         goto end_label_14;
       }if (!hasError) {
       
-      objectPropertyExpression();
+      lintDataKeys.append(objectPropertyExpression());
       }
       
     }
@@ -3048,6 +3049,7 @@ CBuildExpressionPtr OWL2FunctionalStyleParser::hasKey() {if (!hasError) {
     jj_consume_token(CLOSE_BRACKET);
     }
     
+if (!hasError && Konclude::Parser::CLintParseRecorder::isRecording()) { Konclude::Parser::CLintParseRecorder::recordHasKey(lintClassExp, lintObjKeys, lintDataKeys); }
 return nullptr;
 assert(false);
   }

@@ -1,0 +1,14 @@
+# OWL-Time style: intervals with hasBeginning / hasEnd to instants that carry the date. i1 = March 1-10, i2 = March 10-20 (i1 meets i2), i3 = March 15-18 (inside i2).
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix ex: <http://ex.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:i1 a time:ProperInterval ; time:hasBeginning ex:i1b ; time:hasEnd ex:i1e .
+ex:i2 a time:ProperInterval ; time:hasBeginning ex:i2b ; time:hasEnd ex:i2e .
+ex:i3 a time:ProperInterval ; time:hasBeginning ex:i3b ; time:hasEnd ex:i3e .
+ex:i1b a time:Instant ; time:inXSDDateTimeStamp "2026-03-01T00:00:00Z"^^xsd:dateTimeStamp .
+ex:i1e a time:Instant ; time:inXSDDateTimeStamp "2026-03-10T00:00:00Z"^^xsd:dateTimeStamp .
+ex:i2b a time:Instant ; time:inXSDDateTimeStamp "2026-03-10T00:00:00Z"^^xsd:dateTimeStamp .
+ex:i2e a time:Instant ; time:inXSDDateTimeStamp "2026-03-20T00:00:00Z"^^xsd:dateTimeStamp .
+ex:i3b a time:Instant ; time:inXSDDateTimeStamp "2026-03-15T00:00:00Z"^^xsd:dateTimeStamp .
+ex:i3e a time:Instant ; time:inXSDDateTimeStamp "2026-03-18T00:00:00Z"^^xsd:dateTimeStamp .

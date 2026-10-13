@@ -1,0 +1,6 @@
+# Two different relations for the same pair: a before b and a meets b.
+@prefix t: <http://example.org/time#> .
+@prefix ex: <http://ex.org/> .
+
+ex:a t:before ex:b .
+ex:a t:meets ex:b .

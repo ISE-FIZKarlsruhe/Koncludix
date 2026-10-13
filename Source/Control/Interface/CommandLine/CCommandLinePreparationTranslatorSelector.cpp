@@ -41,6 +41,9 @@ namespace Konclude {
 					mTranslatorList.append(new CCLISatisfiabilityComandLinePreparationTranslator(loaderFactory));
 					mTranslatorList.append(new CCLIRealizationComandLinePreparationTranslator(loaderFactory));
 					mTranslatorList.append(new CCLIMaterializeComandLinePreparationTranslator(loaderFactory));
+					mTranslatorList.append(new CCLIExplainComandLinePreparationTranslator(loaderFactory));
+					mTranslatorList.append(new CCLILintComandLinePreparationTranslator(loaderFactory));
+					mTranslatorList.append(new CCLIIntervalComandLinePreparationTranslator(loaderFactory));
 					mTranslatorList.append(new CSPARQLServerComandLinePreparationTranslator(loaderFactory));
 					mTranslatorList.append(new CHelpComandLinePreparationTranslator(loaderFactory));
 				}

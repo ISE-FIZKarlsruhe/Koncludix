@@ -29,6 +29,13 @@ namespace Konclude {
 		COntologyMultiAutoParsingLoader::COntologyMultiAutoParsingLoader(CConcreteOntology *ont, COntologyConfigurationExtension *ontConfig) : CLogIdentifier("::Konclude::Parser::MultiAutoParsingLoader", this) {
 			mOntConfig = ontConfig;
 			mOnt = ont;
+			mABoxReductionAllowed = false;
+		}
+
+
+		COntologyMultiAutoParsingLoader* COntologyMultiAutoParsingLoader::setABoxReductionAllowed(bool allowed) {
+			mABoxReductionAllowed = allowed;
+			return this;
 		}
 
 
@@ -296,6 +303,14 @@ namespace Konclude {
 			}
 
 			importOntologiesList.append(builder->takeAddedImportOntologyList());
+
+			if (parsingSucceeded && !triplesParsed && mABoxReductionAllowed && ontConfig) {
+				// optional reduction of the ABox (Konclude.CLI.Materialize.ReduceABox): interchangeable individuals are represented by one individual,
+				// the writer of the materialization copies the results to the individuals that were left out
+				CABoxReducer::reduceOntology(ont, builder, ontConfig, importOntologiesList);
+			} else if (parsingSucceeded && triplesParsed && mABoxReductionAllowed && ontConfig && CABoxReducer::readReductionMode(ontConfig) != CABoxReducer::REDUCTIONOFF) {
+				LOG(INFO, "::Konclude::CLIBatchProcessor", logTr("ABox reduction not applied: the ontology was loaded as RDF triples (use OWL functional syntax or OWL/XML)."), this);
+			}
 
 			return parsingSucceeded;
 		}

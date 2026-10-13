@@ -1,0 +1,6 @@
+# x preceded by y, y preceded by z (BFO_0000062): z precedes y precedes x, so z is before x (derived, not asserted).
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix ex: <http://ex.org/> .
+
+ex:x obo:BFO_0000062 ex:y .
+ex:y obo:BFO_0000062 ex:z .

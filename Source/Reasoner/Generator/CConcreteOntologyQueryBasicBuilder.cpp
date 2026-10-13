@@ -984,8 +984,7 @@ namespace Konclude {
 					if (classExp) {
 						CConcept* concept = getConceptFromBuildExpression(classExp);
 
-						QString iriClassNameString = CIRIName::getRecentIRIName(concept->getClassNameLinker());
-						QString classString = iriClassNameString;
+						QString classString = getStringFromConcept(concept);      // also for a class expression such as the complement of a class, which has no class name
 
 						CCalculationConfigurationExtension *calcConfig = new CCalculationConfigurationExtension(config,0);
 						CFlattenedInstancesQuery *query = new CFlattenedInstancesQuery(mOntology,calcConfig,concept,flattenedInstances->isDirect(),classString,queryName);
@@ -1062,8 +1061,7 @@ namespace Konclude {
 					if (classExp) {
 						CConcept* concept = getConceptFromBuildExpression(classExp);
 
-						QString iriClassNameString = CIRIName::getRecentIRIName(concept->getClassNameLinker());
-						QString classString = iriClassNameString;
+						QString classString = getStringFromConcept(concept);      // also for a class expression such as the complement of a class, which has no class name
 
 						CCalculationConfigurationExtension *calcConfig = new CCalculationConfigurationExtension(config,0);
 						CInstancesQuery *query = new CInstancesQuery(mOntology,calcConfig,concept,instancesExp->isDirect(),classString,queryName);
@@ -1088,8 +1086,7 @@ namespace Konclude {
 						CConcept* concept = getConceptFromBuildExpression(classExp);
 
 						if (concept) {
-							QString iriClassNameString = CIRIName::getRecentIRIName(concept->getClassNameLinker());
-							QString classString = iriClassNameString;
+							QString classString = getStringFromConcept(concept);      // also for a class expression such as the complement of a class, which has no class name
 	
 							CCalculationConfigurationExtension *calcConfig = new CCalculationConfigurationExtension(config,0);
 							CSubClassesQuery *query = new CSubClassesQuery(mOntology,calcConfig,concept,subClassesExp->isDirect(),classString,queryName);
@@ -1117,8 +1114,7 @@ namespace Konclude {
 						CConcept* concept = getConceptFromBuildExpression(classExp);
 
 						if (concept) {
-							QString iriClassNameString = CIRIName::getRecentIRIName(concept->getClassNameLinker());
-							QString classString = iriClassNameString;
+							QString classString = getStringFromConcept(concept);      // also for a class expression such as the complement of a class, which has no class name
 
 							CCalculationConfigurationExtension *calcConfig = new CCalculationConfigurationExtension(config,0);
 							CSuperClassesQuery *query = new CSuperClassesQuery(mOntology,calcConfig,concept,superClassesExp->isDirect(),classString,queryName);
@@ -1146,8 +1142,7 @@ namespace Konclude {
 						CConcept* concept = getConceptFromBuildExpression(classExp);
 
 						if (concept) {
-							QString iriClassNameString = CIRIName::getRecentIRIName(concept->getClassNameLinker());
-							QString classString = iriClassNameString;
+							QString classString = getStringFromConcept(concept);      // also for a class expression such as the complement of a class, which has no class name
 
 							CCalculationConfigurationExtension *calcConfig = new CCalculationConfigurationExtension(config,0);
 							CEquivalentClassesQuery *query = new CEquivalentClassesQuery(mOntology,calcConfig,concept,classString,queryName);

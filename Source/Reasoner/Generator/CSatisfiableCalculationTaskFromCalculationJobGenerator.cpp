@@ -354,7 +354,9 @@ namespace Konclude {
 						if (prevNondetConsTask) {
 							firstPossibleNewIndividualID = prevNondetConsTask->getProcessingDataBox()->getNextIndividualNodeID(false);
 						}
-						prevDetConsTask->getProcessingDataBox()->setIncrementalExpansionID(satCalcTask->getSatisfiableTaskIncrementalConsistencyTestingAdapter()->getIncrementalRevisionID());
+						if (prevDetConsTask) {
+							prevDetConsTask->getProcessingDataBox()->setIncrementalExpansionID(satCalcTask->getSatisfiableTaskIncrementalConsistencyTestingAdapter()->getIncrementalRevisionID());
+						}
 					}
 					if (satCalcTask->getSatisfiableTaskIndividualDependenceTrackingAdapter()) {
 						dataBox->setIndividualDependenceTrackingRequired(true);

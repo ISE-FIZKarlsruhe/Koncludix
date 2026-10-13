@@ -382,6 +382,7 @@ namespace Konclude {
 				void jumpFunctionParseIgnoredNode(CStreamParseStackObject* parseStackObj);
 
 				void jumpFunctionUnsupportedDatatypeNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionUnsupportedHasKeyNode(CStreamParseStackObject* parseStackObj);
 				void jumpFunctionUnsupportedRDFNode(CStreamParseStackObject* parseStackObj);
 				void jumpFunctionUnsupportedImportNode(CStreamParseStackObject* parseStackObj);
 				void jumpFunctionUnsupportedAnnotationNode(const QXmlStreamAttributes& attributes);

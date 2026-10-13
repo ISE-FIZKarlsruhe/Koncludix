@@ -36,6 +36,9 @@
 #include "CWriteQuery.h"
 
 #include "Reasoner/Realization/CConceptRealizationInstantiatedToConceptVisitor.h"
+#include "Reasoner/Realization/CSameRealization.h"
+#include "Reasoner/Realization/CSameRealizationIndividualVisitor.h"
+#include "Reasoner/Ontology/CABoxReductionData.h"
 
 
 #include "Config/CConfigDataReader.h"
@@ -65,7 +68,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class CWriteIndividualFlattenedTypesQuery : public CRealizationPremisingQuery, public CConceptRealizationInstantiatedToConceptVisitor, public CWriteQuery {
+			class CWriteIndividualFlattenedTypesQuery : public CRealizationPremisingQuery, public CConceptRealizationInstantiatedToConceptVisitor, public CWriteQuery, public CSameRealizationIndividualVisitor {
 				// public methods
 				public:
 					//! Constructor
@@ -131,6 +134,14 @@ namespace Konclude {
 					QString mTopClassNameString;
 
 					QSet<CConcept*> mDeclaratedConceptSet;
+
+					// optional ABox reduction (Konclude.CLI.Materialize.ReduceABox / Konclude.CLI.Realization.ReduceABox, see CABoxReducer):
+					// the types of the representatives are copied to the removed individuals
+					CABoxReductionData* mReduction;
+					const QStringList* mCurrentIndividualMembers;
+					QStringList mCheckSameIndividualNameList;
+					virtual bool visitIndividual(const CIndividualReference& indiRef, CSameRealization* sameRealization);
+					bool checkABoxReductionApplicable(CRealization* realization, QString& problem);
 					QString mCurrentIndividualName;
 					bool mCurrentIndividualAnonymous;
 					

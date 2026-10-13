@@ -1,0 +1,7 @@
+# A cycle of "before": a before b, b before c, c before a. No single pair of facts is contradictory; the conflict only shows through composition.
+@prefix t: <http://example.org/time#> .
+@prefix ex: <http://ex.org/> .
+
+ex:a t:before ex:b .
+ex:b t:before ex:c .
+ex:c t:before ex:a .

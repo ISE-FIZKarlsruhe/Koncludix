@@ -23,6 +23,7 @@
 
 // Libraries includes
 #include <QString>
+#include <QProcess>
 #include <QRegExp>
 #include <QTime>
 #include <QDir>
@@ -136,6 +137,9 @@ namespace Konclude {
 					void terminateProcessing();
 					void processNextCommand();
 					void finishCommandProcessing();
+
+					//! repeats the whole processing in a new process (same command line) with the ABox reduction switched off
+					int runWithoutABoxReduction();
 					virtual void finishProcessing();
 
 					void logOutputNotice(const QString& outputString);

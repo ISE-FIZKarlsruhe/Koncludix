@@ -1,0 +1,11 @@
+# Intervals with time stamps (plain numbers: a = 10..20, b = 30..40, so a is before b) combined with an interval c that has no time stamps:
+# c is during a and c is after b. Both cannot hold; four facts are needed to see it (two time stamps and two claims).
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix t: <http://example.org/time#> .
+@prefix ex: <http://ex.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:a prov:startedAtTime "10"^^xsd:integer ; prov:endedAtTime "20"^^xsd:integer .
+ex:b prov:startedAtTime "30"^^xsd:integer ; prov:endedAtTime "40"^^xsd:integer .
+ex:c t:during ex:a .
+ex:c t:after ex:b .

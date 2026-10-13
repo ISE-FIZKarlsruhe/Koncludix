@@ -129,10 +129,13 @@ Changes found and tested while running OWL2Bench DL (3.7k to 98k individuals) an
 
 Fixed: `materialize` output that changed from run to run (an asserted self loop on a transitive role missing, facts that do not follow written after a non-deterministic merge, `sameAs` groups in varying order) - see [README-fixes-and-status.md](README-fixes-and-status.md). Not fixed / known: in rare cases (1 of 231 random small ontologies) one entailed fact is still missing in some runs, and (1 of 231) `materialize` hangs at "Realizing ontology"; a verdict can depend on the *order* of the axioms for some ontologies that combine nominal enumerations, `hasValue` and `hasKey`; `owl:hasKey`, `owl:InverseFunctionalProperty` and qualified cardinality are still not enforced (see above); materialization output can be huge for transitive/symmetric roles (the closure is quadratic in the size of each group).
 
-### Lint report and explanations (separate tools; Konclude itself has neither)
+### Lint, explain, diagnose and examples (built into this build)
 
-* `java -cp tools/openllet.jar:tools KoncludeLint ontology.owl` prints a lint report: size, features, and warnings for constructs and data patterns that are expensive for this build or not handled completely - unenforced `hasKey` / inverse-functional / qualified cardinality, large nominal enumerations and wide disjunctions (n-way decisions on every node), large cardinality constants, general concept inclusions with a complex left-hand side, quadratic closures of transitive+symmetric roles, cycles/self loops on transitive roles, large ABoxes (use `-w 1`) and how much of the ABox could be removed by the reduction below. Each warning comes with example axioms.
-* `tools/explain.py ontology.owl [--konclude ./Konclude]` prints a minimal set of axioms that makes the ontology inconsistent; with `--subclass "<A>" "<B>"` or `--type "<individual>" "<Class>"` a minimal set of axioms that entails that statement. It uses Konclude as a black box (removes axioms while the result stays the same), so it needs one Konclude call per tried subset; for big ontologies first cut the ontology down.
+* `./Konclude lint -i ontology.owl` prints a lint report: size, features, and warnings for constructs and data patterns that are expensive for this build or not handled completely, each with a suggestion.
+* `./Konclude explain -i ontology.owl` prints a minimal set of axioms that makes the ontology inconsistent; with `--subclass "<A>" "<B>"` or `--type "<individual>" "<Class>"` a minimal set of axioms that entails that statement.
+* `tools/konclude_diagnose.py` shows where the time and the memory go; `tools/konclude_examples.py` writes multi-step reasoning examples in plain English.
+
+All commands with examples: `README-COMMANDS.md`.
 
 ### Optional ABox reduction (separate tool)
 

@@ -133,6 +133,9 @@ namespace Konclude {
 					COptimizedKPSetIndividualItem* takeTestingPossibleSameIndividualItem();
 
 					bool hasToProcessPossibleSameIndividualsFlag();
+					//! false for an item that was only created for role instances or possible same individuals: it has no concept instance data and must not hide the types of the cache label
+					bool isConceptInstancesInitialized();
+					COptimizedKPSetIndividualItem* setConceptInstancesInitialized(bool initialized);
 					COptimizedKPSetIndividualItem* setToProcessPossibleSameIndividualsFlag(bool toProcess);
 
 					bool hasPossibleSameIndividualsProcessingQueuedFlag();
@@ -188,6 +191,7 @@ namespace Konclude {
 
 					COptimizedKPSetIndividualItem* mItemSameIndividualMerged;
 					bool mToProcessPossibleSameIndividualsFlag;
+					bool mConceptInstancesInitializedFlag;
 					bool mPossibleSameIndividualsProcessingQueuedFlag;
 
 					cint64 mInitializingRoleCandidateCount;
